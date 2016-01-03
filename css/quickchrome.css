@@ -1,0 +1,49 @@
+@font-face {
+    font-family: Roboto;
+    src: url('chrome-extension://__MSG_@@extension_id__/font/Roboto-Medium.ttf');
+}
+.quickchrome {
+  overflow: auto !important;
+  font-family: Roboto !important;
+  box-shadow: inset 0px 0px 0px 1px #000000 !important;
+  border: 0px !important;
+  background: #5f5f5f !important;
+  margin: 0px !important;
+  padding: 5px !important;
+  color: #f1f1f1 !important;
+}
+.quickchrome a {
+  color: #f1f1f1 !important;
+  text-decoration: underline !important;
+  background: transparent !important;
+}
+.quickchrome a[target='_blank'] {
+  margin-left: 10px;
+}
+.quickchrome a:hover {
+  color: #FFFFFF !important;
+  text-decoration: underline !important;
+  background: transparent !important;
+}
+.quickchrome button {
+  font-family: Roboto !important;
+}
+.quickchromevideo {
+  background: #5f5f5f !important;
+}
+.quickchromevideo::-webkit-media-controls-panel {
+	border-radius: 0px !important;
+	background: #5f5f5f !important;
+	margin: 0px !important;
+	position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+.quickchromelogo {
+  background: url('chrome-extension://__MSG_@@extension_id__/img/icondark.png') no-repeat center;
+  background-size: contain;
+  margin-bottom: 3px;
+  width: 128px;
+  height: 40%;
+}

@@ -1,0 +1,35 @@
+{
+"manifest_version": 2,
+	"name": "QuickChrome",
+	"version": "1.0",
+	"author": "Corbin Davenport",
+	"description": "Play QuickTime videos in Chrome without plugins.",
+	"homepage_url": "https://github.com/corbindavenport",
+	"permissions": [
+		"http://*/*",
+		"https://*/*"
+	],
+	"background": {
+		"scripts": ["js/background.js"]
+	},
+	"web_accessible_resources": [
+		"js/*",
+		"css/*",
+		"img/*",
+		"font/*"
+	],
+	"content_scripts": [
+		{
+		"matches": ["http://*/*", "https://*/*"],
+		"css": ["css/quickchrome.css"],
+		"js": ["js/jquery-2.1.3.min.js", "js/contentscript.js"],
+		"run_at": "document_end"
+		}
+	],
+	"icons":{
+		"16":"img/icon16.png",
+		"32":"img/icon32.png",
+		"48":"img/icon48.png",
+		"128":"img/icon128.png"
+	}
+}
