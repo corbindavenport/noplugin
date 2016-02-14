@@ -19,7 +19,7 @@ function replaceEmbed(object) {
 	var id = String(Math.floor((Math.random() * 1000000) + 1));
 	// Find video source of object
 	var url = findURL(object.attr("src"));
-	// Find dimensions of object
+	// Find attributes of object
 	if (object.is("[width]")) {
 		var width = $(object).attr("width");
 	} else {
@@ -30,13 +30,28 @@ function replaceEmbed(object) {
 	} else {
 		var height = object.height();
 	}
+	if (object.is("[class]")) {
+		var cssclass = $(object).attr("class");
+	} else {
+		var cssclass = "";
+	}
+	if (object.is("[style]")) {
+		var cssstyles = $(object).attr("style");
+	} else {
+		var cssstyles = "";
+	}
+	if (object.is("[name]")) {
+		var name = $(object).attr("name");
+	} else {
+		var name = "";
+	}
 	// Replace embed with HTML5 video player
 	var oldembed = String($(object).html());
 	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
-		$(object).replaceWith('<div class="quickchrome" id="alert' + id + '" align="center" style="width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can try to load the content with QuickChrome, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="quickchromevideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
+		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can try to load the content with QuickChrome, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="quickchromevideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
 		$("video[id$='video" + id + "']").css("display", "none");
 	} else {
-		$(object).replaceWith('<div class="quickchrome" id="alert' + id + '" align="center" style="width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. Chrome doesnt support this file format, so QuickChrome cant play it. However, you can try to download this and play it on your computer.<br /><br /><a href="' + url + '" download >Download content</a><a href="https://github.com/corbindavenport/quickchrome/wiki/Why-cant-QuickChrome-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' -->');
+		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can only download this and play it on your computer.<br /><br /><a href="' + url + '" download >Download content</a><a href="https://github.com/corbindavenport/quickchrome/wiki/Why-cant-QuickChrome-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' -->');
 	}
 	console.log("[QuickChrome] Replaced QuickTime embed for " + url);
 	$(document).on('click', "#button" + id, function() {
@@ -56,7 +71,7 @@ function replaceObject(object) {
 	} else {
 		return;
 	}
-	// Find dimensions of object
+	// Find attributes of object
 	if (object.is("[width]")) {
 		var width = $(object).attr("width");
 	} else {
@@ -67,13 +82,28 @@ function replaceObject(object) {
 	} else {
 		var height = object.height();
 	}
+	if (object.is("[class]")) {
+		var cssclass = $(object).attr("class");
+	} else {
+		var cssclass = "";
+	}
+	if (object.is("[style]")) {
+		var cssstyles = $(object).attr("style");
+	} else {
+		var cssstyles = "";
+	}
+	if (object.is("[name]")) {
+		var name = $(object).attr("name");
+	} else {
+		var name = "";
+	}
 	// Replace object with HTML5 video player
 	var oldembed = String($(object).html());
 	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
-		$(object).replaceWith('<div class="quickchrome" id="alert' + id + '" align="center" style="width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can try to load the content with QuickChrome, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="quickchromevideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
+		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can try to load the content with QuickChrome, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="quickchromevideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
 		$("video[id$='video" + id + "']").css("display", "none");
 	} else {
-		$(object).replaceWith('<div class="quickchrome" id="alert' + id + '" align="center" style="width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. Chrome doesnt support this file format, so QuickChrome cant play it. However, you can try to download this and play it on your computer.<br /><br /><a href="' + url + '" download >Download content</a><a href="https://github.com/corbindavenport/quickchrome/wiki/Why-cant-QuickChrome-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' -->');
+		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can only download this and play it on your computer.<br /><br /><a href="' + url + '" download >Download content</a><a href="https://github.com/corbindavenport/quickchrome/wiki/Why-cant-QuickChrome-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' -->');
 	}
 	console.log("[QuickChrome] Replaced QuickTime embed for " + url);
 	$(document).on('click', "#button" + id, function() {
@@ -83,13 +113,16 @@ function replaceObject(object) {
 }
 
 function reloadDOM() {
-	$("object[type~='video/quicktime']").each(function() {
+	$("object[type='video/quicktime']").each(function() {
 		replaceObject($(this));
 	});
-	$("object[codebase~='http://www.apple.com/qtactivex/qtplugin.cab']").each(function() {
+	$("object[codebase='http://www.apple.com/qtactivex/qtplugin.cab']").each(function() {
 		replaceObject($(this));
 	});
-	$("embed[type~='video/quicktime']").each(function() {
+	$("object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B']").each(function() {
+		replaceObject($(this));
+	});
+	$("embed[type='video/quicktime']").each(function() {
 		replaceEmbed($(this));
 	});
 	$("embed[src$='.mov']").each(function() {

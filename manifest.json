@@ -1,7 +1,7 @@
 {
 "manifest_version": 2,
 	"name": "QuickChrome",
-	"version": "1.0",
+	"version": "1.1",
 	"author": "Corbin Davenport",
 	"description": "Play QuickTime videos in Chrome without plugins.",
 	"homepage_url": "https://github.com/corbindavenport",
