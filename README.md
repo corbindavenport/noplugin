@@ -5,6 +5,10 @@ QuickChrome is a Google Chrome extension that lets you play QuickTime content in
 QuickChrome searches webpages for embedded QuickTime players, and plays the content with Chrome's built-in HTML5 player. QuickChrome will either replace the embedded code with Chrome's player, or a message to download the video if Chrome cannot play it.
 
 ---------------------------------------------------------
+__New in QuickChrome 1.2:__
+* Added option to report pages broken.
+* Minor UI tweaks and bug fixes.
+
 __New in QuickChrome 1.1:__
 * Improved replacing QuickTime plugin objects with QuickChrome player.
 
