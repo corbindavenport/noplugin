@@ -9,7 +9,7 @@ NoPlugin was previously named 'QuickChrome', so if you happen to see references 
 ---------------------------------------------------------
 __New in NoPlugin 2.0:__
 * QuickChrome is now NoPlugin!
-* Added support for RealPlayer content.
+* Added support for RealPlayer and Windows Media Player content.
 * Automatically opens content unsupported by the browser in a media player
 * Fixed common MutationObserver error and layout bugs
 * Rewritten code

@@ -3,7 +3,7 @@
 	"name": "NoPlugin (previously QuickChrome)",
 	"version": "2.0",
 	"author": "Corbin Davenport",
-	"description": "Play QuickTime, RealPlayer content in Chrome without plugins.",
+	"description": "Play QuickTime, RealPlayer, and Windows Media content in your browser without plugins.",
 	"homepage_url": "https://github.com/corbindavenport",
 	"permissions": [
 		"http://*/*",

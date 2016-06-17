@@ -6,6 +6,11 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
+// How NoPlugin works
+// 1 - The reloadDOM() function runs when the page is loaded or changes, and looks for plugin objects.
+// 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
+// 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
+
 function findURL(url){
 	var img = document.createElement('img');
 	img.src = url; // Set string url
@@ -17,16 +22,16 @@ function findURL(url){
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
 	// Replace embed with HTML5 video player
 	var oldembed = $(object).prop('outerHTML').toString();
-	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav')) || (url.endsWith('.avi'))) {
+	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
 		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="nopluginlogo"></div>This page is trying to load plugin content here. You can try to load the content with NoPlugin, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="nopluginvideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
 		$("video[id$='video" + id + "']").css("display", "none");
 	} else {
-		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content"><div class="nopluginlogo"></div>This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open content</button><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-noplugin-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' --></div>');
+		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="nopluginlogo"></div>This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open content</button><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F" target="_blank">More info</a><!-- Original embed code: ' + oldembed + ' --></div>');
 		$(document).on('click', 'button[title="' + url + '"]', function(){
 			// Pass URL to background.js for browser to download and open video
 			chrome.runtime.sendMessage({method: "saveVideo", key: url}, function(response) {
 				$('button[title="' + url + '"]').prop("disabled",true);
-				$('button[title="' + url + '"]').html("Downloading video...");
+				$('button[title="' + url + '"]').html("Downloading media...");
 			})
 		});
 	}
@@ -118,20 +123,53 @@ function replaceObject(object) {
 }
 
 function reloadDOM() {
+	// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object. For browsers that support plugins, it checks if the original plugin is installed, and if available, uses that instead.
 	// MIME types from www.freeformatter.com/mime-types-list.html
+
 	// QuickTime Player
 	$("object[type='video/quicktime'],object[codebase='http://www.apple.com/qtactivex/qtplugin.cab'],object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B']").each(function() {
-		replaceObject($(this));
+		if ($.inArray('QuickTime', navigator.plugins) > -1) {
+			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
+		} else {
+			replaceObject($(this));
+		}
 	});
 	$("embed[type='video/quicktime'],embed[src$='.mov']").each(function() {
-		replaceEmbed($(this));
+		if ($.inArray('QuickTime', navigator.plugins) > -1) {
+			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
+		} else {
+			replaceEmbed($(this));
+		}
 	});
 	// RealPlayer
 	$("object[type='application/vnd.rn-realmedia'],object[type='audio/x-pn-realaudio'],object[type='audio/x-pn-realaudio-plugin'],object[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA']").each(function() {
-		replaceObject($(this));
+		if ($.inArray('Real', navigator.plugins) > -1) {
+			console.log("[NoPlugin] RealPlayer plugin detected, will not replace embed.");
+		} else {
+			replaceObject($(this));
+		}
 	});
 	$("embed[type='application/vnd.rn-realmedia'],embed[type='audio/x-pn-realaudio'],embed[type='audio/x-pn-realaudio-plugin'],embed[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA'],embed[src$='.ram'],embed[src$='.rmp'],embed[src$='.rm']").each(function() {
-		replaceEmbed($(this));
+		if ($.inArray('Real', navigator.plugins) > -1) {
+			console.log("[NoPlugin] RealPlayer plugin detected, will not replace embed.");
+		} else {
+			replaceEmbed($(this));
+		}
+	});
+	// Windows Media Player
+	$("object[type='video/x-ms-wm'],object[type='audio/x-ms-wma'],object[type='audio/x-ms-wmv'],object[type='application/x-mplayer2'],object[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],object[codebase^='http://activex.microsoft.com/activex/controls/mplayer'],object[pluginspage^='http://www.microsoft.com']").each(function() {
+		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
+			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
+		} else {
+			replaceObject($(this));
+		}
+	});
+	$("embed[type='video/x-ms-wm'],embed[type='audio/x-ms-wma'],embed[type='audio/x-ms-wmv'],embed[type='application/x-mplayer2'],embed[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],embed[pluginspage^='http://www.microsoft.com'],embed[src$='.wm'],embed[src$='.wma'],embed[src$='.wmv']").each(function() {
+		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
+			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
+		} else {
+			replaceEmbed($(this));
+		}
 	});
 }
 
