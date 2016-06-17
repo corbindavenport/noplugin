@@ -14,6 +14,35 @@ function findURL(url){
 	return url;
 }
 
+function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
+	// Replace embed with HTML5 video player
+	var oldembed = $(object).prop('outerHTML').toString();
+	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav')) || (url.endsWith('.avi'))) {
+		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="nopluginlogo"></div>This page is trying to load plugin content here. You can try to load the content with NoPlugin, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="nopluginvideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
+		$("video[id$='video" + id + "']").css("display", "none");
+	} else {
+		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content"><div class="nopluginlogo"></div>This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open content</button><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-noplugin-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' --></div>');
+		$(document).on('click', 'button[title="' + url + '"]', function(){
+			// Pass URL to background.js for browser to download and open video
+			chrome.runtime.sendMessage({method: "saveVideo", key: url}, function(response) {
+				$('button[title="' + url + '"]').prop("disabled",true);
+				$('button[title="' + url + '"]').html("Downloading video...");
+			})
+		});
+	}
+	console.log("[NoPlugin] Replaced plugin embed for " + url);
+	$(document).on('click', "#button" + id, function() {
+		$("video[id$='video" + id + "']").css("display", "block");
+		$("div[id$='alert" + id + "']").css("display", "none");
+	});
+	// Show warning for NoPlugin
+	if ($(".NoPlugin-popup").length) {
+		// The popup was already created by another instance, so don't do it again
+	} else {
+		$("body").append('<!-- Begin NoPlugin popup --><style>body {margin-top: 37px !important;}</style><div class="noplugin-popup"><span class="noplugin-message">NoPlugin loaded plugin content on this page.</span><a href="https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken" target="_blank">Not working?</a></div>');
+	}
+}
+
 function replaceEmbed(object) {
 	// Create ID for player
 	var id = String(Math.floor((Math.random() * 1000000) + 1));
@@ -45,24 +74,7 @@ function replaceEmbed(object) {
 	} else {
 		var name = "";
 	}
-	// Replace embed with HTML5 video player
-	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav')) || (url.endsWith('.avi'))) {
-		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can try to load the content with QuickChrome, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="quickchromevideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
-		$("video[id$='video" + id + "']").css("display", "none");
-	} else {
-		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can only download this and play it on your computer.<br /><br /><a href="' + url + '" download >Download content</a><a href="https://github.com/corbindavenport/quickchrome/wiki/Why-cant-QuickChrome-play-a-video%3F" target="_blank">More info</a></div>');
-	}
-	console.log("[QuickChrome] Replaced QuickTime embed for " + url);
-	$(document).on('click', "#button" + id, function() {
-		$("video[id$='video" + id + "']").css("display", "block");
-		$("div[id$='alert" + id + "']").css("display", "none");
-	});
-	// Show warning for QuickChrome
-	if ($(".quickchrome-popup").length) {
-		// Do nothing
-	} else {
-		$("body").append('<!-- Begin QuickChrome popup --><style>body {margin-top: 37px !important;}</style><div class="quickchrome-popup"><span class="quickchrome-message">QuickChrome loaded QuickTime content on this page.</span><a href="https://github.com/corbindavenport/quickchrome/wiki/Report-a-page-broken" target="_blank">Not working?</a></div>');
-	}
+	injectPlayer(object, id, url, width, height, cssclass, cssstyles, name);
 }
 
 function replaceObject(object) {
@@ -102,40 +114,23 @@ function replaceObject(object) {
 	} else {
 		var name = "";
 	}
-	// Replace object with HTML5 video player
-	if ((url.endsWith('.mp4')) || (url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav')) || (url.endsWith('.avi'))) {
-		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can try to load the content with QuickChrome, but it might not work.<br /><br /><button type="button" id="button' + id + '">Show content</button></div><video class="quickchromevideo" id="video' + id + '" controls width="' + width + '" height="' + height + '"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
-		$("video[id$='video" + id + "']").css("display", "none");
-	} else {
-		$(object).replaceWith('<div name="' + name + '" class="quickchrome + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="quickchromelogo"></div>This page is trying to load a QuickTime video here. You can only download this and play it on your computer.<br /><br /><a href="' + url + '" download >Download content</a><a href="https://github.com/corbindavenport/quickchrome/wiki/Why-cant-QuickChrome-play-a-video%3F" target="_blank">More info</a></div>');
-	}
-	console.log("[QuickChrome] Replaced QuickTime plugin object for " + url);
-	$(document).on('click', "#button" + id, function() {
-		$("video[id$='video" + id + "']").css("display", "block");
-		$("div[id$='alert" + id + "']").css("display", "none");
-	});
-	// Show warning for QuickChrome
-	if ($(".quickchrome-popup").length) {
-		// Do nothing
-	} else {
-		$("body").append('<!-- Begin QuickChrome popup --><style>body {margin-top: 37px !important;}</style><div class="quickchrome-popup"><span class="quickchrome-message">QuickChrome loaded QuickTime content on this page.</span><a href="https://github.com/corbindavenport/quickchrome/wiki/Report-a-page-broken" target="_blank">Not working?</a></div>');
-	}
+	injectPlayer(object, id, url, width, height, cssclass, cssstyles, name);
 }
 
 function reloadDOM() {
-	$("object[type='video/quicktime']").each(function() {
+	// MIME types from www.freeformatter.com/mime-types-list.html
+	// QuickTime Player
+	$("object[type='video/quicktime'],object[codebase='http://www.apple.com/qtactivex/qtplugin.cab'],object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B']").each(function() {
 		replaceObject($(this));
 	});
-	$("object[codebase='http://www.apple.com/qtactivex/qtplugin.cab']").each(function() {
-		replaceObject($(this));
-	});
-	$("object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B']").each(function() {
-		replaceObject($(this));
-	});
-	$("embed[type='video/quicktime']").each(function() {
+	$("embed[type='video/quicktime'],embed[src$='.mov']").each(function() {
 		replaceEmbed($(this));
 	});
-	$("embed[src$='.mov']").each(function() {
+	// RealPlayer
+	$("object[type='application/vnd.rn-realmedia'],object[type='audio/x-pn-realaudio'],object[type='audio/x-pn-realaudio-plugin'],object[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA']").each(function() {
+		replaceObject($(this));
+	});
+	$("embed[type='application/vnd.rn-realmedia'],embed[type='audio/x-pn-realaudio'],embed[type='audio/x-pn-realaudio-plugin'],embed[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA'],embed[src$='.ram'],embed[src$='.rmp'],embed[src$='.rm']").each(function() {
 		replaceEmbed($(this));
 	});
 }
@@ -148,7 +143,7 @@ $( document ).ready(function() {
 // Initialize tooltips every time DOM is modified
 var observer = new MutationObserver(function(mutations) {
 	mutations.forEach(function(mutation) {
-		console.log("[QuickChrome] DOM change detected, looking for embeds again");
+		console.log("[NoPlugin] DOM change detected, looking for embeds again");
 		reloadDOM();
 	});
 });
@@ -159,5 +154,4 @@ var observerConfig = {
 	characterData: true
 };
 
-var targetNode = document.body;
-observer.observe(targetNode, observerConfig);
+observer.observe(document, observerConfig);

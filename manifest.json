@@ -1,13 +1,16 @@
 {
 "manifest_version": 2,
-	"name": "QuickChrome",
-	"version": "1.2",
+	"name": "NoPlugin (previously QuickChrome)",
+	"version": "2.0",
 	"author": "Corbin Davenport",
-	"description": "Play QuickTime videos in Chrome without plugins.",
+	"description": "Play QuickTime, RealPlayer content in Chrome without plugins.",
 	"homepage_url": "https://github.com/corbindavenport",
 	"permissions": [
 		"http://*/*",
-		"https://*/*"
+		"https://*/*",
+		"downloads",
+		"downloads.open",
+		"notifications"
 	],
 	"background": {
 		"scripts": ["js/background.js"]
@@ -21,7 +24,7 @@
 	"content_scripts": [
 		{
 		"matches": ["http://*/*", "https://*/*"],
-		"css": ["css/quickchrome.css"],
+		"css": ["css/noplugin.css"],
 		"js": ["js/jquery-2.1.3.min.js", "js/contentscript.js"],
 		"run_at": "document_start"
 		}
