@@ -1,6 +1,6 @@
 NoPlugin
 ================
-QuickChrome is a Google Chrome and Opera extension that lets you play QuickTime and RealPlayer content in your browser without plugins. [Chrome no longer supports NPAPI plugins](https://support.google.com/chrome/answer/6213033?hl=en), which includes virtually every plugin except the Flash plugin.
+NoPlugin is a Google Chrome and Opera extension that lets you play QuickTime, RealPlayer, and Windows Media content in your browser without plugins. [Chrome no longer supports NPAPI plugins](https://support.google.com/chrome/answer/6213033?hl=en), which includes virtually every plugin except the Flash plugin.
 
 NoPlugin searches webpages for embedded plugin objects, and plays the content with the browsers's built-in HTML5 player. NoPlugin will either replace the embedded code with the browser's HTML5 player, or play it with your computer's built-in video player.
 
@@ -10,19 +10,9 @@ NoPlugin was previously named 'QuickChrome', so if you happen to see references 
 __New in NoPlugin 2.0:__
 * QuickChrome is now NoPlugin!
 * Added support for RealPlayer and Windows Media Player content.
-* Automatically opens content unsupported by the browser in a media player
-* Fixed common MutationObserver error and layout bugs
-* Rewritten code
-
-__New in QuickChrome 1.2:__
-* Added option to report pages broken.
-* Minor UI tweaks and bug fixes.
-
-__New in QuickChrome 1.1:__
-* Improved replacing QuickTime plugin objects with QuickChrome player.
-
-__New in QuickChrome 1.0:__
-* Initial release
+* Automatically opens content unsupported by the browser in a media player.
+* Fixed common MutationObserver error and layout bugs.
+* Rewritten codebase for better performance.
 
 ---------------------------------------------------------
 

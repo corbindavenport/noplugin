@@ -41,10 +41,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 										iconUrl: "img/icon128.png",
 										buttons: [{
 												title: "Open file on your computer",
-												iconUrl: "/img/icondark.png"
+												iconUrl: "/img/notification-file.png"
 										},{
 												title: "Get VLC Media Player",
-												iconUrl: "/img/icondark.png"
+												iconUrl: "/img/notification-vlc.png"
 										}]
 									}, function(id) {
 										myNotificationID = id;
