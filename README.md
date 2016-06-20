@@ -8,6 +8,9 @@ NoPlugin was previously named 'QuickChrome', so if you happen to see references 
 
 ---------------------------------------------------------
 __New in NoPlugin 2.0:__
+* Fixed bug where download notifications would appear for files not downloaded by NoPlugin
+
+__New in NoPlugin 2.0:__
 * QuickChrome is now NoPlugin!
 * Added support for RealPlayer and Windows Media Player content.
 * Automatically opens content unsupported by the browser in a media player.

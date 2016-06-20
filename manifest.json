@@ -13,7 +13,7 @@
 		"notifications"
 	],
 	"background": {
-		"scripts": ["js/background.js"]
+		"scripts": ["js/background.js","js/jquery-2.1.3.min.js"]
 	},
 	"web_accessible_resources": [
 		"js/*",

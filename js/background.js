@@ -29,10 +29,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		chrome.downloads.onChanged.addListener(function(obj) {
 				if (obj.hasOwnProperty("state") && obj.state.current === "complete") {
 						chrome.downloads.search({id: videoID}, function(items) {
-								filename = items[0].url.split('/').pop(); // Get name of file
-								console.log("[NoPlugin] Notification for " + filename + " triggered, MIME is " + items[0].mime + ".");
-								console.log(obj.id);
-								if (downloadsAlreadyNotified.indexOf(obj.id) <= 0) { // Don't make multiple notifications for the same file
+								var filename = items[0].url.split('/').pop(); // Get name of file
+								if ($.inArray(filename,downloadsAlreadyNotified) === -1) { // Don't make multiple notifications for the same file
+									console.log("[NoPlugin] Notification for " + filename + " triggered, MIME is " + items[0].mime);
+									downloadsAlreadyNotified.push(filename);
 									chrome.notifications.create("", {
 										type: "basic",
 										requireInteraction: true,
