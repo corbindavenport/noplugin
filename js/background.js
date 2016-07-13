@@ -33,48 +33,68 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 								if ($.inArray(filename,downloadsAlreadyNotified) === -1) { // Don't make multiple notifications for the same file
 									console.log("[NoPlugin] Notification for " + filename + " triggered, MIME is " + items[0].mime);
 									downloadsAlreadyNotified.push(filename);
-									chrome.notifications.create("", {
-										type: "basic",
-										requireInteraction: true,
-										title: "NoPlugin",
-										message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
-										iconUrl: "img/icon128.png",
-										buttons: [{
-												title: "Open file on your computer",
-												iconUrl: "/img/notification-file.png"
-										},{
-												title: "Get VLC Media Player",
-												iconUrl: "/img/notification-vlc.png"
-										}]
-									}, function(id) {
-										myNotificationID = id;
-										if(chrome.runtime.lastError) {
-											console.error(chrome.runtime.lastError.message);
-										}
-									});
-									chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
-											if (notifId === myNotificationID) {
-													if (btnIdx === 0) {
-															// Open downloaded media
-															chrome.downloads.open(videoID);
-													} else {
-														// Download VLC for user's operating system
-														if (navigator.platform.indexOf('Mac') > -1) {
-															// Mac OS X download
-															chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
-														} else if (navigator.platform.indexOf('Win') > -1) {
-															// Windows download
-															chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
-														} else if (navigator.platform.indexOf('CrOS') > -1) {
-															// Chrome OS download
-															chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
-														}else {
-															// Other downloads
-															chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
-														}
-													}
+									// Trim filename to fit in notification
+									if (filename.length > 20) {
+										filename = filename.substring(0, 20) + "..."
+									}
+									if (navigator.userAgent.indexOf("OPR") !== -1) {
+										// Opera doesn't support notifications with buttons
+										chrome.notifications.create("", {
+											type: "basic",
+											requireInteraction: true,
+											title: "NoPlugin",
+											message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
+											iconUrl: "img/icon128.png"
+										}, function(id) {
+											myNotificationID = id;
+											if(chrome.runtime.lastError) {
+												console.error(chrome.runtime.lastError.message);
 											}
-									});
+										}); 
+									} else {
+										chrome.notifications.create("", {
+											type: "basic",
+											requireInteraction: true,
+											title: "NoPlugin",
+											message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
+											iconUrl: "img/icon128.png",
+											buttons: [{
+													title: "Open file on your computer",
+													iconUrl: "/img/notification-file.png"
+											},{
+													title: "Get VLC Media Player",
+													iconUrl: "/img/notification-vlc.png"
+											}]
+										}, function(id) {
+											myNotificationID = id;
+											if(chrome.runtime.lastError) {
+												console.error(chrome.runtime.lastError.message);
+											}
+										});
+										chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
+												if (notifId === myNotificationID) {
+														if (btnIdx === 0) {
+																// Open downloaded media
+																chrome.downloads.open(videoID);
+														} else {
+															// Download VLC for user's operating system
+															if (navigator.platform.indexOf('Mac') > -1) {
+																// Mac OS X download
+																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
+															} else if (navigator.platform.indexOf('Win') > -1) {
+																// Windows download
+																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
+															} else if (navigator.platform.indexOf('CrOS') > -1) {
+																// Chrome OS download
+																chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
+															}else {
+																// Other downloads
+																chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
+															}
+														}
+												}
+										});
+									}
 								}
 						});
 				}

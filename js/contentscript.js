@@ -23,15 +23,17 @@ var helpbar = 0;
 
 function injectHelp() {
 	// Show warning for NoPlugin
-	if ($(".NoPlugin-popup").length) {
+	if ($(".noplugin-popup").length) {
 		// The popup was already created by another instance, so don't do it again
 	} else {
+		// Add opera class to HTML if using Opera, for Opera-specific CSS tweaks
+		if (navigator.userAgent.indexOf("OPR") !== -1) {
+			$('html').addClass('opera');
+	    }
 		// Try to get existing margin
 		if (($("body").css("marginTop")) && (helpbar === 0)) {
-			console.log($("body").css("marginTop"));
 			margin = $("body").css("marginTop").replace("px", "");
 			margin = parseInt(margin) + 37;
-			console.log("new margin is " + margin);
 		} else {
 			margin = 37;
 		}

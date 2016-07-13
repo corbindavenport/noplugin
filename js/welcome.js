@@ -9,6 +9,22 @@ You should have received a copy of the GNU General Public License along with thi
 window.onload = function() {
 	document.getElementById("bitcoin").style.display = "none";
 
+	document.querySelector('input[value="Download VLC Media Player"]').onclick=function(){
+		if (navigator.platform.indexOf('Mac') > -1) {
+			// Mac OS X download
+			chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
+		} else if (navigator.platform.indexOf('Win') > -1) {
+			// Windows download
+			chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
+		} else if (navigator.platform.indexOf('CrOS') > -1) {
+			// Chrome OS download
+			chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
+		}else {
+			// Other downloads
+			chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
+		}
+	};
+
 	document.querySelector('input[value="Donate via PayPal"]').onclick=function(){chrome.tabs.create({ url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=NoPlugin%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted" });};
 
 	document.querySelector('input[value="Donate via Bitcoin"]').onclick=function(){document.getElementById("bitcoin").style.display = "block";};
