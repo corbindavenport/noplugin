@@ -5,13 +5,13 @@
 
 .noplugin {
 	overflow: auto !important;
-	box-shadow: inset 0px 0px 0px 1px #000000 !important;
+	box-shadow: inset 0px 0px 0px 1px #212121 !important;
 	box-sizing: border-box !important;
 	border: 0px !important;
-	background: #5f5f5f !important;
+	background: #424242 !important;
 	margin: 0px !important;
 	padding: 3% !important;
-	color: #f1f1f1 !important;
+	color: #FFFFFF !important;
 	font-size: 90% !important;
 	min-height: 100px !important;
 	font-style: normal !important;
@@ -24,28 +24,58 @@
 	vertical-align: middle !important;
 }
 .noplugin a {
-	color: #f1f1f1 !important;
+	color: #FFFFFF !important;
 	text-decoration: underline !important;
 	background: transparent !important;
 }
 .noplugin a:hover {
-	color: #FFFFFF !important;
+	color: #f1f1f1 !important;
 	text-decoration: underline !important;
 	background: transparent !important;
 	font-style: normal !important;
 }
 .nopluginvideo {
-	background: #5f5f5f !important;
-	box-shadow: inset 0px 0px 0px 1px #000000 !important;
+	background: url('chrome-extension://__MSG_@@extension_id__/img/preloader.gif') no-repeat center #424242 !important;
+	box-shadow: inset 0px 0px 0px 1px #212121 !important;
 }
-.nopluginvideo::-webkit-media-controls-panel {
+.nopluginaudio {
+	background: #212121 !important;
+	box-shadow: inset 0px 0px 0px 1px #212121 !important;
+}
+.nopluginvideo::-webkit-media-controls-panel, .nopluginaudio::-webkit-media-controls-panel {
 	border-radius: 0px !important;
-	background: #5f5f5f !important;
+	background: #212121 !important;
 	margin: 0px !important;
 	position: absolute !important;
 	bottom: 0 !important;
 	left: 0 !important;
 	right: 0 !important;
+}
+.nopluginvideo::-webkit-media-controls-play-button, .nopluginaudio::-webkit-media-controls-play-button {
+	width: 25px !important;
+	height: 25px !important;
+	line-height: 30px !important;
+	margin-left: 12px !important;
+    margin-right: 12px !important;
+}
+.nopluginvideo::-webkit-media-controls-mute-button, .nopluginaudio::-webkit-media-controls-mute-button {
+	width: 25px !important;
+    height: 25px !important;
+    line-height: 30px !important;
+}
+.nopluginvideo::-webkit-media-controls-fullscreen-button, .nopluginaudio::-webkit-media-controls-fullscreen-button {
+	width: 25px !important;
+    height: 25px !important;
+    line-height: 30px !important;
+}
+.nopluginvideo::-webkit-media-controls-timeline, .nopluginvideo::-webkit-media-controls-volume-slider, .nopluginaudio::-webkit-media-controls-timeline, .nopluginaudio::-webkit-media-controls-volume-slider {
+	height: 2px !important;
+}
+.nopluginvideo::-webkit-slider-runnable-track, .nopluginaudio::-webkit-slider-runnable-track {
+	background-color: #424242 !important;
+}
+.nopluginvideo input[type="range" i]::-webkit-media-slider-thumb, .nopluginaudio input[type="range" i]::-webkit-media-slider-thumb {
+	color: #737373 !important;
 }
 .nopluginlogo {
 	background: url('chrome-extension://__MSG_@@extension_id__/img/icondark.png') no-repeat center;

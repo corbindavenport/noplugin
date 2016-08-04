@@ -7,21 +7,9 @@ NoPlugin searches webpages for embedded plugin objects, and plays the content wi
 NoPlugin was previously named 'QuickChrome', so if you happen to see references to QuickChrome in the code, you'll know why.
 
 ---------------------------------------------------------
-__New in NoPlugin 2.1:__
-* Notifications now work properly on Opera.
-* Several interface tweaks.
-* Upgraded back-end to JQuery 3.0.
-* Fixed bug where NoPlugin would insert multiple 'loaded plugin content' messages in a page.
-
-__New in NoPlugin 2.0.1:__
-* Fixed bug where download notifications would appear for files not downloaded by NoPlugin
-
-__New in NoPlugin 2.0:__
-* QuickChrome is now NoPlugin!
-* Added support for RealPlayer and Windows Media Player content.
-* Automatically opens content unsupported by the browser in a media player.
-* Fixed common MutationObserver error and layout bugs.
-* Rewritten codebase for better performance.
+__New in NoPlugin 2.2:__
+* Interface tweaks to HTML5 player.
+* Audio files now play in the HTML5 audio player instead of the HTML5 video player.
 
 ---------------------------------------------------------
 
