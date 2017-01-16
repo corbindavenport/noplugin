@@ -1,9 +1,9 @@
 {
 "manifest_version": 2,
 	"name": "NoPlugin (previously QuickChrome)",
-	"version": "2.2",
+	"version": "3.0",
 	"author": "Corbin Davenport",
-	"description": "Play QuickTime, RealPlayer, and Windows Media content in your browser without plugins.",
+	"description": "Play QuickTime, RealPlayer, and Windows Media content without plugins.",
 	"homepage_url": "https://github.com/corbindavenport",
 	"permissions": [
 		"http://*/*",
@@ -13,7 +13,7 @@
 		"notifications"
 	],
 	"background": {
-		"scripts": ["js/jquery-3.0.0.slim.min.js", "js/background.js"]
+		"scripts": ["js/jquery-3.1.1.slim.min.js", "js/background.js"]
 	},
 	"web_accessible_resources": [
 		"js/*",
@@ -21,11 +21,18 @@
 		"img/*",
 		"font/*"
 	],
+	"browser_action": {
+	  "default_icon": {
+		"19": "img/icon19.png",
+		"38": "img/icon38.png"
+	  },
+	  "default_title": "Click the icon to open NoPlugin settings."
+	},
 	"content_scripts": [
 		{
 		"matches": ["http://*/*", "https://*/*"],
 		"css": ["css/noplugin.css"],
-		"js": ["js/jquery-3.0.0.slim.min.js", "js/contentscript.js"],
+		"js": ["js/jquery-3.1.1.slim.min.js", "js/contentscript.js"],
 		"run_at": "document_start"
 		}
 	],

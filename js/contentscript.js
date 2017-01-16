@@ -1,9 +1,13 @@
 /*
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+The MIT License (MIT)
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+Copyright (c) 2017 Corbin Davenport
 
-You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 // How NoPlugin works
@@ -29,7 +33,9 @@ function injectHelp() {
 		// Add opera class to HTML if using Opera, for Opera-specific CSS tweaks
 		if (navigator.userAgent.indexOf("OPR") !== -1) {
 			$('html').addClass('opera');
-	    }
+		} else if (navigator.userAgent.indexOf("Firefox") !== -1) {
+			$('html').addClass('firefox');
+		}
 		// Try to get existing margin
 		if (($("body").css("marginTop")) && (helpbar === 0)) {
 			margin = $("body").css("marginTop").replace("px", "");
@@ -45,7 +51,37 @@ function injectHelp() {
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
 	// Replace embed with HTML5 video player
 	var oldembed = $(object).prop('outerHTML').toString();
-	if (url.endsWith('.mp4')) {
+	// Detect MMS links and open them in media player
+	if (url.includes('mms://')) {
+		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load a Windows Media Player stream here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
+		$("video[id$='video" + id + "']").css("display", "none");
+		$(document).on('click', 'button[title="' + url + '"]', function(){
+			if (navigator.platform.includes('Win')) {
+				alert("Choose Windows Media Player (or another video player capable of opening MMS streams) on the next pop-up.")
+				window.open(url, '_self');
+			} else {
+				if (confirm('Do you have VLC Media Player (or another video player capable of opening MMS streams) installed?')) {
+					alert('Choose your video player on the next pop-up.');
+					window.open(url, '_self');
+				} else {
+					if (confirm('Would you like to download VLC Media Player?')) {
+						// Download VLC for user's operating system
+						if (navigator.platform.includes('Mac')) {
+							// Mac OS X download
+							window.open("http://www.videolan.org/vlc/download-macosx.html", "_blank");
+						} else if (navigator.platform.includes('CrOS')) {
+							// Chrome OS download
+							window.open("https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en", "_blank");
+						}else {
+							// Other downloads
+							window.open("http://www.videolan.org/vlc/#download", "_blank");
+						}
+					}
+				}
+			}
+		});
+	// Play supported video files in browser
+	} else if (url.endsWith('.mp4')) {
 		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. NoPlugin is able to play this media in the browser.<br /><br /><button type="button" title="' + url + '">Show content</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></video>');
 		$("video[id$='video" + id + "']").css("display", "none");
 		$(document).on('click', 'button[title="' + url + '"]', function(){
@@ -53,6 +89,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
 			$("div[id$='alert" + id + "']").attr('style','display:none !important');
 			$("video[id$='video" + id + "']").get(0).play();
 		});
+	// Play supported audio files in browser
 	} else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
 		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. NoPlugin is able to play this media in the browser.<br /><br /><button type="button" title="' + url + '">Show content</button></div></div><audio class="nopluginaudio" id="audio' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"><!-- Original embed code: ' + oldembed + ' --></audio>');
 		$("audio[id$='audio" + id + "']").css("display", "none");
@@ -61,6 +98,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
 			$("div[id$='alert" + id + "']").attr('style','display:none !important');
 			$("audio[id$='audio" + id + "']").get(0).play();
 		});
+	// Open unsupported files in media player
 	} else {
 		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open content</button><br /><br /><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F" target="_blank">More info</a></div><!-- Original embed code: ' + oldembed + ' --></div>');
 		$(document).on('click', 'button[title="' + url + '"]', function(){
@@ -78,7 +116,12 @@ function replaceEmbed(object) {
 	// Create ID for player
 	var id = String(Math.floor((Math.random() * 1000000) + 1));
 	// Find video source of object
-	var url = findURL(object.attr("src"));
+	var url;
+	if (object.attr("qtsrc")) {
+		url = findURL(object.attr("qtsrc"));
+	} else {
+		url = findURL(object.attr("src"));
+	}
 	// Find attributes of object
 	if (object.is("[width]")) {
 		var width = $(object).attr("width");
@@ -155,7 +198,7 @@ function reloadDOM() {
 	// MIME types from www.freeformatter.com/mime-types-list.html
 
 	// QuickTime Player
-	$("object[type='video/quicktime'],object[codebase='http://www.apple.com/qtactivex/qtplugin.cab'],object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B']").each(function() {
+	$("object[type='video/quicktime'],object[codebase='http://www.apple.com/qtactivex/qtplugin.cab'],object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B'],object[data$='.mov'],object[data$='.qt']").each(function() {
 		if ($.inArray('QuickTime', navigator.plugins) > -1) {
 			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
 		} else {

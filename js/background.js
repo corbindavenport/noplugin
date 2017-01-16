@@ -1,17 +1,19 @@
 /*
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+The MIT License (MIT)
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+Copyright (c) 2017 Corbin Davenport
 
-You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-chrome.runtime.onInstalled.addListener(function(details) {
-	if (localStorage.getItem("version") != chrome.runtime.getManifest().version) {
-		chrome.tabs.create({'url': chrome.extension.getURL('welcome.html')});
-		localStorage["version"] = chrome.runtime.getManifest().version;
-	}
-});
+if (localStorage.getItem("version") != chrome.runtime.getManifest().version) {
+	chrome.tabs.create({'url': chrome.extension.getURL('welcome.html')});
+	localStorage["version"] = chrome.runtime.getManifest().version;
+}
 
 // Download and open videos that can't be played in HTML5 player
 
@@ -37,11 +39,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 									if (filename.length > 20) {
 										filename = filename.substring(0, 20) + "..."
 									}
-									if (navigator.userAgent.indexOf("OPR") !== -1) {
-										// Opera doesn't support notifications with buttons
+									if ((navigator.userAgent.indexOf("OPR") !== -1) || (navigator.userAgent.indexOf("Firefox") !== -1)) {
+										// Opera and Firefox do not support notifications with buttons
 										chrome.notifications.create("", {
 											type: "basic",
-											requireInteraction: true,
 											title: "NoPlugin",
 											message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
 											iconUrl: "img/icon128.png"
@@ -78,13 +79,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 																chrome.downloads.open(videoID);
 														} else {
 															// Download VLC for user's operating system
-															if (navigator.platform.indexOf('Mac') > -1) {
+															if (navigator.platform.includes('Mac')) {
 																// Mac OS X download
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
-															} else if (navigator.platform.indexOf('Win') > -1) {
+															} else if (navigator.platform.includes('Win')) {
 																// Windows download
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
-															} else if (navigator.platform.indexOf('CrOS') > -1) {
+															} else if (navigator.platform.includes('CrOS')) {
 																// Chrome OS download
 																chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
 															}else {
