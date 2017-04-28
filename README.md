@@ -5,6 +5,9 @@ NoPlugin is a Google Chrome and Opera extension that lets you play QuickTime, Re
 NoPlugin searches webpages for embedded plugin objects, and plays the content with the browsers's built-in HTML5 player. NoPlugin will either replace the embedded code with the browser's HTML5 player, or play it with your computer's built-in video player.
 
 ---------------------------------------------------------
+__New in NoPlugin 3.1:__
+* Audio content that can be played in the browser is now automatically replaced, instead of showing the 'Show content' message
+
 __New in NoPlugin 3.0:__
 * Firefox is now supported
 * Added support for detecting MMS links
