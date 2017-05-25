@@ -1,10 +1,18 @@
 NoPlugin
 ================
-NoPlugin is a Google Chrome and Opera extension that lets you play QuickTime, RealPlayer, and Windows Media content in your browser without plugins. [Chrome no longer supports NPAPI plugins](https://support.google.com/chrome/answer/6213033?hl=en), which includes virtually every plugin except the Flash plugin.
+NoPlugin is an extension for Chrome, Opera, and Firefox that allows you to play some plugin content in your browser without plugins. Most browsers are phasing out plugins, due to security concerns, so NoPlugin was created to maintain some compatibility with outdated sites.
 
-NoPlugin searches webpages for embedded plugin objects, and plays the content with the browsers's built-in HTML5 player. NoPlugin will either replace the embedded code with the browser's HTML5 player, or play it with your computer's built-in video player.
+NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 players [if the file format is supported by your browser](https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F). If the file cannot be played in the browser, NoPlugin can download it for playback with the video/audio players installed on your computer.
+
+[Download for Opera](https://addons.opera.com/en/extensions/details/noplugin/)
+
+[Download for Chrome](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice)
 
 ---------------------------------------------------------
+__New in NoPlugin 3.1:__
+* Audio content that can be played in the browser is now automatically replaced, instead of showing the 'Show content' message
+* Updated jQuery framework to version 3.2.1
+
 __New in NoPlugin 3.0:__
 * Firefox is now supported
 * Added support for detecting MMS links
