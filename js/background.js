@@ -15,14 +15,19 @@ chrome.runtime.onInstalled.addListener(function() {
 		chrome.tabs.create({'url': chrome.extension.getURL('welcome.html')});
 		localStorage["version"] = chrome.runtime.getManifest().version;
 	}
+	// Save operating system info to storage to avoid calling getPlatformInfo every time
+	chrome.runtime.getPlatformInfo(function(info) {
+		localStorage["platform"] = info.os;
+	});
 });
 
-// Download and open videos that can't be played in HTML5 player
-
+// Keep track of downloads that NoPlugin has already sent notifications for
 var downloadsAlreadyNotified = [];
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	if (request.method == "saveVideo") {
+	if (request.method == "getPlatform") { // Send system info to content script
+		sendResponse(localStorage["platform"]);
+	} else if (request.method == "saveVideo") { // Download and open videos that can't be played in HTML5 player
 		var videoID;
 		var myNotificationID;
 		chrome.downloads.download({
