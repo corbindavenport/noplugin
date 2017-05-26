@@ -113,33 +113,33 @@ function replaceEmbed(object) {
 	// Find video source of object
 	var url;
 	if (object.attr("qtsrc")) {
-		url = findURL(object.attr("qtsrc"));
+		url = findURL(DOMPurify.sanitize(object.attr("qtsrc"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else {
-		url = findURL(object.attr("src"));
+		url = findURL(DOMPurify.sanitize(object.attr("src"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	}
 	// Find attributes of object
 	if (object.is("[width]")) {
-		var width = $(object).attr("width");
+		var width = DOMPurify.sanitize($(object).attr("width"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var width = object.width();
 	}
 	if (object.is("[height]")) {
-		var height = $(object).attr("height");
+		var height = DOMPurify.sanitize($(object).attr("height"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var height = object.height();
 	}
 	if (object.is("[class]")) {
-		var cssclass = $(object).attr("class");
+		var cssclass = DOMPurify.sanitize($(object).attr("class"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var cssclass = "";
 	}
 	if (object.is("[style]")) {
-		var cssstyles = $(object).attr("style");
+		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var cssstyles = "";
 	}
 	if (object.is("[name]")) {
-		var name = $(object).attr("name");
+		var name = DOMPurify.sanitize($(object).attr("name"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var name = "";
 	}
@@ -152,35 +152,35 @@ function replaceObject(object) {
 	var id = String(Math.floor((Math.random() * 1000000) + 1));
 	// Find video source of object
 	if (object.is("[data]")) {
-		var url = findURL($(object).attr("data"));
+		var url = findURL(DOMPurify.sanitize($(object).attr("data"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else if (object.find("param[name$='src']").length) {
-		var url = findURL($(object).find("param[name$='src']").val());
+		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else {
 		return;
 	}
 	// Find attributes of object
 	if (object.is("[width]")) {
-		var width = $(object).attr("width");
+		var width = DOMPurify.sanitize($(object).attr("width"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var width = object.width();
 	}
 	if (object.is("[height]")) {
-		var height = $(object).attr("height");
+		var height = DOMPurify.sanitize($(object).attr("height"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var height = object.height();
 	}
 	if (object.is("[class]")) {
-		var cssclass = $(object).attr("class");
+		var cssclass = DOMPurify.sanitize($(object).attr("class"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var cssclass = "";
 	}
 	if (object.is("[style]")) {
-		var cssstyles = $(object).attr("style");
+		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var cssstyles = "";
 	}
 	if (object.is("[name]")) {
-		var name = $(object).attr("name");
+		var name = DOMPurify.sanitize($(object).attr("name"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
 	} else {
 		var name = "";
 	}

@@ -1,7 +1,7 @@
 {
 "manifest_version": 2,
 	"name": "NoPlugin (previously QuickChrome)",
-	"version": "3.1",
+	"version": "3.2",
 	"author": "Corbin Davenport",
 	"description": "Play some plugin content without plugins.",
 	"homepage_url": "https://github.com/corbindavenport",
@@ -32,7 +32,7 @@
 		{
 		"matches": ["http://*/*", "https://*/*"],
 		"css": ["css/noplugin.css"],
-		"js": ["js/jquery-3.2.1.slim.min.js", "js/contentscript.js"],
+		"js": ["js/purify.js", "js/jquery-3.2.1.slim.min.js", "js/contentscript.js"],
 		"run_at": "document_start"
 		}
 	],
