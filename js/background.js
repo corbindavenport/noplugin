@@ -18,6 +18,8 @@ chrome.runtime.onInstalled.addListener(function() {
 	// Save operating system info to storage to avoid calling getPlatformInfo every time
 	chrome.runtime.getPlatformInfo(function(info) {
 		localStorage["platform"] = info.os;
+		// Windows: win
+		// Chrome OS: cros
 	});
 });
 
@@ -86,16 +88,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 																chrome.downloads.open(videoID);
 														} else {
 															// Download VLC for user's operating system
-															if (navigator.platform.includes('Mac')) {
+															if (localStorage["platform"] === "mac") {
 																// Mac OS X download
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
-															} else if (navigator.platform.includes('Win')) {
+															} else if (localStorage["platform"] === "win") {
 																// Windows download
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
-															} else if (navigator.platform.includes('CrOS')) {
+															} else if (localStorage["platform"] === "cros") {
 																// Chrome OS download
 																chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
-															}else {
+																// Replace with market://details?id=org.videolan.vlc for Chromebooks with the Play Store
+															} else {
 																// Other downloads
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
 															}
