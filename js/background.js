@@ -83,8 +83,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 										});
 										chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 												if (notifId === myNotificationID) {
+														// Open downloaded media
 														if (btnIdx === 0) {
-																// Open downloaded media
+																if (localStorage["platform"] === "cros") {
+																	// Check if the file can be played in Chrome OS' media player
+																	var supported = ( filename.includes(".mp4") || filename.includes(".m4a") || filename.includes(".mp3") || filename.includes(".ogv") || filename.includes(".ogm") || filename.includes(".ogg") || filename.includes(".oga") || filename.includes(".webm") || filename.includes(".wav") );
+																	// Alert the user if Chrome OS can't play the file
+																	if (!(supported)) {
+																		alert("Chrome OS may not be able to play this file. If you have problems, open VLC Media Player and select the file from your Downloads folder.\n\nYou can download VLC from the 'Get VLC Media Player' button on the download notification.")
+																	}
+																}
 																chrome.downloads.open(videoID);
 														} else {
 															// Download VLC for user's operating system
@@ -96,7 +104,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
 															} else if (localStorage["platform"] === "cros") {
 																// Chrome OS download
-																chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
+																if (confirm("Does your Chromebook have the Google Play Store? Press 'OK' for Yes, or 'Cancel' for No.")) {
+																	chrome.tabs.create({ url: "market://details?id=org.videolan.vlc" });
+																} else {
+																	chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
+																}
 																// Replace with market://details?id=org.videolan.vlc for Chromebooks with the Play Store
 															} else {
 																// Other downloads
