@@ -1,6 +1,6 @@
 {
 "manifest_version": 2,
-	"name": "NoPlugin (previously QuickChrome)",
+	"name": "NoPlugin",
 	"version": "3.2",
 	"author": "Corbin Davenport",
 	"description": "Play some plugin content in modern browsers without plugins.",

@@ -116,6 +116,8 @@ function replaceEmbed(object) {
 	var url;
 	if (object.attr("qtsrc")) {
 		url = findURL(DOMPurify.sanitize(object.attr("qtsrc"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+	} if (object.attr("target")) {
+		url = findURL(DOMPurify.sanitize(object.attr("target"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else {
 		url = findURL(DOMPurify.sanitize(object.attr("src"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	}
@@ -235,6 +237,21 @@ function reloadDOM() {
 	$("embed[type='video/x-ms-wm'],embed[type='audio/x-ms-wma'],embed[type='audio/x-ms-wmv'],embed[type='application/x-mplayer2'],embed[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],embed[pluginspage^='http://www.microsoft.com'],embed[src$='.wm'],embed[src$='.wma'],embed[src$='.wmv']").each(function() {
 		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
 			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
+		} else {
+			replaceEmbed($(this));
+		}
+	});
+	// VLC Plugin
+	$("object[type='application/x-vlc-plugin'],object[pluginspage='http://www.videolan.org'],object[classid='clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921'],object[codebase='http://download.videolan.org/pub/videolan/vlc/last/win32/axvlc.cab']").each(function() {
+		if ($.inArray('VLC', navigator.plugins) > -1) {
+			console.log("[NoPlugin] VLC plugin detected, will not replace embed.");
+		} else {
+			replaceObject($(this));
+		}
+	});
+	$("embed[type='application/x-vlc-plugin'],embed[pluginspage='http://www.videolan.org']").each(function() {
+		if ($.inArray('VLC', navigator.plugins) > -1) {
+			console.log("[NoPlugin] VLC plugin detected, will not replace embed.");
 		} else {
 			replaceEmbed($(this));
 		}
