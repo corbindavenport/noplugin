@@ -8,17 +8,16 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 
 [Download for Chrome](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice)
 
+Firefox download coming soon!
+
 ---------------------------------------------------------
-__New in NoPlugin 3.1:__
-* Audio content that can be played in the browser is now automatically replaced, instead of showing the 'Show content' message
-* Updated jQuery framework to version 3.2.1
-
-__New in NoPlugin 3.0:__
-* Firefox is now supported
-* Added support for detecting MMS links
-* Fixed several layout bugs
-* Switched to MIT license
-
+__New in NoPlugin 4.0:__
+* Works much better on Chrome OS
+* Plugin embed data is now sanitized to prevent XSS attacks
+* Added support for RTSP media streams
+* Now detects VLC plugin embed code
+* Several other minor improvements and bug fixes
+ 
 ---------------------------------------------------------
 
 The MIT License (MIT)
