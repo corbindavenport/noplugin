@@ -16,9 +16,8 @@
 		"scripts": ["js/jquery-3.2.1.slim.min.js", "js/background.js"]
 	},
 	"web_accessible_resources": [
-		"css/*",
 		"img/*",
-		"font/*"
+		"fonts/*"
 	],
 	"content_scripts": [
 		{

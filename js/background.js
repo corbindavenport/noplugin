@@ -109,7 +109,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 																} else {
 																	chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
 																}
-																// Replace with market://details?id=org.videolan.vlc for Chromebooks with the Play Store
 															} else {
 																// Other downloads
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
