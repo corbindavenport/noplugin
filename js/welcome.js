@@ -10,31 +10,19 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-window.onload = function() {
-	document.getElementById("bitcoin").style.display = "none";
+$(document).ready(function() {
 
-	document.querySelector('input[value="Download VLC Media Player"]').onclick=function(){
-		if (navigator.platform.indexOf('Mac') > -1) {
-			// Mac OS X download
-			chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
-		} else if (navigator.platform.indexOf('Win') > -1) {
-			// Windows download
-			chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
-		} else if (navigator.platform.indexOf('CrOS') > -1) {
-			// Chrome OS download
-			chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
-		}else {
-			// Other downloads
-			chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
-		}
-	};
+	// Add version number to welcome page
+	$(".version").html(" " + chrome.runtime.getManifest().version);
 
-	document.querySelector('input[value="Donate via PayPal"]').onclick=function(){chrome.tabs.create({ url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=NoPlugin%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted" });};
+	//Show instructions for leaving a review based on the browser being used
+	var useragent = navigator.userAgent;
 
-	document.querySelector('input[value="Donate via Bitcoin"]').onclick=function(){document.getElementById("bitcoin").style.display = "block";};
+	// Opera has to be checked before Chrome, because Opera has both "Chrome" and "OPR" in the user agent string
+	if (useragent.includes("OPR")) {
+		$('.review-info').html('Also please leave a review on the <a href="https://addons.opera.com/en/extensions/details/noplugin/" target="_blank">Opera add-ons site</a> if you can.');
+	} else if (useragent.includes("Chrome")) {
+		$('.review-info').html('Also please leave a review on the <a href="https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice" target="_blank">Chrome Web Store</a> if you can.');
+	}
 
-	var list = document.getElementsByClassName("version");
-		for (var i = 0; i < list.length; i++) {
-		    list[i].innerHTML = chrome.runtime.getManifest().version;
-		}
-}
+});

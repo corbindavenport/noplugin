@@ -10,17 +10,26 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-if (localStorage.getItem("version") != chrome.runtime.getManifest().version) {
-	chrome.tabs.create({'url': chrome.extension.getURL('welcome.html')});
-	localStorage["version"] = chrome.runtime.getManifest().version;
-}
+chrome.runtime.onInstalled.addListener(function() {
+	if (localStorage.getItem("version") != chrome.runtime.getManifest().version) {
+		chrome.tabs.create({'url': chrome.extension.getURL('welcome.html')});
+		localStorage["version"] = chrome.runtime.getManifest().version;
+	}
+	// Save operating system info to storage to avoid calling getPlatformInfo every time
+	chrome.runtime.getPlatformInfo(function(info) {
+		localStorage["platform"] = info.os;
+		// Windows: win
+		// Chrome OS: cros
+	});
+});
 
-// Download and open videos that can't be played in HTML5 player
-
+// Keep track of downloads that NoPlugin has already sent notifications for
 var downloadsAlreadyNotified = [];
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	if (request.method == "saveVideo") {
+	if (request.method == "getPlatform") { // Send system info to content script
+		sendResponse(localStorage["platform"]);
+	} else if (request.method == "saveVideo") { // Download and open videos that can't be played in HTML5 player
 		var videoID;
 		var myNotificationID;
 		chrome.downloads.download({
@@ -74,21 +83,33 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 										});
 										chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 												if (notifId === myNotificationID) {
+														// Open downloaded media
 														if (btnIdx === 0) {
-																// Open downloaded media
+																if (localStorage["platform"] === "cros") {
+																	// Check if the file can be played in Chrome OS' media player
+																	var supported = ( filename.includes(".mp4") || filename.includes(".m4a") || filename.includes(".mp3") || filename.includes(".ogv") || filename.includes(".ogm") || filename.includes(".ogg") || filename.includes(".oga") || filename.includes(".webm") || filename.includes(".wav") );
+																	// Alert the user if Chrome OS can't play the file
+																	if (!(supported)) {
+																		alert("Chrome OS may not be able to play this file. If you have problems, open VLC Media Player and select the file from your Downloads folder.\n\nYou can download VLC from the 'Get VLC Media Player' button on the download notification.")
+																	}
+																}
 																chrome.downloads.open(videoID);
 														} else {
 															// Download VLC for user's operating system
-															if (navigator.platform.includes('Mac')) {
+															if (localStorage["platform"] === "mac") {
 																// Mac OS X download
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
-															} else if (navigator.platform.includes('Win')) {
+															} else if (localStorage["platform"] === "win") {
 																// Windows download
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
-															} else if (navigator.platform.includes('CrOS')) {
+															} else if (localStorage["platform"] === "cros") {
 																// Chrome OS download
-																chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
-															}else {
+																if (confirm("Does your Chromebook have the Google Play Store? Press 'OK' for Yes, or 'Cancel' for No.")) {
+																	chrome.tabs.create({ url: "market://details?id=org.videolan.vlc" });
+																} else {
+																	chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
+																}
+															} else {
 																// Other downloads
 																chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
 															}

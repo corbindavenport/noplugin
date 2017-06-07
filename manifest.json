@@ -1,10 +1,10 @@
 {
 "manifest_version": 2,
-	"name": "NoPlugin (previously QuickChrome)",
-	"version": "3.1",
+	"name": "NoPlugin",
+	"version": "4.0",
 	"author": "Corbin Davenport",
-	"description": "Play some plugin content without plugins.",
-	"homepage_url": "https://github.com/corbindavenport",
+	"description": "Play some plugin content in modern browsers without plugins.",
+	"homepage_url": "https://github.com/corbindavenport/noplugin",
 	"permissions": [
 		"http://*/*",
 		"https://*/*",
@@ -16,23 +16,14 @@
 		"scripts": ["js/jquery-3.2.1.slim.min.js", "js/background.js"]
 	},
 	"web_accessible_resources": [
-		"js/*",
-		"css/*",
 		"img/*",
-		"font/*"
+		"fonts/*"
 	],
-	"browser_action": {
-	  "default_icon": {
-		"19": "img/icon19.png",
-		"38": "img/icon38.png"
-	  },
-	  "default_title": "Click the icon to open NoPlugin settings."
-	},
 	"content_scripts": [
 		{
 		"matches": ["http://*/*", "https://*/*"],
 		"css": ["css/noplugin.css"],
-		"js": ["js/jquery-3.2.1.slim.min.js", "js/contentscript.js"],
+		"js": ["js/purify.js", "js/jquery-3.2.1.slim.min.js", "js/contentscript.js"],
 		"run_at": "document_start"
 		}
 	],
