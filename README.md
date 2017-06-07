@@ -8,7 +8,7 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 
 [Download for Chrome](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice)
 
-Firefox download coming soon!
+[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/noplugin/)
 
 ---------------------------------------------------------
 __New in NoPlugin 4.0:__
