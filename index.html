@@ -18,13 +18,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	<link rel="icon" type="image/png" href="img/icon16.png">
 	<title>NoPlugin</title>
 	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<style>
-		body { padding-top: 70px; }
-	</style>
 </head>
 <body>
 
-	<nav class="navbar navbar-default navbar-fixed-top">
+	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 			<div class="navbar-header">
 				<a class="navbar-brand" href="#">NoPlugin</a>
@@ -46,24 +43,38 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		<div class="row">
 			<div class="col-md-8">
 				<h2>Sample video</h2>
+				<p>NoPlugin is able to play some plugin content in the web browser, as long as the plugin is trying to load an MP4, MP3, M4A, or WAV file. The below embed uses the QuickTime plugin to play MP4 video.</p>
 				<p>
-					<object classid="clsid:02bf25d5-8c17-4b23-bc80-d3488abddc6b" width="320"height="180"
+					<object classid="clsid:02bf25d5-8c17-4b23-bc80-d3488abddc6b" width="320" height="180"
 codebase="http://www.apple.com/qtactivex/qtplugin.cab">
 						<param name="src" value="sample.mp4">
 						<param name="autoplay" value="true">
 						<param name="controller" value="false">
-					</object></p>
+						<b>There was a problem trying to run this plugin.</b>
+					</object>
+				</p>
+				<p>If you have NoPlugin, all you have to do is click the 'Show Content' button, and the video will start to play in your browser. Easy!</p>
+			<h2>Sample audio</h2>
+			<p>NoPlugin automatically replaces embedded audio, so you don't need to click any buttons. For example, the below audio embed uses the QuickTime plugin to play an MP3 file.</p>
+			<p>
+					<object classid="clsid:02bf25d5-8c17-4b23-bc80-d3488abddc6b" width="320" height="40"
+codebase="http://www.apple.com/qtactivex/qtplugin.cab">
+						<param name="src" value="sample.mp3">
+						<param name="autoplay" value="true">
+						<param name="controller" value="false">
+						<b>There was a problem trying to run this plugin.</b>
+					</object>
+				</p>
 			</div>
 			<div class="col-md-4">
 				<h2>Donate</h2>
-				<p>If you find Peek useful, please donate to support continued development. It would mean a lot!</p>
+				<p>If you find NoPlugin useful, please donate to support continued development. It would mean a lot!</p>
 				<p><a class="btn btn-warning" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=Peek%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank" role="button">Donate via PayPal</a></p>
-				<p class="review-info"></p>
 				<h2>Having issues?</h2>
 				<p>If you find a bug, or have a suggestion for a new feature, please create an issue at <a href="https://github.com/corbindavenport/noplugin/issues" target="_blank">NoPlugin GitHub repository</a>. You can also <a href="https://twitter.com/corbindavenport" target="_blank">send me a tweet</a> or <a href="mailto:me@corbin.io?subject=NoPlugin%20bug%20report">email me</a>.</p>
 			</div>
 		</div>
-		
+
 	</div>
 
 <script src="js/jquery-3.2.1.slim.min.js"></script>
