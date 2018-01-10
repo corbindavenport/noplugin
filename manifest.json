@@ -1,7 +1,7 @@
 {
 "manifest_version": 2,
 	"name": "NoPlugin",
-	"version": "4.0",
+	"version": "4.1",
 	"author": "Corbin Davenport",
 	"description": "Play some plugin content in modern browsers without plugins.",
 	"homepage_url": "https://github.com/corbindavenport/noplugin",
