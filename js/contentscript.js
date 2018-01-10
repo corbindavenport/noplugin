@@ -95,7 +95,9 @@ function openStream(url, type) {
 }
 
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
-	if (url.includes('mms://')) {
+	if (url == null) {
+		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here, but NoPlugin could not detect the URL.');
+	} else if (url.includes('mms://')) {
 		// Detect MMS links and open them in a local media player
 		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load a Windows Media Player stream here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
 		$("video[id$='video" + id + "']").css("display", "none");
@@ -140,13 +142,14 @@ function replaceEmbed(object) {
 	// Create ID for player
 	var id = String(Math.floor((Math.random() * 1000000) + 1));
 	// Find video source of object
-	var url;
 	if (object.attr("qtsrc")) {
-		url = findURL(DOMPurify.sanitize(object.attr("qtsrc"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	} if (object.attr("target")) {
-		url = findURL(DOMPurify.sanitize(object.attr("target"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+		var url = findURL(DOMPurify.sanitize(object.attr("qtsrc"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+	} else if (object.attr("href")) {
+		var url = findURL(DOMPurify.sanitize(object.attr("href"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+	} else if (object.attr("src")) {
+		var url = findURL(DOMPurify.sanitize(object.attr("src"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else {
-		url = findURL(DOMPurify.sanitize(object.attr("src"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+		var url = null;
 	}
 	// Find attributes of object
 	if (object.is("[width]")) {
@@ -184,10 +187,12 @@ function replaceObject(object) {
 	// Find video source of object
 	if (object.is("[data]")) {
 		var url = findURL(DOMPurify.sanitize($(object).attr("data"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	} else if (object.find("param[name$='src']").length) {
-		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+	} else if (object.find("param[name$='href'],param[name$='HREF']").length) {
+		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='href'],param[name$='HREF']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+	} else if (object.find("param[name$='src'],param[name$='SRC']").length) {
+		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src'],param[name$='SRC']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else {
-		return;
+		var url = null;
 	}
 	// Find attributes of object
 	if (object.is("[width]")) {
