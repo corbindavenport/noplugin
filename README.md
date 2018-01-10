@@ -11,12 +11,8 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/noplugin/)
 
 ---------------------------------------------------------
-__New in NoPlugin 4.0:__
-* Works much better on Chrome OS
-* Plugin embed data is now sanitized to prevent XSS attacks
-* Added support for RTSP media streams
-* Now detects VLC plugin embed code
-* Several other minor improvements and bug fixes
+__New in NoPlugin 4.1:__
+* Fixed notification issues on Opera
  
 ---------------------------------------------------------
 
