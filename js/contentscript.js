@@ -168,7 +168,7 @@ function replaceEmbed(object) {
 		var cssclass = "";
 	}
 	if (object.is("[style]")) {
-		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
+		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}) + ";";
 	} else {
 		var cssstyles = "";
 	}
@@ -191,6 +191,8 @@ function replaceObject(object) {
 		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='href'],param[name$='HREF']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else if (object.find("param[name$='src'],param[name$='SRC']").length) {
 		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src'],param[name$='SRC']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
+	} else if (object.find("embed").length && object.find("embed")[0].hasAttribute("src")) {
+		var url = findURL(DOMPurify.sanitize($(object).find("embed").attr("src"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
 	} else {
 		var url = null;
 	}
@@ -211,7 +213,7 @@ function replaceObject(object) {
 		var cssclass = "";
 	}
 	if (object.is("[style]")) {
-		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
+		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}) + ";";
 	} else {
 		var cssstyles = "";
 	}

@@ -12,6 +12,8 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 
 ---------------------------------------------------------
 __New in NoPlugin 4.1:__
+
+* Improved URL detection on embedded plugin objects
 * Fixed notification issues on Opera
  
 ---------------------------------------------------------
