@@ -1,13 +1,9 @@
 /*
-The MIT License (MIT)
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Copyright (c) 2017 Corbin Davenport
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
 $(document).ready(function() {
@@ -24,5 +20,29 @@ $(document).ready(function() {
 	} else if (useragent.includes("Chrome")) {
 		$('.review-info').html('Also please leave a review on the <a href="https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice" target="_blank">Chrome Web Store</a> if you can.');
 	}
+
+	// Download button for VLC
+	$(document).on('click', '.vlc-btn', function(){
+		// Get the OS from background.js
+		chrome.runtime.sendMessage({method: "getPlatform", key: "os"}, function(response) {
+			if (localStorage["platform"] === "mac") {
+				// Mac OS X download
+				chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-macosx.html" });
+			} else if (localStorage["platform"] === "win") {
+				// Windows download
+				chrome.tabs.create({ url: "http://www.videolan.org/vlc/download-windows.html" });
+			} else if (localStorage["platform"] === "cros") {
+				// Chrome OS download
+				if (confirm("Does your Chromebook have the Google Play Store? Press 'OK' for Yes, or 'Cancel' for No.")) {
+					chrome.tabs.create({ url: "market://details?id=org.videolan.vlc" });
+				} else {
+					chrome.tabs.create({ url: "https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en" });
+				}
+			} else {
+				// Other downloads
+				chrome.tabs.create({ url: "http://www.videolan.org/vlc/#download" });
+			}
+		});
+	});
 
 });
