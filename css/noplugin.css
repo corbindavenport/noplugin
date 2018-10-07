@@ -54,11 +54,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 html.firefox .nopluginvideo {
 	background: #424242 !important;
 }
-.nopluginaudio {
-	background: #fafafa !important;
-	box-shadow: inset 0px 0px 0px 1px #212121 !important;
-	padding: 2px !important;
-}
 .noplugin-popup {
 	background: #FFF;
 	height: 36px;
