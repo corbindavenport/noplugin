@@ -297,19 +297,3 @@ function reloadDOM() {
 $( document ).ready(function() {
 	reloadDOM();
 });
-
-// Initialize tooltips every time DOM is modified
-var observer = new MutationObserver(function(mutations) {
-	mutations.forEach(function(mutation) {
-		console.log("[NoPlugin] DOM change detected, looking for embeds again");
-		reloadDOM();
-	});
-});
-
-var observerConfig = {
-	attributes: true,
-	childList: true,
-	characterData: true
-};
-
-observer.observe(document, observerConfig);
