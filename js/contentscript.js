@@ -227,73 +227,76 @@ function replaceObject(object) {
 	injectHelp();
 }
 
+// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object. For browsers that support plugins, it checks if the original plugin is installed, and if available, uses that instead.
+// MIME types from www.freeformatter.com/mime-types-list.html
 function reloadDOM() {
-	// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object. For browsers that support plugins, it checks if the original plugin is installed, and if available, uses that instead.
-	// MIME types from www.freeformatter.com/mime-types-list.html
-
-	// QuickTime Player
-	$("object[type='video/quicktime'],object[codebase='http://www.apple.com/qtactivex/qtplugin.cab'],object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B'],object[data$='.mov'],object[data$='.qt']").each(function() {
-		if ($.inArray('QuickTime', navigator.plugins) > -1) {
-			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
+	var objectList = [
+		/* QuickTime */
+		"object[type='video/quicktime']",
+		"object[codebase='http://www.apple.com/qtactivex/qtplugin.cab']",
+		"object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B']",
+		"object[data$='.mov']",
+		"object[data$='.qt']",
+		/* RealPlayer */
+		"object[type='application/vnd.rn-realmedia']",
+		"object[type='audio/x-pn-realaudio']",
+		"object[type='audio/x-pn-realaudio-plugin']",
+		"object[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA']",
+		/* Windows Media Player */
+		"object[type='video/x-ms-wm']",
+		"object[type='audio/x-ms-wma']",
+		"object[type='audio/x-ms-wmv']",
+		"object[type='application/x-mplayer2']",
+		"object[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95']",
+		"object[codebase^='http://activex.microsoft.com/activex/controls/mplayer']",
+		"object[pluginspage^='http://www.microsoft.com']",
+		/* VLC Plugin */
+		"object[type='application/x-vlc-plugin']",
+		"object[pluginspage='http://www.videolan.org']",
+		"object[classid='clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921']",
+		"object[codebase='http://download.videolan.org/pub/videolan/vlc/last/win32/axvlc.cab']"
+	];
+	var embedList = [
+		/* QuickTime */
+		"embed[type='video/quicktime']",
+		"embed[src$='.mov']",
+		"embed[src$='.qt']",
+		/* RealPlayer */
+		"embed[type='application/vnd.rn-realmedia']",
+		"embed[type='audio/x-pn-realaudio']",
+		"embed[type='audio/x-pn-realaudio-plugin']",
+		"embed[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA']",
+		"embed[src$='.ram']",
+		"embed[src$='.rmp']",
+		"embed[src$='.rm']",
+		/* Windows Media Player */
+		"embed[type='video/x-ms-wm']",
+		"embed[type='audio/x-ms-wma']",
+		"embed[type='audio/x-ms-wmv']",
+		"embed[type='application/x-mplayer2']",
+		"embed[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95']",
+		"embed[pluginspage^='http://www.microsoft.com']",
+		"embed[src$='.wm']",
+		"embed[src$='.wma']",
+		"embed[src$='.wmv']",
+		/* VLC Plugin */
+		"embed[type='application/x-vlc-plugin']",
+		"embed[pluginspage='http://www.videolan.org']"
+	];
+	// Replace objects
+	var objects = objectList.toString()
+	document.querySelectorAll(objects).forEach(function(item) {
+		replaceObject($(item));
 	});
-	$("embed[type='video/quicktime'],embed[src$='.mov'],embed[src$='.qt']").each(function() {
-		if ($.inArray('QuickTime', navigator.plugins) > -1) {
-			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
-	// RealPlayer
-	$("object[type='application/vnd.rn-realmedia'],object[type='audio/x-pn-realaudio'],object[type='audio/x-pn-realaudio-plugin'],object[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA']").each(function() {
-		if ($.inArray('Real', navigator.plugins) > -1) {
-			console.log("[NoPlugin] RealPlayer plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='application/vnd.rn-realmedia'],embed[type='audio/x-pn-realaudio'],embed[type='audio/x-pn-realaudio-plugin'],embed[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA'],embed[src$='.ram'],embed[src$='.rmp'],embed[src$='.rm']").each(function() {
-		if ($.inArray('Real', navigator.plugins) > -1) {
-			console.log("[NoPlugin] RealPlayer plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
-	// Windows Media Player
-	$("object[type='video/x-ms-wm'],object[type='audio/x-ms-wma'],object[type='audio/x-ms-wmv'],object[type='application/x-mplayer2'],object[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],object[codebase^='http://activex.microsoft.com/activex/controls/mplayer'],object[pluginspage^='http://www.microsoft.com']").each(function() {
-		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
-			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='video/x-ms-wm'],embed[type='audio/x-ms-wma'],embed[type='audio/x-ms-wmv'],embed[type='application/x-mplayer2'],embed[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],embed[pluginspage^='http://www.microsoft.com'],embed[src$='.wm'],embed[src$='.wma'],embed[src$='.wmv']").each(function() {
-		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
-			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
-	// VLC Plugin
-	$("object[type='application/x-vlc-plugin'],object[pluginspage='http://www.videolan.org'],object[classid='clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921'],object[codebase='http://download.videolan.org/pub/videolan/vlc/last/win32/axvlc.cab']").each(function() {
-		if ($.inArray('VLC', navigator.plugins) > -1) {
-			console.log("[NoPlugin] VLC plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='application/x-vlc-plugin'],embed[pluginspage='http://www.videolan.org']").each(function() {
-		if ($.inArray('VLC', navigator.plugins) > -1) {
-			console.log("[NoPlugin] VLC plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
+	// Replace embeds
+	var embeds = embedList.toString()
+	document.querySelectorAll(embeds).forEach(function(item) {
+		replaceEmbed($(item));
 	});
 }
 
 // Initialize tooltips for initial page load
-$( document ).ready(function() {
+$(document).ready(function() {
+	console.log("[NoPlugin] Searching for plugin objects...");
 	reloadDOM();
 });
