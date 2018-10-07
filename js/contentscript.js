@@ -222,6 +222,18 @@ function replaceObject(object) {
 	injectHelp();
 }
 
+function replaceFrame(frame) {
+	var url = DOMPurify.sanitize($(frame).attr("src"));
+	// Replace old YouTube embeds
+	if (url.includes("youtube.com/v/")) {
+		var regex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
+		var youtubeID = url.match(regex)[1];
+		$(frame).attr("src", "https://www.youtube.com/embed/" + youtubeID);
+		console.log("[NoPlugin] Replaced plugin embed for " + url);
+	}
+	injectHelp();
+}
+
 // This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object. For browsers that support plugins, it checks if the original plugin is installed, and if available, uses that instead.
 // MIME types from www.freeformatter.com/mime-types-list.html
 function reloadDOM() {
@@ -278,6 +290,10 @@ function reloadDOM() {
 		"embed[type='application/x-vlc-plugin']",
 		"embed[pluginspage='http://www.videolan.org']"
 	];
+	var frameList = [
+		/* YouTube */
+		"iframe[src*='youtube.com/v/']"
+	]
 	// Replace objects
 	var objects = objectList.toString()
 	document.querySelectorAll(objects).forEach(function(item) {
@@ -287,6 +303,11 @@ function reloadDOM() {
 	var embeds = embedList.toString()
 	document.querySelectorAll(embeds).forEach(function(item) {
 		replaceEmbed($(item));
+	});
+	// Replace frames
+	var frames = frameList.toString()
+	document.querySelectorAll(frames).forEach(function(item) {
+		replaceFrame($(item));
 	});
 }
 
