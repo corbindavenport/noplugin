@@ -64,10 +64,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 							});
 						} else if (navigator.userAgent.includes("Firefox")) {
 							// Firefox doesn't support notification buttons or opening a download from the notification
-							chrome.notifications.create("", {
+							browser.notifications.create("", {
 								type: "basic",
 								title: "NoPlugin",
-								message: filename + " has finished downloading.",
+								message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
 								iconUrl: "img/icon128.png"
 							}, function(id) {
 								myNotificationID = id;

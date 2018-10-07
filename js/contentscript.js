@@ -35,11 +35,16 @@ function injectHelp() {
 		// Try to get existing margin
 		if (($("body").css("marginTop")) && (helpbar === 0)) {
 			margin = $("body").css("marginTop").replace("px", "");
-			margin = parseInt(margin) + 37;
+			margin = parseInt(margin) + 36;
 		} else {
-			margin = 37;
+			margin = 36;
 		}
-		$("body").append('<!-- Begin NoPlugin popup --><style>body {margin-top: ' + margin + 'px !important;}</style><div class="noplugin-popup"><span class="noplugin-message">NoPlugin loaded plugin content on this page.</span><a href="https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken" target="_blank">Not working?</a></div><!-- End NoPlugin popup -->');
+		$("body").prepend('<!-- Begin NoPlugin popup --><style>body {margin-top: ' + margin + 'px !important;}</style><div class="noplugin-popup"><span class="noplugin-popup-message">NoPlugin has loaded plugin content on this page.</span><button type="button" id="noplugin-broken-button" aria-label="NoPlugin not working?">Not working?</button></div><!-- End NoPlugin popup -->');
+		// Add event listener for button
+		$(document).on('click', '#noplugin-broken-button', function(){
+			// TODO: Fix error
+			chrome.tabs.create({url: "https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken"});
+		});
 		helpbar = 1;
 	}
 }

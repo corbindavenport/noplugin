@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 /* Attempt to use system font */
-.noplugin, .noplugin a, .noplugin a:hover, .noplugin button, .noplugin-popup, .noplugin-popup a {
+.noplugin, .noplugin a, .noplugin a:hover, .noplugin button, .noplugin-popup, .noplugin-popup button {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
 }
 
@@ -60,7 +60,7 @@ html.firefox .nopluginvideo {
 	padding: 2px !important;
 }
 .noplugin-popup {
-	background: linear-gradient(to bottom, #fef1b3 0%,#fae692 100%);
+	background: #FFF;
 	height: 36px;
 	z-index: 10000000 !important;
 	line-height: 36px;
@@ -71,99 +71,22 @@ html.firefox .nopluginvideo {
 	left: 0px;
 	right: 0px;
 	top: 0px;
-	-webkit-user-select: none !important;
 	cursor: default !important;
+	padding-left: 10px !important;
+	padding-right: 10px !important;
+	overflow: hidden !important;
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	justify-content: space-between !important;
 }
-.noplugin-popup .noplugin-message {
-	float: left;
-	width: calc(100% - 180px);
-	margin-left: 10px !important;
+.noplugin-popup .noplugin-popup-message {
 	white-space: nowrap !important;
 	text-overflow: ellipsis !important;
 	overflow: hidden !important;
 }
-.noplugin-popup a {
-	background: linear-gradient(to bottom, #fffde2 0%,#fdf4d4 37%,#fcf1be 58%,#fcecb2 79%,#feeeb3 89%,#fcecb2 95%,#faeeba 100%) !important;
-	text-decoration: none !important;
-	border: 1px solid #998d56 !important;
-	border-radius: 4px !important;
-	margin-top: 5px !important;
-	margin-bottom: 5px !important;
-	padding-left: 8px !important;
-	padding-right: 8px !important;
-	font-weight: normal !important;
-	font-size: 14px !important;
-	float: right !important;
-	margin-right: 10px;
-	color: #44433c !important;
-	line-height: 26px !important;
-	height: 26px !important;
-}
-.noplugin-popup a:visited {
-	color: #44433c !important;
-}
-.noplugin-popup a:hover {
-	color: #000000 !important;
-}
-
-@media (max-width: 220px) {
-	.noplugin-popup .noplugin-message {
-		display: none !important;
-	}
-	.noplugin-popup a {
-		float: left !important;
-		margin-left: 47px !important;
-		white-space: nowrap !important;
-		overflow: hidden !important;
-	}
-}
-
-/* Opera-specific styles */
-
-html.opera .noplugin-popup {
-	background: #f2f2f2 !important;
-	border-bottom: 1px solid #cccccc !important;
-	font-size: 14px !important;
-}
-html.opera .noplugin-popup a {
-	background: #e1e1e1 !important;
-	border: 1px solid #adadad !important;
-	border-radius: 0px !important;
-	font-size: 12px !important;
-	margin-top: 7px !important;
-	margin-bottom: 7px !important;
-	line-height: 20px !important;
-	height: 20px !important;
-}
-
-/* Firefox-specific styles */
-
-html.firefox .noplugin-popup {
-	background: rgb(246, 246, 246) !important;
-	border-bottom: 1px solid #c2c2c2 !important;
-	font-size: 14px !important;
-	color: #000000 !important;
-}
-html.firefox .noplugin-popup a {
-	background: #ffffff !important;
-	border: 1px solid #d6d6d6 !important;
-	border-radius: 0px !important;
-	font-size: 12px !important;
-	margin-top: 3px !important;
-	margin-bottom: 3px !important;
-	line-height: 20px !important;
-	height: 20px !important;
-	color: #000000 !important;
-}
-html.firefox .noplugin-popup a:hover {
-	background-color: #ededed !important;
-	color: #000000 !important;
-}
-html.firefox .noplugin-popup {
-	height: 28px !important;
-	line-height: 28px !important;
-	font-size: 12px !important;
-}
-html.firefox .noplugin-popup .noplugin-message {
-	margin-left: 10px !important;
+.noplugin-popup #noplugin-broken-button {
+	line-height: initial !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
 }
