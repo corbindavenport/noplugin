@@ -11,9 +11,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 /* Attempt to use system font */
+
 .noplugin, .noplugin a, .noplugin a:hover, .noplugin button, .noplugin-popup, .noplugin-popup button {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
 }
+
+/* CSS reset for buttons */
+
+.noplugin-content button, .noplugin-popup button {
+	line-height: initial !important;
+	color: initial !important;
+	font-size: initial;
+}
+
+/* Rest of styles */
 
 .noplugin {
 	overflow: auto !important;
@@ -36,6 +47,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	color: #FFFFFF !important;
 	font-style: normal !important;
 }
+.noplugin-content button {
+	line-height: initial !important;
+	color: initial !important;
+	font-size: initial;
+
+}
 .noplugin a {
 	color: #FFFFFF !important;
 	text-decoration: underline !important;
@@ -50,9 +67,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 .nopluginvideo {
 	background: url('chrome-extension://__MSG_@@extension_id__/img/preloader.gif') no-repeat center #424242 !important;
 	box-shadow: inset 0px 0px 0px 1px #212121 !important;
-}
-html.firefox .nopluginvideo {
-	background: #424242 !important;
 }
 .noplugin-popup {
 	background: #FFF;
@@ -81,7 +95,6 @@ html.firefox .nopluginvideo {
 	overflow: hidden !important;
 }
 .noplugin-popup #noplugin-broken-button {
-	line-height: initial !important;
 	white-space: nowrap !important;
 	overflow: hidden !important;
 }

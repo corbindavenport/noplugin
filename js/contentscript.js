@@ -26,12 +26,6 @@ function injectHelp() {
 	if ($(".noplugin-popup").length) {
 		// The popup was already created by another instance, so don't do it again
 	} else {
-		// Add opera class to HTML if using Opera, for Opera-specific CSS tweaks
-		if (navigator.userAgent.indexOf("OPR") !== -1) {
-			$('html').addClass('opera');
-		} else if (navigator.userAgent.indexOf("Firefox") !== -1) {
-			$('html').addClass('firefox');
-		}
 		// Try to get existing margin
 		if (($("body").css("marginTop")) && (helpbar === 0)) {
 			margin = $("body").css("marginTop").replace("px", "");
@@ -39,6 +33,7 @@ function injectHelp() {
 		} else {
 			margin = 36;
 		}
+		// Inject toolbar
 		$("body").prepend('<!-- Begin NoPlugin popup --><style>body {margin-top: ' + margin + 'px !important;}</style><div class="noplugin-popup"><span class="noplugin-popup-message">NoPlugin has loaded plugin content on this page.</span><button type="button" id="noplugin-broken-button" aria-label="NoPlugin not working?">Not working?</button></div><!-- End NoPlugin popup -->');
 		// Add event listener for button
 		$(document).on('click', '#noplugin-broken-button', function(){
