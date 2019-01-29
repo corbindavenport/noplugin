@@ -24,7 +24,7 @@
 		"matches": ["http://*/*", "https://*/*"],
 		"css": ["css/noplugin.css"],
 		"js": ["js/purify.js", "js/jquery-3.3.1.slim.min.js", "js/contentscript.js"],
-		"run_at": "document_start"
+		"run_at": "document_end"
 		}
 	],
 	"icons":{

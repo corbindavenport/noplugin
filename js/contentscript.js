@@ -19,28 +19,44 @@ function findURL(url) {
   return url;
 }
 
-var helpbar = 0;
-
 function injectHelp() {
   // Show warning for NoPlugin
-  if ($(".noplugin-popup").length) {
+  if (document.querySelector('.noplugin-popup')) {
     // The popup was already created by another instance, so don't do it again
   } else {
     // Try to get existing margin
-    if (($("body").css("marginTop")) && (helpbar === 0)) {
-      margin = $("body").css("marginTop").replace("px", "");
+    var bodyMargin = window.getComputedStyle(document.body, null).getPropertyValue('margin-top')
+    // Make sure margin is a pixel value and isn't null
+    if (bodyMargin && bodyMargin.includes('px')) {
+      margin = bodyMargin.replace('px', '');
       margin = parseInt(margin) + 36;
     } else {
       margin = 36;
     }
-    // Inject toolbar
-    $("body").prepend('<!-- Begin NoPlugin popup --><style>body {margin-top: ' + margin + 'px !important;}</style><div class="noplugin-popup"><span class="noplugin-popup-message">NoPlugin has loaded plugin content on this page.</span><button type="button" id="noplugin-broken-button" aria-label="NoPlugin not working?">Not working?</button></div><!-- End NoPlugin popup -->');
-    // Add event listener for button
-    $(document).on('click', '#noplugin-broken-button', function () {
-      // TODO: Fix error
-      chrome.tabs.create({ url: "https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken" });
-    });
-    helpbar = 1;
+    // Create popup
+    var popup = document.createElement('div')
+    popup.className = 'noplugin-popup'
+    // Create popup message
+    var popupMessage = document.createElement('span')
+    popupMessage.className = 'noplugin-popup-message'
+    popupMessage.innerText = 'NoPlugin has loaded plugin content on this page.'
+    popup.appendChild(popupMessage)
+    // Create popup button
+    var popupButton = document.createElement('button')
+    popupButton.type = 'button'
+    popupButton.id = 'noplugin-broken-button'
+    popupButton.setAttribute('aria-label', 'NoPlugin not working?')
+    popupButton.textContent = 'Not working?'
+    popupButton.addEventListener('click', function() {
+      window.open('https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken', '_blank');
+    })
+    popup.appendChild(popupButton)
+    // Create CSS styles for body margin
+    var popupStyles = document.createElement('style')
+    popupStyles.textContent = 'body {margin-top: ' + margin + 'px !important;}'
+    popup.appendChild(popupStyles)
+    // Insert popup into <body>
+    document.body.prepend(popup)
   }
 }
 
@@ -92,42 +108,43 @@ function openStream(url, type) {
 
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
   if (url == null) {
+    // URL error
     $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here, but NoPlugin could not detect the URL.');
   } else if (url.includes('mms://')) {
     // Detect MMS links and open them in a local media player
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load a Windows Media Player stream here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
+    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load a Windows Media Player stream here. Click to open it in your media player.<br /><br /><button type="button" data-url="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
     $("video[id$='video" + id + "']").css("display", "none");
-    $(document).on('click', 'button[title="' + url + '"]', function () {
+    $(document).on('click', 'button[data-url="' + url + '"]', function () {
       openStream(url, "MMS");
     });
   } else if (url.includes('rtsp://')) {
     // Detect RTSP links and open them in a local media player
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load an RTSP stream here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
+    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load an RTSP stream here. Click to open it in your media player.<br /><br /><button type="button" data-url="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
     $("video[id$='video" + id + "']").css("display", "none");
-    $(document).on('click', 'button[title="' + url + '"]', function () {
+    $(document).on('click', 'button[data-url="' + url + '"]', function () {
       openStream(url, "RTSP");
     });
   } else if (url.endsWith('.mp4')) {
     // Play supported video files in browser
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. NoPlugin is able to play this media in the browser.<br /><br /><button type="button" title="' + url + '">Show content</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
+    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. NoPlugin is able to play this media in the browser.<br /><br /><button type="button" data-url="' + url + '">Show content</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
     $("video[id$='video" + id + "']").css("display", "none");
-    $(document).on('click', 'button[title="' + url + '"]', function () {
+    $(document).on('click', 'button[data-url="' + url + '"]', function () {
       $("video[id$='video" + id + "']").css("display", "block");
       $("div[id$='alert" + id + "']").attr('style', 'display:none !important');
       $("video[id$='video" + id + "']").get(0).play();
     });
+  } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     // Play supported audio files in browser
     // Most plugin audio embeds have a small width, so some buttons on the HTML5 player are removed to make the seek bar as large as possible
-  } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     $(object).replaceWith('<div><audio controlsList="nofullscreen nodownload" class="nopluginaudio" id="audio' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + width + 'px !important;"><source src="' + url + '"></audio></div>');
-    // Open unsupported files in media player
   } else {
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Download content</button><br /><br /><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F" target="_blank">More info</a></div></div>');
-    $(document).on('click', 'button[title="' + url + '"]', function () {
+    // Open unsupported files in media player
+    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" data-url="' + url + '">Download content</button><br /><br /><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F" target="_blank">More info</a></div></div>');
+    $(document).on('click', 'button[data-url="' + url + '"]', function () {
       // Pass URL to background.js for browser to download and open video
       chrome.runtime.sendMessage({ method: "saveVideo", key: url }, function (response) {
-        $('button[title="' + url + '"]').prop("disabled", true);
-        $('button[title="' + url + '"]').html("Downloading media...");
+        $('button[data-url="' + url + '"]').prop("disabled", true);
+        $('button[data-url="' + url + '"]').html("Downloading media...");
       })
     });
   }
@@ -312,7 +329,5 @@ function reloadDOM() {
 }
 
 // Initialize tooltips for initial page load
-$(document).ready(function () {
-  console.log("[NoPlugin] Searching for plugin objects...");
-  reloadDOM();
-});
+console.log("[NoPlugin] Searching for plugin objects...");
+reloadDOM();
