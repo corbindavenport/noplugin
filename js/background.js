@@ -68,7 +68,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 								type: "basic",
 								title: "NoPlugin",
 								message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
-								iconUrl: "img/icon128.png"
 							}, function(id) {
 								myNotificationID = id;
 								if(chrome.runtime.lastError) {
@@ -84,11 +83,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 								message: filename + " has finished downloading. If you cannot open the file, download VLC Media Player.",
 								iconUrl: "img/icon128.png",
 								buttons: [{
-										title: "Open file",
-										iconUrl: "/img/notification-file.png"
+										title: "Open file"
 								},{
-										title: "Download VLC",
-										iconUrl: "/img/notification-vlc.png"
+										title: "Download VLC"
 								}]
 							}, function(id) {
 								myNotificationID = id;
