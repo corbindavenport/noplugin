@@ -64,12 +64,13 @@ function injectHelp() {
 function openStream(url, type) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: "getPlatform", key: "os" }, function (response) {
-    // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
-    if ((response === "win") && url.includes('mms://')) {
+    var winCompatibleStream = url.includes('mms://') || url.includes('rtsp://')
+    if ((response === "win") && winCompatibleStream) {
+       // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
       alert("Choose Windows Media Player (or another video player capable of opening " + type + " streams) on the next pop-up.")
       window.open(url, '_self');
-      // Directly opening the stream might not work on Chrome OS, so the user has to copy and paste it manually into VLC Media Player
     } else if (response === "cros") {
+      // Directly opening the stream might not work on Chrome OS, so the user has to copy and paste it manually into VLC Media Player
       if (confirm("Do you have VLC Media Player installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
         prompt("NoPlugin cannot automatically open this stream in VLC, due to limitations with Chrome OS.\n\nYou have to open VLC, select 'Stream' from the side menu, and paste this:", url)
       } else {
@@ -82,8 +83,8 @@ function openStream(url, type) {
           }
         }
       }
-      // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
     } else {
+      // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
       if (confirm("Do you have VLC Media Player (or another video player capable of opening " + type + " streams) installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
         alert('Choose your video player on the next pop-up.');
         window.open(url, '_self');
@@ -91,10 +92,10 @@ function openStream(url, type) {
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
           // Download VLC for user's operating system
           if (response === "win") {
-            // Mac OS X download
+            // Windows download
             window.open("http://www.videolan.org/vlc/download-windows.html", "_blank");
           } else if (response === "mac") {
-            // Mac OS X download
+            // macOS download
             window.open("http://www.videolan.org/vlc/download-macosx.html", "_blank");
           } else {
             // Other downloads
