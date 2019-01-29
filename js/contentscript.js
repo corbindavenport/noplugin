@@ -56,15 +56,14 @@ function injectHelp() {
 function openStream(url, type) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: "getPlatform", key: "os" }, function (response) {
-    var winCompatibleStream = url.includes('mms://') || url.includes('rtsp://')
-    if ((response === "win") && winCompatibleStream) {
+    if ((response === "win") && url.includes('mms://')) {
        // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
-      alert("Choose Windows Media Player (or another video player capable of opening " + type + " streams) on the next pop-up.")
+      alert("Choose Windows Media Player on the next pop-up.")
       window.open(url, '_self');
     } else if (response === "cros") {
       // Directly opening the stream might not work on Chrome OS, so the user has to copy and paste it manually into VLC Media Player
       if (confirm("Do you have VLC Media Player installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
-        prompt("NoPlugin cannot automatically open this stream in VLC, due to limitations with Chrome OS.\n\nYou have to open VLC, select 'Stream' from the side menu, and paste this:", url)
+        prompt("NoPlugin cannot automatically open this stream in VLC. Open VLC, select 'Stream' from the side menu, and paste this:", url)
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
@@ -77,9 +76,8 @@ function openStream(url, type) {
       }
     } else {
       // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
-      if (confirm("Do you have VLC Media Player (or another video player capable of opening " + type + " streams) installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
-        alert('Choose your video player on the next pop-up.');
-        window.open(url, '_self');
+      if (confirm("Do you have VLC Media Player installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
+        prompt("NoPlugin cannot automatically open this stream in VLC. Open VLC, click the 'Media' menu, select 'Open Network Stream', and paste this:", url)
       } else {
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
           // Download VLC for user's operating system
@@ -195,10 +193,12 @@ function replaceObject(object) {
     var url = findURL(DOMPurify.sanitize($(object).attr("data"), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }));
   } else if (object.find("param[name$='href'],param[name$='HREF']").length) {
     var url = findURL(DOMPurify.sanitize($(object).find("param[name$='href'],param[name$='HREF']").val(), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }));
-  } else if (object.find("param[name$='src'],param[name$='SRC']").length) {
-    var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src'],param[name$='SRC']").val(), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }));
+  } else if (object.find("param[name$='src'],param[name$='SRC'],param[name$='Src']").length) {
+    var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src'],param[name$='SRC'],param[name$='Src']").val(), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }));
   } else if (object.find("embed").length && object.find("embed")[0].hasAttribute("src")) {
     var url = findURL(DOMPurify.sanitize($(object).find("embed").attr("src"), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }));
+  } else if (object.find("embed").length && object.find("embed")[0].hasAttribute("target")) {
+    var url = findURL(DOMPurify.sanitize($(object).find("embed").attr("target"), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }));
   } else {
     var url = null;
   }
