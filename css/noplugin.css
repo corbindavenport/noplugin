@@ -38,8 +38,7 @@
 .noplugin-content button {
 	line-height: initial !important;
 	color: initial !important;
-	font-size: initial;
-
+	font-size: 90% !important;
 }
 .noplugin a {
 	color: #FFFFFF !important;

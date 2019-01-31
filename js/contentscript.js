@@ -4,10 +4,21 @@
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
 function findURL(url) {
-  var img = document.createElement('img');
-  img.src = url; // Set string url
-  url = img.src; // Get qualified url
-  img.src = null; // No server request
+  // Fix for Internet Archive pages sometimes storing the media on another backup
+  if (document.location.href.includes('//web.archive.org/') && !(url.includes('//web.archive.org/'))) {
+    // Regex to grab current Web Archive date: https://regex101.com/r/4F12w7/2
+    var regex = /(?:web\.archive\.org\/web\/)(\d*)/
+    var date = regex.exec(document.location.href)[1]
+    // Change URL to Internet Archive mirror
+    // Append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
+    url = 'https://web.archive.org/web/' + date + 'id_/' + url
+  } else if (url.includes('//web.archive.org/')) {
+    // TODO: Append _id to already fixed URL
+  }
+  var img = document.createElement('img')
+  img.src = url // Set string url
+  url = img.src // Get qualified url
+  img.src = null // No server request
   return url;
 }
 
@@ -37,10 +48,10 @@ function injectHelp() {
     var popupButton = document.createElement('button')
     popupButton.type = 'button'
     popupButton.id = 'noplugin-broken-button'
-    popupButton.setAttribute('aria-label', 'NoPlugin not working?')
     popupButton.textContent = 'Not working?'
     popupButton.addEventListener('click', function() {
-      window.open('https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken', '_blank');
+      window.open(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location), '_blank', 'height=300,width=500')
+      //window.open('mailto:noplugin@fire.fundersclub.com?subject=NoPlugin%20Bug%20Report&body=Web%20page%3A%20' + encodeURIComponent(window.location) + '%0A%0ADescribe%20the%20issue%3A', '_self');
     })
     popup.appendChild(popupButton)
     // Create CSS styles for body margin
