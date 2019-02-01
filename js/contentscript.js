@@ -108,6 +108,14 @@ function openStream(url, type) {
   });
 }
 
+// Allow user to download files that failed to play in-browser
+function playbackError(url) {
+  if (confirm('This media cannot be played in your browser, due to missing video/audio codecs. Do you want to try downloading the media file instead?')) {
+    // Pass URL to background.js for browser to download and open video
+    chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
+  }
+}
+
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
   if (url == null) {
     // URL error
@@ -126,6 +134,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     $(document).on('click', 'button[data-url="' + url + '"]', function () {
       openStream(url, "RTSP");
     });
+  /*
   } else if (url.endsWith('.mp4')) {
     // Play supported video files in browser
     $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. NoPlugin is able to play this media in the browser.<br /><br /><button type="button" data-url="' + url + '">Show content</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
@@ -135,11 +144,57 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
       $("div[id$='alert" + id + "']").attr('style', 'display:none !important');
       $("video[id$='video" + id + "']").get(0).play();
     });
+  */
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     // Play supported audio files in browser
     // Most plugin audio embeds have a small width, so some buttons on the HTML5 player are removed to make the seek bar as large as possible
     $(object).replaceWith('<div><audio controlsList="nofullscreen nodownload" class="nopluginaudio" id="audio' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + width + 'px !important;"><source src="' + url + '"></audio></div>');
   } else {
+    // Attempt to play other formats (MP4, QuickTime, etc.) in browser
+    // Create noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load plugin content here. NoPlugin may be able to play the media file.'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var playMediaButton = document.createElement('button')
+    playMediaButton.type = 'button'
+    playMediaButton.setAttribute('data-url', url)
+    playMediaButton.textContent = 'Play media file'
+    content.appendChild(playMediaButton)
+    // Create video player
+    var mediaPlayer = document.createElement('video')
+    mediaPlayer.controls = true
+    mediaPlayer.setAttribute('class', 'noplugin ' + cssclass)
+    mediaPlayer.id = id
+    mediaPlayer.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Add source to video player
+    var source = document.createElement('source')
+    source.src = url
+    source.addEventListener('error', function(event) {
+      if (event.type === 'error') {
+        playbackError(url)
+      }
+    })
+    //source.setAttribute('onerror', 'playbackError(' + url + ')')
+    // Write container to page
+    container.appendChild(content)
+    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+    // Create eventListener for button
+    playMediaButton.addEventListener('click', function() {
+      // Replace container element with video
+      container.parentNode.replaceChild(mediaPlayer, container)
+      // Load media in player
+      mediaPlayer.appendChild(source)
+      mediaPlayer.play()
+    })
+    /*
     // Open unsupported files in media player
     $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" data-url="' + url + '">Download content</button><br /><br /><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F" target="_blank">More info</a></div></div>');
     $(document).on('click', 'button[data-url="' + url + '"]', function () {
@@ -149,6 +204,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
         $('button[data-url="' + url + '"]').html("Downloading media...");
       })
     });
+    */
   }
   console.log("[NoPlugin] Replaced plugin embed for " + url);
 }
