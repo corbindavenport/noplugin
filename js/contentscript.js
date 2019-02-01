@@ -66,41 +66,41 @@ function injectHelp() {
 // Opens a media stream with a local application
 function openStream(url, type) {
   // Determine the user's operating system
-  chrome.runtime.sendMessage({ method: "getPlatform", key: "os" }, function (response) {
-    if ((response === "win") && url.includes('mms://')) {
+  chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    if ((response === 'win') && url.includes('mms://')) {
        // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
-      alert("Choose Windows Media Player on the next pop-up.")
-      window.open(url, '_self');
-    } else if (response === "cros") {
+      alert('Choose Windows Media Player on the next pop-up.')
+      window.open(url, '_self')
+    } else if (response === 'cros') {
       // Directly opening the stream might not work on Chrome OS, so the user has to copy and paste it manually into VLC Media Player
-      if (confirm("Do you have VLC Media Player installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
-        prompt("NoPlugin cannot automatically open this stream in VLC. Open VLC, select 'Stream' from the side menu, and paste this:", url)
+      if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
+        prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, select "Stream" from the side menu, and paste this:', url)
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          if (confirm("Last question - does your Chromebook have the Google Play Store? Press 'OK' for Yes, or 'Cancel' for No.")) {
-            window.open("market://details?id=org.videolan.vlc", "_blank");
+          if (confirm('Last question - does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
+            window.open('market://details?id=org.videolan.vlc', '_blank')
           } else {
-            window.open("https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en", "_blank");
+            window.open('https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en', '_blank')
           }
         }
       }
     } else {
       // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
-      if (confirm("Do you have VLC Media Player installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
-        prompt("NoPlugin cannot automatically open this stream in VLC. Open VLC, click the 'Media' menu, select 'Open Network Stream', and paste this:", url)
+      if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
+        prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
       } else {
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
           // Download VLC for user's operating system
-          if (response === "win") {
+          if (response === 'win') {
             // Windows download
-            window.open("http://www.videolan.org/vlc/download-windows.html", "_blank");
-          } else if (response === "mac") {
+            window.open('http://www.videolan.org/vlc/download-windows.html', '_blank')
+          } else if (response === 'mac') {
             // macOS download
-            window.open("http://www.videolan.org/vlc/download-macosx.html", "_blank");
+            window.open('http://www.videolan.org/vlc/download-macosx.html', '_blank')
           } else {
             // Other downloads
-            window.open("http://www.videolan.org/vlc/#download", "_blank");
+            window.open('http://www.videolan.org/vlc/#download', '_blank')
           }
         }
       }
