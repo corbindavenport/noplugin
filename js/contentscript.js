@@ -109,14 +109,33 @@ function openStream(url) {
 }
 
 // Allow user to download files that failed to play in-browser
-function playbackError(url) {
-  if (confirm('This media cannot be played in your browser, due to missing video/audio codecs. Do you want to try downloading the media file instead?')) {
-    // Pass URL to background.js for browser to download and open video
+function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles) {
+  // Create new noplguin container
+  var container = document.createElement('div')
+  container.setAttribute('class', 'noplugin ' + cssclass)
+  container.id = id
+  container.align = 'center'
+  container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+  // Create text content
+  var content = document.createElement('div')
+  content.className = 'noplugin-content'
+  content.textContent = 'This media cannot be played in your browser. Do you want to try downloading the media file instead?'
+  content.appendChild(document.createElement('br'))
+  // Create play button
+  var downloadButton = document.createElement('button')
+  downloadButton.type = 'button'
+  downloadButton.textContent = 'Download media file'
+  content.appendChild(downloadButton)
+  // Write container to page
+  container.appendChild(content)
+  mediaPlayer.parentNode.replaceChild(container, mediaPlayer)
+  // Create eventListener for button
+  downloadButton.addEventListener('click', function() {
     chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
-  }
+  })
 }
 
-function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
+function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
   if (url == null) {
     // URL error
     // Create noplguin container
@@ -142,7 +161,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     // Create text content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
-    content.textContent = 'This page is trying to load a video/audio stream here. You migh be able to play this with a media player.'
+    content.textContent = 'This page is trying to load a video/audio stream here. You might be able to play this with a media player.'
     content.appendChild(document.createElement('br'))
     // Create play button
     var playStreamButton = document.createElement('button')
@@ -205,7 +224,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     source.src = url
     source.addEventListener('error', function(event) {
       if (event.type === 'error') {
-        playbackError(url)
+        playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
       }
     })
     // Write container to page
@@ -274,7 +293,7 @@ function replaceEmbed(object) {
   } else {
     var name = ''
   }
-  injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  injectPlayer(object, id, url, width, height, cssclass, cssstyles)
   injectHelp()
 }
 
@@ -355,9 +374,9 @@ function replaceFrame(frame) {
   injectHelp()
 }
 
-// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object.
+// This function goes through certain <object>, <embed>, <iframe>, and <frame> elements on the page and replaces it with a NoPlugin object.
 // MIME types from www.freeformatter.com/mime-types-list.html
-function reloadDOM() {
+function loadDOM() {
   var objectList = [
     /* QuickTime */
     'object[type="video/quicktime"]',
@@ -414,7 +433,8 @@ function reloadDOM() {
   ]
   var frameList = [
     /* YouTube */
-    'iframe[src*="youtube.com/v/"]'
+    'iframe[src*="youtube.com/v/"]',
+    'frame[src*="youtube.com/v/"]'
   ]
   // Replace objects
   var objects = objectList.toString()
@@ -435,4 +455,4 @@ function reloadDOM() {
 
 // Initialize tooltips for initial page load
 console.log('[NoPlugin] Searching for plugin objects...')
-reloadDOM()
+loadDOM()
