@@ -64,7 +64,7 @@ function injectHelp() {
 }
 
 // Opens a media stream with a local application
-function openStream(url, type) {
+function openStream(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
     if ((response === 'win') && url.includes('mms://')) {
@@ -119,25 +119,62 @@ function playbackError(url) {
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
   if (url == null) {
     // URL error
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here, but NoPlugin could not detect the URL.')
-  } else if (url.includes('mms://')) {
-    // Detect MMS links and open them in a local media player
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load a Windows Media Player stream here. Click to open it in your media player.<br /><br /><button type="button" data-url="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>')
-    $("video[id$='video" + id + "']").css("display", "none")
-    $(document).on('click', 'button[data-url="' + url + '"]', function () {
-      openStream(url, "MMS")
-    })
-  } else if (url.includes('rtsp://')) {
-    // Detect RTSP links and open them in a local media player
-    $(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load an RTSP stream here. Click to open it in your media player.<br /><br /><button type="button" data-url="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>')
-    $("video[id$='video" + id + "']").css("display", "none")
-    $(document).on('click', 'button[data-url="' + url + '"]', function () {
-      openStream(url, "RTSP")
+    // Create noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load plugin content here, but NoPlugin could not detect the media address.'
+    // Write container to page
+    container.appendChild(content)
+    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+  } else if (url.includes('mms://') || url.includes('rtsp://')) {
+    // Create noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load a video/audio stream here. You migh be able to play this with a media player.'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var playStreamButton = document.createElement('button')
+    playStreamButton.type = 'button'
+    playStreamButton.setAttribute('data-url', url)
+    playStreamButton.textContent = 'Open stream'
+    content.appendChild(playStreamButton)
+    // Write container to page
+    container.appendChild(content)
+    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+    // Create eventListener for button
+    playStreamButton.addEventListener('click', function() {
+      openStream(url)
     })
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     // Play supported audio files in browser
-    // Most plugin audio embeds have a small width, so some buttons on the HTML5 player are removed to make the seek bar as large as possible
-    $(object).replaceWith('<div><audio controlsList="nofullscreen nodownload" class="nopluginaudio" id="audio' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + width + 'px !important;"><source src="' + url + '"></audio></div>')
+    // Create basic container element
+    var container = document.createElement('div')
+    // Create audio player
+    var mediaPlayer = document.createElement('audio')
+    mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
+    mediaPlayer.id = id
+    mediaPlayer.controls = true
+    mediaPlayer.name = name
+    container.setAttribute('style', cssstyles + ' width:' + width + 'px !important; height:' + height + 'px !important;')
+    container.appendChild(mediaPlayer)
+    // Add source to audio player
+    var source = document.createElement('source')
+    source.src = url
+    mediaPlayer.appendChild(source)
+    // Write container to page
+    $(object)[0].parentNode.replaceChild(container, $(object)[0])
   } else {
     // Attempt to play other formats (MP4, QuickTime, etc.) in browser
     // Create noplguin container
@@ -171,7 +208,6 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
         playbackError(url)
       }
     })
-    //source.setAttribute('onerror', 'playbackError(' + url + ')')
     // Write container to page
     container.appendChild(content)
     $(object)[0].parentNode.replaceChild(container, $(object)[0])
