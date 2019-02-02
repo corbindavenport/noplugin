@@ -63,6 +63,9 @@ video.noplugin {
 	z-index: 10000000 !important;
 	line-height: 36px;
 	border-bottom: 1px solid #e1e1e2;
+	border-top: 0 !important;
+	border-left: 0 !important;
+	border-right: 0 !important;
 	color: #44433c !important;
 	font-size: 16px !important;
 	position: fixed;
