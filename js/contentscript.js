@@ -227,38 +227,50 @@ function replaceEmbed(object) {
   // Create ID for player
   var id = String(Math.floor((Math.random() * 1000000) + 1))
   // Find video source of object
-  if (object.attr('qtsrc')) {
-    var url = findURL(DOMPurify.sanitize(object.attr('qtsrc'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
-  } else if (object.attr('href')) {
-    var url = findURL(DOMPurify.sanitize(object.attr('href'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
-  } else if (object.attr('src')) {
-    var url = findURL(DOMPurify.sanitize(object.attr('src'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
+  if (object.hasAttribute('qtsrc')) {
+    // <object qtsrc="url"></object>
+    var url = DOMPurify.sanitize(object.getAttribute('qtsrc'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else if (object.hasAttribute('href')) {
+    // <object href="url"></object>
+    var url = DOMPurify.sanitize(object.getAttribute('href'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else if (object.hasAttribute('src')) {
+    // <object src="url"></object>
+    var url = DOMPurify.sanitize(object.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var url = null
   }
   // Find attributes of object
-  if (object.is('[width]')) {
-    var width = DOMPurify.sanitize($(object).attr('width'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('width')) {
+    var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var width = object.width()
+    var width = object.getBoundingClientRect().width
   }
-  if (object.is('[height]')) {
-    var height = DOMPurify.sanitize($(object).attr('height'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('height')) {
+    var height = DOMPurify.sanitize(object.getAttribute('height'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var height = object.height()
+    var height = object.getBoundingClientRect().height
   }
-  if (object.is('[class]')) {
-    var cssclass = DOMPurify.sanitize($(object).attr('class'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('class')) {
+    var cssclass = DOMPurify.sanitize(object.getAttribute('class'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var cssclass = ''
   }
-  if (object.is('[style]')) {
-    var cssstyles = DOMPurify.sanitize($(object).attr('style'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }) + ';'
+  if (object.hasAttribute('id')) {
+    var id = DOMPurify.sanitize(object.getAttribute('id'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var id = ''
+  }
+  if (object.hasAttribute('style')) {
+    var cssstyles = DOMPurify.sanitize(object.getAttribute('style'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    // Add semi-colon to end of styles if not already present
+    if (!cssstyles.endsWith(';')) {
+      cssstyles = cssstyles + ';'
+    }
   } else {
     var cssstyles = ''
   }
-  if (object.is('[name]')) {
-    var name = DOMPurify.sanitize($(object).attr('name'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('name')) {
+    var name = DOMPurify.sanitize(object.getAttribute('name'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var name = ''
   }
@@ -267,9 +279,6 @@ function replaceEmbed(object) {
 }
 
 function replaceObject(object) {
-  object = object[0] // tempt convert jQuery object to DOM
-  // Create ID for player
-  var id = String(Math.floor((Math.random() * 1000000) + 1))
   // Find video source of object
   if (object.hasAttribute('data')) {
     // <object data="url"></object>
@@ -290,56 +299,63 @@ function replaceObject(object) {
     var url = null
   }
   if ((url != null) && (url != undefined)) {
+    // Sanitize URL
+    url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
     // Get exact URL
     url = findURL(url)
-    // Sanitize URL
-    url = DOMPurify.sanitize(url, { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
   }
   // Find attributes of object
-  object = $(object) // temp for testing
-  if (object.is('[width]')) {
-    var width = DOMPurify.sanitize($(object).attr('width'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('width')) {
+    var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var width = object.width()
+    var width = object.getBoundingClientRect().width
   }
-  if (object.is('[height]')) {
-    var height = DOMPurify.sanitize($(object).attr('height'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('height')) {
+    var height = DOMPurify.sanitize(object.getAttribute('height'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var height = object.height()
+    var height = object.getBoundingClientRect().height
   }
-  if (object.is('[class]')) {
-    var cssclass = DOMPurify.sanitize($(object).attr('class'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('class')) {
+    var cssclass = DOMPurify.sanitize(object.getAttribute('class'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var cssclass = ''
   }
-  if (object.is('[style]')) {
-    var cssstyles = DOMPurify.sanitize($(object).attr('style'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }) + ';'
+  if (object.hasAttribute('style')) {
+    var cssstyles = DOMPurify.sanitize(object.getAttribute('style'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    // Add semi-colon to end of styles if not already present
+    if (!cssstyles.endsWith(';')) {
+      cssstyles = cssstyles + ';'
+    }
   } else {
     var cssstyles = ''
   }
-  if (object.is('[name]')) {
-    var name = DOMPurify.sanitize($(object).attr('name'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  if (object.hasAttribute('id')) {
+    var id = DOMPurify.sanitize(object.getAttribute('id'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var id = ''
+  }
+  if (object.hasAttribute('name')) {
+    var name = DOMPurify.sanitize(object.getAttribute('name'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var name = ''
   }
-  object = object[0] // temp for testing
   injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
   injectHelp()
 }
 
 function replaceFrame(frame) {
-  var url = DOMPurify.sanitize($(frame).attr('src'))
+  var url = DOMPurify.sanitize(frame.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   // Replace old YouTube embeds
   if (url.includes('youtube.com/v/')) {
     var regex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/
     var youtubeID = url.match(regex)[1]
-    $(frame).attr('src', 'https://www.youtube.com/embed/' + youtubeID)
+    frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
   }
   injectHelp()
 }
 
-// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object. For browsers that support plugins, it checks if the original plugin is installed, and if available, uses that instead.
+// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object.
 // MIME types from www.freeformatter.com/mime-types-list.html
 function reloadDOM() {
   var objectList = [
@@ -403,17 +419,17 @@ function reloadDOM() {
   // Replace objects
   var objects = objectList.toString()
   document.querySelectorAll(objects).forEach(function (item) {
-    replaceObject($(item))
+    replaceObject(item)
   })
   // Replace embeds
   var embeds = embedList.toString()
   document.querySelectorAll(embeds).forEach(function (item) {
-    replaceEmbed($(item))
+    replaceEmbed(item)
   })
   // Replace frames
   var frames = frameList.toString()
   document.querySelectorAll(frames).forEach(function (item) {
-    replaceFrame($(item))
+    replaceFrame(item)
   })
 }
 
