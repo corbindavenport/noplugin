@@ -131,7 +131,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     content.textContent = 'This page is trying to load plugin content here, but NoPlugin could not detect the media address.'
     // Write container to page
     container.appendChild(content)
-    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+    object.parentNode.replaceChild(container, object)
   } else if (url.includes('mms://') || url.includes('rtsp://')) {
     // Create noplguin container
     var container = document.createElement('div')
@@ -152,7 +152,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     content.appendChild(playStreamButton)
     // Write container to page
     container.appendChild(content)
-    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+    object.parentNode.replaceChild(container, object)
     // Create eventListener for button
     playStreamButton.addEventListener('click', function() {
       openStream(url)
@@ -174,7 +174,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     source.src = url
     mediaPlayer.appendChild(source)
     // Write container to page
-    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+    object.parentNode.replaceChild(container, object)
   } else {
     // Attempt to play other formats (MP4, QuickTime, etc.) in browser
     // Create noplguin container
@@ -210,7 +210,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
     })
     // Write container to page
     container.appendChild(content)
-    $(object)[0].parentNode.replaceChild(container, $(object)[0])
+    object.parentNode.replaceChild(container, object)
     // Create eventListener for button
     playMediaButton.addEventListener('click', function() {
       // Replace container element with video
@@ -267,23 +267,36 @@ function replaceEmbed(object) {
 }
 
 function replaceObject(object) {
+  object = object[0] // tempt convert jQuery object to DOM
   // Create ID for player
   var id = String(Math.floor((Math.random() * 1000000) + 1))
   // Find video source of object
-  if (object.is('[data]')) {
-    var url = findURL(DOMPurify.sanitize($(object).attr('data'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
-  } else if (object.find('param[name$="href"],param[name$="HREF"]').length) {
-    var url = findURL(DOMPurify.sanitize($(object).find('param[name$="href"],param[name$="HREF"]').val(), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
-  } else if (object.find('param[name$="src"],param[name$="SRC"],param[name$="Src"]').length) {
-    var url = findURL(DOMPurify.sanitize($(object).find('param[name$="src"],param[name$="SRC"],param[name$="Src"]').val(), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
-  } else if (object.find('embed').length && object.find('embed')[0].hasAttribute('src')) {
-    var url = findURL(DOMPurify.sanitize($(object).find('embed').attr('src'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
-  } else if (object.find('embed').length && object.find('embed')[0].hasAttribute('target')) {
-    var url = findURL(DOMPurify.sanitize($(object).find('embed').attr('target'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true }))
+  if (object.hasAttribute('data')) {
+    // <object data="url"></object>
+    var url = object.getAttribute('data')
+  } else if (object.querySelector('param[name="HREF" i]')) {
+    // <object><param name="href" value="url"></object>
+    var url = object.querySelector('param[name="HREF" i]').getAttribute('value')
+  } else if (object.querySelector('param[name="SRC" i]')) {
+    // <object><param name="src" value="url"></object>
+    var url = object.querySelector('param[name="SRC" i]').getAttribute('value')
+  } else if (object.querySelector('embed').getAttribute('src')) {
+    // <object><embed src="url"></object>
+    var url = object.querySelector('embed').getAttribute('src')
+  } else if (object.querySelector('embed').getAttribute('target')) {
+    // <object><embed target="url"></object>
+    var url = object.querySelector('embed').getAttribute('target')
   } else {
     var url = null
   }
+  if ((url != null) && (url != undefined)) {
+    // Get exact URL
+    url = findURL(url)
+    // Sanitize URL
+    url = DOMPurify.sanitize(url, { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
+  }
   // Find attributes of object
+  object = $(object) // temp for testing
   if (object.is('[width]')) {
     var width = DOMPurify.sanitize($(object).attr('width'), { SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
@@ -309,6 +322,7 @@ function replaceObject(object) {
   } else {
     var name = ''
   }
+  object = object[0] // temp for testing
   injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
   injectHelp()
 }
