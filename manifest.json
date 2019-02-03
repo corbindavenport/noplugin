@@ -18,7 +18,8 @@
 	"web_accessible_resources": [
 		"img/*",
 		"fonts/*",
-		"bugreport.html"
+		"bugreport.html",
+		"media-info.html"
 	],
 	"content_scripts": [
 		{

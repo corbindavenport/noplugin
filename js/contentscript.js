@@ -1,6 +1,6 @@
 // How NoPlugin works
-// 1 - The reloadDOM() function runs when the page is loaded or changes, and looks for plugin objects.
-// 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
+// 1 - The reloadDOM() function runs when the page is loaded and looks for plugin objects.
+// 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
 function findURL(url) {
@@ -50,8 +50,7 @@ function injectHelp() {
     popupButton.id = 'noplugin-broken-button'
     popupButton.textContent = 'Not working?'
     popupButton.addEventListener('click', function() {
-      window.open(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location), '_blank', 'height=300,width=500')
-      //window.open('mailto:noplugin@fire.fundersclub.com?subject=NoPlugin%20Bug%20Report&body=Web%20page%3A%20' + encodeURIComponent(window.location) + '%0A%0ADescribe%20the%20issue%3A', '_self')
+      window.open(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location), '_blank', 'height=350,width=500')
     })
     popup.appendChild(popupButton)
     // Create CSS styles for body margin
@@ -119,19 +118,28 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
   // Create text content
   var content = document.createElement('div')
   content.className = 'noplugin-content'
-  content.textContent = 'This media cannot be played in your browser. Do you want to try downloading the media file instead?'
+  content.textContent = 'This media file cannot be played in your browser. Do you want to try downloading the file instead?'
   content.appendChild(document.createElement('br'))
   // Create play button
   var downloadButton = document.createElement('button')
   downloadButton.type = 'button'
   downloadButton.textContent = 'Download media file'
   content.appendChild(downloadButton)
+  content.appendChild(document.createElement('br'))
+  // Create info button
+  var infoButton = document.createElement('button')
+  infoButton.textContent = "More info"
+  content.appendChild(infoButton)
   // Write container to page
   container.appendChild(content)
   mediaPlayer.parentNode.replaceChild(container, mediaPlayer)
-  // Create eventListener for button
+  // Create eventListener for play button
   downloadButton.addEventListener('click', function() {
     chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
+  })
+  // Create eventListener for info button
+  infoButton.addEventListener('click', function() {
+    window.open(chrome.extension.getURL("media-info.html"), '_blank', 'height=350,width=500')
   })
 }
 
