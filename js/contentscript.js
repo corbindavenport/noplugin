@@ -3,17 +3,21 @@
 // 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
+// Get direct URL for media, and fix Internet Archive links if required
 function findURL(url) {
-  // Fix for Internet Archive pages sometimes storing the media on another backup
+  // Regex to parse Internet Archive URLs: https://regex101.com/r/4F12w7/3
+  var regex = /(?:web\.archive\.org\/web\/)(\d*)(\/)(.*)/
   if (document.location.href.includes('//web.archive.org/') && !(url.includes('//web.archive.org/'))) {
-    // Regex to grab current Web Archive date: https://regex101.com/r/4F12w7/2
-    var regex = /(?:web\.archive\.org\/web\/)(\d*)/
     var date = regex.exec(document.location.href)[1]
-    // Change URL to Internet Archive mirror
-    // Append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
+    // Change URL to Internet Archive mirror, and append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
     url = 'https://web.archive.org/web/' + date + 'id_/' + url
   } else if (url.includes('//web.archive.org/')) {
-    // TODO: Append _id to already fixed URL
+    // Get date
+    var date = regex.exec(document.location.href)[1]
+    // Get original URL
+    var originalURL = regex.exec(document.location.href)[3]
+    // Append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
+    url = 'https://web.archive.org/web/' + date + 'id_/' + originalURL
   }
   var img = document.createElement('img')
   img.src = url // Set string url
@@ -22,6 +26,7 @@ function findURL(url) {
   return url
 }
 
+// Insert 'NoPlugin has loaded plugin content on this page' toolbar
 function injectHelp() {
   // Show warning for NoPlugin
   if (document.querySelector('.noplugin-popup')) {
@@ -62,7 +67,7 @@ function injectHelp() {
   }
 }
 
-// Opens a media stream with a local application
+// Open a media stream with a local application
 function openStream(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
@@ -143,6 +148,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
   })
 }
 
+// Replace plugin embeds with native players
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
   if (url == null) {
     // URL error
@@ -247,6 +253,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
   console.log('[NoPlugin] Replaced plugin embed for ' + url)
 }
 
+// Parse <embed> tag attributes and pass data to injectPlayer()
 function replaceEmbed(object) {
   // Create ID for player
   var id = String(Math.floor((Math.random() * 1000000) + 1))
@@ -302,6 +309,7 @@ function replaceEmbed(object) {
   injectHelp()
 }
 
+// Parse <object> tag attributes and pass data to injectPlayer()
 function replaceObject(object) {
   // Find video source of object
   if (object.hasAttribute('data')) {
@@ -367,6 +375,7 @@ function replaceObject(object) {
   injectHelp()
 }
 
+// Replace URLs for specific <frame> and <iframe> embeds
 function replaceFrame(frame) {
   var url = DOMPurify.sanitize(frame.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   // Replace old YouTube embeds
@@ -374,13 +383,12 @@ function replaceFrame(frame) {
     var regex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/
     var youtubeID = url.match(regex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
+    console.log('[NoPlugin] Replaced frame embed for ' + url)
   }
   injectHelp()
 }
 
-// This function goes through certain <object>, <embed>, <iframe>, and <frame> elements on the page and replaces it with a NoPlugin object.
-// MIME types from www.freeformatter.com/mime-types-list.html
+// Detect possible plugin/frame objects and pass elements to replaceObject(), replaceEmbed(), and replaceFrame()
 function loadDOM() {
   var objectList = [
     /* QuickTime */
@@ -458,6 +466,6 @@ function loadDOM() {
   })
 }
 
-// Initialize tooltips for initial page load
+// Initialize NoPlugin on page load
 console.log('[NoPlugin] Searching for plugin objects...')
 loadDOM()
