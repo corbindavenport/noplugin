@@ -186,22 +186,19 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     })
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     // Play supported audio files in browser
-    // Create basic container element
-    var container = document.createElement('div')
     // Create audio player
     var mediaPlayer = document.createElement('audio')
     mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
     mediaPlayer.id = id
     mediaPlayer.controls = true
     mediaPlayer.name = name
-    container.setAttribute('style', cssstyles + ' width:' + width + 'px !important; height:' + height + 'px !important;')
-    container.appendChild(mediaPlayer)
+    mediaPlayer.setAttribute('style', cssstyles + ' width:' + width + 'px !important; height:' + height + 'px !important;')
     // Add source to audio player
     var source = document.createElement('source')
     source.src = url
     mediaPlayer.appendChild(source)
     // Write container to page
-    object.parentNode.replaceChild(container, object)
+    object.parentNode.replaceChild(mediaPlayer, object)
   } else {
     // Attempt to play other formats (MP4, QuickTime, etc.) in browser
     // Create noplguin container
