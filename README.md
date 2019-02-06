@@ -12,9 +12,14 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 
 ---------------------------------------------------------
 
-__New in NoPlugin 5.0:__
+**New in NoPlugin 5.0:**
 
-* Improved performance
+- Improved performance and reduced RAM usage
+- Some QuickTime files (.mov, .qt) files and other container formats can now be played in-browser
+- Broken pages can now be reported from inside the extension
+- Improved download notifications on Chrome and Opera
+- Fixed bugs with media on Internet Archive pages
+- NoPlugin no longer scans for plugin objects when pages are modified
  
 ---------------------------------------------------------
 
