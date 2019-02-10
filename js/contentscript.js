@@ -230,6 +230,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     mediaPlayer.setAttribute('class', 'noplugin ' + cssclass)
     mediaPlayer.id = id
     mediaPlayer.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    mediaPlayer.setAttribute('autopictureinpicture', 'true')
     // Add source to video player
     var source = document.createElement('source')
     source.src = url
