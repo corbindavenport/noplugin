@@ -76,7 +76,7 @@ function openStream(url) {
       alert('Choose Windows Media Player on the next pop-up.')
       window.open(url, '_self')
     } else if (response === 'cros') {
-      // Directly opening the stream might not work on Chrome OS, so the user has to copy and paste it manually into VLC Media Player
+      // VLC Media Player is the only option for playing media streams on Chrome OS
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
         prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, select "Stream" from the side menu, and paste this:', url)
       } else {
@@ -146,6 +146,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
       // Remove 
       var newurl = url.replace(/^\/\/|^.*?:\/\//, '') // Remove protocol from URL
       var intenturl = 'intent://' + newurl + '#Intent;scheme=http;package=org.videolan.vlc;end'
+      console.log('[NoPlugin] VLC intent URL set to: ' + intenturl)
       // Create eventListener for VLC button
       vlcButton.addEventListener('click', function() {
         window.open(intenturl, '_blank')

@@ -18,6 +18,7 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 - Some QuickTime files (.mov, .qt) files and other container formats can now be played in-browser
 - Broken pages can now be reported from inside the extension
 - Improved download notifications on Chrome and Opera
+- Improved Chrome OS support
 - Fixed bugs with media on Internet Archive pages
 - NoPlugin no longer scans for plugin objects when pages are modified
  
