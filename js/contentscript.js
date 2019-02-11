@@ -114,37 +114,54 @@ function openStream(url) {
 
 // Allow user to download files that failed to play in-browser
 function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles) {
-  // Create new noplguin container
-  var container = document.createElement('div')
-  container.setAttribute('class', 'noplugin ' + cssclass)
-  container.id = id
-  container.align = 'center'
-  container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
-  // Create text content
-  var content = document.createElement('div')
-  content.className = 'noplugin-content'
-  content.textContent = 'This media file cannot be played in your browser. Do you want to try downloading the file instead?'
-  content.appendChild(document.createElement('br'))
-  // Create play button
-  var downloadButton = document.createElement('button')
-  downloadButton.type = 'button'
-  downloadButton.textContent = 'Download media file'
-  content.appendChild(downloadButton)
-  content.appendChild(document.createElement('br'))
-  // Create info button
-  var infoButton = document.createElement('button')
-  infoButton.textContent = "More info"
-  content.appendChild(infoButton)
-  // Write container to page
-  container.appendChild(content)
-  mediaPlayer.parentNode.replaceChild(container, mediaPlayer)
-  // Create eventListener for play button
-  downloadButton.addEventListener('click', function() {
-    chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
-  })
-  // Create eventListener for info button
-  infoButton.addEventListener('click', function() {
-    window.open(chrome.extension.getURL("media-info.html"), '_blank', 'height=350,width=500')
+  chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    // Create new noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This media file cannot be played in your browser. Do you want to try downloading the file instead?'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var downloadButton = document.createElement('button')
+    downloadButton.type = 'button'
+    downloadButton.textContent = 'Download media file'
+    content.appendChild(downloadButton)
+    content.appendChild(document.createElement('br'))
+    // Create eventListener for play button
+    downloadButton.addEventListener('click', function() {
+      chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
+    })
+    // Create VLC button for Chrome OS
+    if (response === 'cros') {
+      var vlcButton = document.createElement('button')
+      vlcButton.type = 'button'
+      vlcButton.textContent = 'Open with VLC for Android'
+      content.appendChild(vlcButton)
+      content.appendChild(document.createElement('br'))
+      // Remove 
+      var newurl = url.replace(/^\/\/|^.*?:\/\//, '') // Remove protocol from URL
+      var intenturl = 'intent://' + newurl + '#Intent;scheme=http;package=org.videolan.vlc;end'
+      // Create eventListener for VLC button
+      vlcButton.addEventListener('click', function() {
+        window.open(intenturl, '_blank')
+      })
+    }
+    // Create info button
+    var infoButton = document.createElement('button')
+    infoButton.textContent = "More info"
+    content.appendChild(infoButton)
+    // Create eventListener for info button
+    infoButton.addEventListener('click', function() {
+      window.open(chrome.extension.getURL("media-info.html"), '_blank', 'height=350,width=500')
+    })
+    // Write container to page
+    container.appendChild(content)
+    mediaPlayer.parentNode.replaceChild(container, mediaPlayer)
   })
 }
 
