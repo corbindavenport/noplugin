@@ -1,307 +1,490 @@
-/*
-The MIT License (MIT)
-
-Copyright (c) 2017 Corbin Davenport
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 // How NoPlugin works
-// 1 - The reloadDOM() function runs when the page is loaded or changes, and looks for plugin objects.
-// 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
+// 1 - The reloadDOM() function runs when the page is loaded and looks for plugin objects.
+// 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
-function findURL(url){
-	var img = document.createElement('img');
-	img.src = url; // Set string url
-	url = img.src; // Get qualified url
-	img.src = null; // No server request
-	return url;
+// Get direct URL for media, and fix Internet Archive links if required
+function findURL(url) {
+  // Regex to parse Internet Archive URLs: https://regex101.com/r/4F12w7/3
+  var regex = /(?:web\.archive\.org\/web\/)(\d*)(\/)(.*)/
+  if (document.location.href.includes('//web.archive.org/') && !(url.includes('//web.archive.org/'))) {
+    var date = regex.exec(document.location.href)[1]
+    // Change URL to Internet Archive mirror, and append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
+    url = 'https://web.archive.org/web/' + date + 'id_/' + url
+  } else if (url.includes('//web.archive.org/')) {
+    // Get date
+    var date = regex.exec(document.location.href)[1]
+    // Get original URL
+    var originalURL = regex.exec(document.location.href)[3]
+    // Append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
+    url = 'https://web.archive.org/web/' + date + 'id_/' + originalURL
+  }
+  var img = document.createElement('img')
+  img.src = url // Set string url
+  url = img.src // Get qualified url
+  img.src = null // No server request
+  return url
 }
 
-var helpbar = 0;
-
+// Insert 'NoPlugin has loaded plugin content on this page' toolbar
 function injectHelp() {
-	// Show warning for NoPlugin
-	if ($(".noplugin-popup").length) {
-		// The popup was already created by another instance, so don't do it again
-	} else {
-		// Add opera class to HTML if using Opera, for Opera-specific CSS tweaks
-		if (navigator.userAgent.indexOf("OPR") !== -1) {
-			$('html').addClass('opera');
-		} else if (navigator.userAgent.indexOf("Firefox") !== -1) {
-			$('html').addClass('firefox');
-		}
-		// Try to get existing margin
-		if (($("body").css("marginTop")) && (helpbar === 0)) {
-			margin = $("body").css("marginTop").replace("px", "");
-			margin = parseInt(margin) + 37;
-		} else {
-			margin = 37;
-		}
-		$("body").append('<!-- Begin NoPlugin popup --><style>body {margin-top: ' + margin + 'px !important;}</style><div class="noplugin-popup"><span class="noplugin-message">NoPlugin loaded plugin content on this page.</span><a href="https://github.com/corbindavenport/noplugin/wiki/Report-a-page-broken" target="_blank">Not working?</a></div><!-- End NoPlugin popup -->');
-		helpbar = 1;
-	}
+  // Show warning for NoPlugin
+  if (document.querySelector('.noplugin-popup')) {
+    // The popup was already created by another instance, so don't do it again
+  } else {
+    // Try to get existing margin
+    var bodyMargin = window.getComputedStyle(document.body, null).getPropertyValue('margin-top')
+    // Make sure margin is a pixel value and isn't null
+    if (bodyMargin && bodyMargin.includes('px')) {
+      margin = bodyMargin.replace('px', '')
+      margin = parseInt(margin) + 36
+    } else {
+      margin = 36
+    }
+    // Create popup
+    var popup = document.createElement('div')
+    popup.className = 'noplugin-popup'
+    // Create popup message
+    var popupMessage = document.createElement('span')
+    popupMessage.className = 'noplugin-popup-message'
+    popupMessage.innerText = 'NoPlugin has loaded plugin content on this page.'
+    popup.appendChild(popupMessage)
+    // Create popup button
+    var popupButton = document.createElement('button')
+    popupButton.type = 'button'
+    popupButton.id = 'noplugin-broken-button'
+    popupButton.textContent = 'Not working?'
+    popupButton.addEventListener('click', function() {
+      window.open(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location), '_blank', 'height=350,width=500')
+    })
+    popup.appendChild(popupButton)
+    // Create CSS styles for body margin
+    var popupStyles = document.createElement('style')
+    popupStyles.textContent = 'body {margin-top: ' + margin + 'px !important;}'
+    popup.appendChild(popupStyles)
+    // Insert popup into <body>
+    document.body.prepend(popup)
+  }
 }
 
-// Opens a media stream with a local application
-function openStream(url, type) {
-	// Determine the user's operating system
-	chrome.runtime.sendMessage({method: "getPlatform", key: "os"}, function(response) {
-		// The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
-		if ((response === "win") && url.includes('mms://')) {
-			alert("Choose Windows Media Player (or another video player capable of opening " + type + " streams) on the next pop-up.")
-			window.open(url, '_self');
-		// Directly opening the stream might not work on Chrome OS, so the user has to copy and paste it manually into VLC Media Player
-		} else if (response === "cros") {
-			if (confirm("Do you have VLC Media Player installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
-				prompt("NoPlugin cannot automatically open this stream in VLC, due to limitations with Chrome OS.\n\nYou have to open VLC, select 'Stream' from the side menu, and paste this:", url)
-			} else {
-				// Help the user install VLC Media Player
-				if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-					if (confirm("Last question - does your Chromebook have the Google Play Store? Press 'OK' for Yes, or 'Cancel' for No.")) {
-						window.open("market://details?id=org.videolan.vlc", "_blank");
-					} else {
-						window.open("https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en", "_blank");
-					}
-				}
-			}
-		// For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
-		} else {
-			if (confirm("Do you have VLC Media Player (or another video player capable of opening " + type + " streams) installed?\n\nPress 'OK' for Yes, or 'Cancel' for No.")) {
-				alert('Choose your video player on the next pop-up.');
-				window.open(url, '_self');
-			} else {
-				if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-					// Download VLC for user's operating system
-					if (response === "win") {
-						// Mac OS X download
-						window.open("http://www.videolan.org/vlc/download-windows.html", "_blank");
-					} else if (response === "mac") {
-						// Mac OS X download
-						window.open("http://www.videolan.org/vlc/download-macosx.html", "_blank");
-					} else {
-						// Other downloads
-						window.open("http://www.videolan.org/vlc/#download", "_blank");
-					}
-				}
-			}
-		}
-	});
+// Open a media stream with a local application
+function openStream(url) {
+  // Determine the user's operating system
+  chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    if ((response === 'win') && url.includes('mms://')) {
+       // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
+      alert('Choose Windows Media Player on the next pop-up.')
+      window.open(url, '_self')
+    } else if (response === 'cros') {
+      // VLC Media Player is the only option for playing media streams on Chrome OS
+      if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
+        prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, select "Stream" from the side menu, and paste this:', url)
+      } else {
+        // Help the user install VLC Media Player
+        if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
+          if (confirm('Last question - does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
+            window.open('market://details?id=org.videolan.vlc', '_blank')
+          } else {
+            window.open('https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en', '_blank')
+          }
+        }
+      }
+    } else {
+      // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
+      if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
+        prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
+      } else {
+        if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
+          // Download VLC for user's operating system
+          if (response === 'win') {
+            // Windows download
+            window.open('http://www.videolan.org/vlc/download-windows.html', '_blank')
+          } else if (response === 'mac') {
+            // macOS download
+            window.open('http://www.videolan.org/vlc/download-macosx.html', '_blank')
+          } else {
+            // Other downloads
+            window.open('http://www.videolan.org/vlc/#download', '_blank')
+          }
+        }
+      }
+    }
+  })
 }
 
-function injectPlayer(object, id, url, width, height, cssclass, cssstyles, name) {
-	if (url.includes('mms://')) {
-		// Detect MMS links and open them in a local media player
-		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load a Windows Media Player stream here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
-		$("video[id$='video" + id + "']").css("display", "none");
-		$(document).on('click', 'button[title="' + url + '"]', function(){
-			openStream(url, "MMS");
-		});
-	} else if (url.includes('rtsp://')) {
-		// Detect RTSP links and open them in a local media player
-		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load an RTSP stream here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open video stream</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
-		$("video[id$='video" + id + "']").css("display", "none");
-		$(document).on('click', 'button[title="' + url + '"]', function(){
-			openStream(url, "RTSP");
-		});
-	} else if (url.endsWith('.mp4')) {
-		// Play supported video files in browser
-		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. NoPlugin is able to play this media in the browser.<br /><br /><button type="button" title="' + url + '">Show content</button></div></div><video class="nopluginvideo" id="video' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><source src="' + url + '"></video>');
-		$("video[id$='video" + id + "']").css("display", "none");
-		$(document).on('click', 'button[title="' + url + '"]', function(){
-			$("video[id$='video" + id + "']").css("display", "block");
-			$("div[id$='alert" + id + "']").attr('style','display:none !important');
-			$("video[id$='video" + id + "']").get(0).play();
-		});
-	// Play supported audio files in browser
-	// Most plugin audio embeds have a small width, so some buttons on the HTML5 player are removed to make the seek bar as large as possible
-	} else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
-		$(object).replaceWith('<div><audio controlsList="nofullscreen nodownload" class="nopluginaudio" id="audio' + id + '" controls name="' + name + '" class="noplugin + ' + cssclass + '" style="' + cssstyles + ' width:' + width + 'px !important; height:' + height + 'px !important;"><source src="' + url + '"></audio></div>');
-	// Open unsupported files in media player
-	} else {
-		$(object).replaceWith('<div name="' + name + '" class="noplugin + ' + cssclass + '" id="alert' + id + '" align="center" style="' + cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;"><div class="noplugin-content">This page is trying to load plugin content here. Click to open it in your media player.<br /><br /><button type="button" title="' + url + '">Open content</button><br /><br /><a href="https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F" target="_blank">More info</a></div></div>');
-		$(document).on('click', 'button[title="' + url + '"]', function(){
-			// Pass URL to background.js for browser to download and open video
-			chrome.runtime.sendMessage({method: "saveVideo", key: url}, function(response) {
-				$('button[title="' + url + '"]').prop("disabled",true);
-				$('button[title="' + url + '"]').html("Downloading media...");
-			})
-		});
-	}
-	console.log("[NoPlugin] Replaced plugin embed for " + url);
+// Allow user to download files that failed to play in-browser
+function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles) {
+  chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    // Create new noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This media file cannot be played in your browser. Do you want to try downloading the file instead?'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var downloadButton = document.createElement('button')
+    downloadButton.type = 'button'
+    downloadButton.textContent = 'Download media file'
+    content.appendChild(downloadButton)
+    content.appendChild(document.createElement('br'))
+    // Create eventListener for play button
+    downloadButton.addEventListener('click', function() {
+      chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
+    })
+    // Create VLC button for Chrome OS
+    if (response === 'cros') {
+      var vlcButton = document.createElement('button')
+      vlcButton.type = 'button'
+      vlcButton.textContent = 'Open with VLC for Android'
+      content.appendChild(vlcButton)
+      content.appendChild(document.createElement('br'))
+      // Remove 
+      var newurl = url.replace(/^\/\/|^.*?:\/\//, '') // Remove protocol from URL
+      var intenturl = 'intent://' + newurl + '#Intent;scheme=http;package=org.videolan.vlc;end'
+      console.log('[NoPlugin] VLC intent URL set to: ' + intenturl)
+      // Create eventListener for VLC button
+      vlcButton.addEventListener('click', function() {
+        window.open(intenturl, '_blank')
+      })
+    }
+    // Create info button
+    var infoButton = document.createElement('button')
+    infoButton.textContent = "More info"
+    content.appendChild(infoButton)
+    // Create eventListener for info button
+    infoButton.addEventListener('click', function() {
+      window.open(chrome.extension.getURL("media-info.html"), '_blank', 'height=350,width=500')
+    })
+    // Write container to page
+    container.appendChild(content)
+    mediaPlayer.parentNode.replaceChild(container, mediaPlayer)
+  })
 }
 
+// Replace plugin embeds with native players
+function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
+  if (url == null) {
+    // URL error
+    // Create noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load plugin content here, but NoPlugin could not detect the media address.'
+    // Write container to page
+    container.appendChild(content)
+    object.parentNode.replaceChild(container, object)
+  } else if (url.includes('mms://') || url.includes('rtsp://')) {
+    // Create noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load a video/audio stream here. You might be able to play this with a media player.'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var playStreamButton = document.createElement('button')
+    playStreamButton.type = 'button'
+    playStreamButton.setAttribute('data-url', url)
+    playStreamButton.textContent = 'Open stream'
+    content.appendChild(playStreamButton)
+    // Write container to page
+    container.appendChild(content)
+    object.parentNode.replaceChild(container, object)
+    // Create eventListener for button
+    playStreamButton.addEventListener('click', function() {
+      openStream(url)
+    })
+  } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
+    // Play supported audio files in browser
+    // Create audio player
+    var mediaPlayer = document.createElement('audio')
+    mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
+    mediaPlayer.id = id
+    mediaPlayer.controls = true
+    mediaPlayer.name = name
+    mediaPlayer.setAttribute('style', cssstyles + ' width:' + width + 'px !important; height:' + height + 'px !important;')
+    // Add source to audio player
+    var source = document.createElement('source')
+    source.src = url
+    mediaPlayer.appendChild(source)
+    // Write container to page
+    object.parentNode.replaceChild(mediaPlayer, object)
+  } else {
+    // Attempt to play other formats (MP4, QuickTime, etc.) in browser
+    // Create noplguin container
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load plugin content here. NoPlugin may be able to play the media file.'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var playMediaButton = document.createElement('button')
+    playMediaButton.type = 'button'
+    playMediaButton.setAttribute('data-url', url)
+    playMediaButton.textContent = 'Play media file'
+    content.appendChild(playMediaButton)
+    // Create video player
+    var mediaPlayer = document.createElement('video')
+    mediaPlayer.controls = true
+    mediaPlayer.setAttribute('class', 'noplugin ' + cssclass)
+    mediaPlayer.id = id
+    mediaPlayer.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    mediaPlayer.setAttribute('autopictureinpicture', 'true')
+    // Add source to video player
+    var source = document.createElement('source')
+    source.src = url
+    source.addEventListener('error', function(event) {
+      if (event.type === 'error') {
+        playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
+      }
+    })
+    // Write container to page
+    container.appendChild(content)
+    object.parentNode.replaceChild(container, object)
+    // Create eventListener for button
+    playMediaButton.addEventListener('click', function() {
+      // Replace container element with video
+      container.parentNode.replaceChild(mediaPlayer, container)
+      // Load media in player
+      mediaPlayer.appendChild(source)
+      mediaPlayer.play()
+    })
+  }
+  console.log('[NoPlugin] Replaced plugin embed for ' + url)
+}
+
+// Parse <embed> tag attributes and pass data to injectPlayer()
 function replaceEmbed(object) {
-	// Create ID for player
-	var id = String(Math.floor((Math.random() * 1000000) + 1));
-	// Find video source of object
-	var url;
-	if (object.attr("qtsrc")) {
-		url = findURL(DOMPurify.sanitize(object.attr("qtsrc"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	} if (object.attr("target")) {
-		url = findURL(DOMPurify.sanitize(object.attr("target"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	} else {
-		url = findURL(DOMPurify.sanitize(object.attr("src"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	}
-	// Find attributes of object
-	if (object.is("[width]")) {
-		var width = DOMPurify.sanitize($(object).attr("width"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var width = object.width();
-	}
-	if (object.is("[height]")) {
-		var height = DOMPurify.sanitize($(object).attr("height"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var height = object.height();
-	}
-	if (object.is("[class]")) {
-		var cssclass = DOMPurify.sanitize($(object).attr("class"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var cssclass = "";
-	}
-	if (object.is("[style]")) {
-		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var cssstyles = "";
-	}
-	if (object.is("[name]")) {
-		var name = DOMPurify.sanitize($(object).attr("name"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var name = "";
-	}
-	injectPlayer(object, id, url, width, height, cssclass, cssstyles, name);
-	injectHelp();
+  // Create ID for player
+  var id = String(Math.floor((Math.random() * 1000000) + 1))
+  // Find video source of object
+  if (object.hasAttribute('qtsrc')) {
+    // <object qtsrc="url"></object>
+    var url = DOMPurify.sanitize(object.getAttribute('qtsrc'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else if (object.hasAttribute('href')) {
+    // <object href="url"></object>
+    var url = DOMPurify.sanitize(object.getAttribute('href'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else if (object.hasAttribute('src')) {
+    // <object src="url"></object>
+    var url = DOMPurify.sanitize(object.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var url = null
+  }
+  // Find attributes of object
+  if (object.hasAttribute('width')) {
+    var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var width = object.getBoundingClientRect().width
+  }
+  if (object.hasAttribute('height')) {
+    var height = DOMPurify.sanitize(object.getAttribute('height'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var height = object.getBoundingClientRect().height
+  }
+  if (object.hasAttribute('class')) {
+    var cssclass = DOMPurify.sanitize(object.getAttribute('class'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var cssclass = ''
+  }
+  if (object.hasAttribute('id')) {
+    var id = DOMPurify.sanitize(object.getAttribute('id'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var id = ''
+  }
+  if (object.hasAttribute('style')) {
+    var cssstyles = DOMPurify.sanitize(object.getAttribute('style'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    // Add semi-colon to end of styles if not already present
+    if (!cssstyles.endsWith(';')) {
+      cssstyles = cssstyles + ';'
+    }
+  } else {
+    var cssstyles = ''
+  }
+  if (object.hasAttribute('name')) {
+    var name = DOMPurify.sanitize(object.getAttribute('name'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var name = ''
+  }
+  injectPlayer(object, id, url, width, height, cssclass, cssstyles)
+  injectHelp()
 }
 
+// Parse <object> tag attributes and pass data to injectPlayer()
 function replaceObject(object) {
-	// Create ID for player
-	var id = String(Math.floor((Math.random() * 1000000) + 1));
-	// Find video source of object
-	if (object.is("[data]")) {
-		var url = findURL(DOMPurify.sanitize($(object).attr("data"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	} else if (object.find("param[name$='src']").length) {
-		var url = findURL(DOMPurify.sanitize($(object).find("param[name$='src']").val(), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true}));
-	} else {
-		return;
-	}
-	// Find attributes of object
-	if (object.is("[width]")) {
-		var width = DOMPurify.sanitize($(object).attr("width"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var width = object.width();
-	}
-	if (object.is("[height]")) {
-		var height = DOMPurify.sanitize($(object).attr("height"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var height = object.height();
-	}
-	if (object.is("[class]")) {
-		var cssclass = DOMPurify.sanitize($(object).attr("class"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var cssclass = "";
-	}
-	if (object.is("[style]")) {
-		var cssstyles = DOMPurify.sanitize($(object).attr("style"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var cssstyles = "";
-	}
-	if (object.is("[name]")) {
-		var name = DOMPurify.sanitize($(object).attr("name"), {SAFE_FOR_JQUERY: true, ALLOW_UNKNOWN_PROTOCOLS: true});
-	} else {
-		var name = "";
-	}
-	injectPlayer(object, id, url, width, height, cssclass, cssstyles, name);
-	injectHelp();
+  // Find video source of object
+  if (object.hasAttribute('data')) {
+    // <object data="url"></object>
+    var url = object.getAttribute('data')
+  } else if (object.querySelector('param[name="HREF" i]')) {
+    // <object><param name="href" value="url"></object>
+    var url = object.querySelector('param[name="HREF" i]').getAttribute('value')
+  } else if (object.querySelector('param[name="SRC" i]')) {
+    // <object><param name="src" value="url"></object>
+    var url = object.querySelector('param[name="SRC" i]').getAttribute('value')
+  } else if (object.querySelector('embed').getAttribute('src')) {
+    // <object><embed src="url"></object>
+    var url = object.querySelector('embed').getAttribute('src')
+  } else if (object.querySelector('embed').getAttribute('target')) {
+    // <object><embed target="url"></object>
+    var url = object.querySelector('embed').getAttribute('target')
+  } else {
+    var url = null
+  }
+  if ((url != null) && (url != undefined)) {
+    // Sanitize URL
+    url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
+    // Get exact URL
+    url = findURL(url)
+  }
+  // Find attributes of object
+  if (object.hasAttribute('width')) {
+    var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var width = object.getBoundingClientRect().width
+  }
+  if (object.hasAttribute('height')) {
+    var height = DOMPurify.sanitize(object.getAttribute('height'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var height = object.getBoundingClientRect().height
+  }
+  if (object.hasAttribute('class')) {
+    var cssclass = DOMPurify.sanitize(object.getAttribute('class'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var cssclass = ''
+  }
+  if (object.hasAttribute('style')) {
+    var cssstyles = DOMPurify.sanitize(object.getAttribute('style'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    // Add semi-colon to end of styles if not already present
+    if (!cssstyles.endsWith(';')) {
+      cssstyles = cssstyles + ';'
+    }
+  } else {
+    var cssstyles = ''
+  }
+  if (object.hasAttribute('id')) {
+    var id = DOMPurify.sanitize(object.getAttribute('id'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var id = ''
+  }
+  if (object.hasAttribute('name')) {
+    var name = DOMPurify.sanitize(object.getAttribute('name'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  } else {
+    var name = ''
+  }
+  injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  injectHelp()
 }
 
-function reloadDOM() {
-	// This function goes through every <object> and <embed> on the page and replaces it with a NoPlugin object. For browsers that support plugins, it checks if the original plugin is installed, and if available, uses that instead.
-	// MIME types from www.freeformatter.com/mime-types-list.html
-
-	// QuickTime Player
-	$("object[type='video/quicktime'],object[codebase='http://www.apple.com/qtactivex/qtplugin.cab'],object[classid='clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B'],object[data$='.mov'],object[data$='.qt']").each(function() {
-		if ($.inArray('QuickTime', navigator.plugins) > -1) {
-			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='video/quicktime'],embed[src$='.mov'],embed[src$='.qt']").each(function() {
-		if ($.inArray('QuickTime', navigator.plugins) > -1) {
-			console.log("[NoPlugin] QuickTime plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
-	// RealPlayer
-	$("object[type='application/vnd.rn-realmedia'],object[type='audio/x-pn-realaudio'],object[type='audio/x-pn-realaudio-plugin'],object[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA']").each(function() {
-		if ($.inArray('Real', navigator.plugins) > -1) {
-			console.log("[NoPlugin] RealPlayer plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='application/vnd.rn-realmedia'],embed[type='audio/x-pn-realaudio'],embed[type='audio/x-pn-realaudio-plugin'],embed[classid='clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA'],embed[src$='.ram'],embed[src$='.rmp'],embed[src$='.rm']").each(function() {
-		if ($.inArray('Real', navigator.plugins) > -1) {
-			console.log("[NoPlugin] RealPlayer plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
-	// Windows Media Player
-	$("object[type='video/x-ms-wm'],object[type='audio/x-ms-wma'],object[type='audio/x-ms-wmv'],object[type='application/x-mplayer2'],object[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],object[codebase^='http://activex.microsoft.com/activex/controls/mplayer'],object[pluginspage^='http://www.microsoft.com']").each(function() {
-		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
-			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='video/x-ms-wm'],embed[type='audio/x-ms-wma'],embed[type='audio/x-ms-wmv'],embed[type='application/x-mplayer2'],embed[classid='clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95'],embed[pluginspage^='http://www.microsoft.com'],embed[src$='.wm'],embed[src$='.wma'],embed[src$='.wmv']").each(function() {
-		if ($.inArray('Windows Media Player', navigator.plugins) > -1) {
-			console.log("[NoPlugin] Windows Media Player plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
-	// VLC Plugin
-	$("object[type='application/x-vlc-plugin'],object[pluginspage='http://www.videolan.org'],object[classid='clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921'],object[codebase='http://download.videolan.org/pub/videolan/vlc/last/win32/axvlc.cab']").each(function() {
-		if ($.inArray('VLC', navigator.plugins) > -1) {
-			console.log("[NoPlugin] VLC plugin detected, will not replace embed.");
-		} else {
-			replaceObject($(this));
-		}
-	});
-	$("embed[type='application/x-vlc-plugin'],embed[pluginspage='http://www.videolan.org']").each(function() {
-		if ($.inArray('VLC', navigator.plugins) > -1) {
-			console.log("[NoPlugin] VLC plugin detected, will not replace embed.");
-		} else {
-			replaceEmbed($(this));
-		}
-	});
+// Replace URLs for specific <frame> and <iframe> embeds
+function replaceFrame(frame) {
+  var url = DOMPurify.sanitize(frame.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+  // Replace old YouTube embeds
+  if (url.includes('youtube.com/v/')) {
+    var regex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/
+    var youtubeID = url.match(regex)[1]
+    frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
+    console.log('[NoPlugin] Replaced frame embed for ' + url)
+  }
+  injectHelp()
 }
 
-// Initialize tooltips for initial page load
-$( document ).ready(function() {
-	reloadDOM();
-});
+// Detect possible plugin/frame objects and pass elements to replaceObject(), replaceEmbed(), and replaceFrame()
+function loadDOM() {
+  var objectList = [
+    /* QuickTime */
+    'object[type="video/quicktime"]',
+    'object[codebase="http://www.apple.com/qtactivex/qtplugin.cab"]',
+    'object[classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"]',
+    'object[data$=".mov"]',
+    'object[data$=".qt"]',
+    /* RealPlayer */
+    'object[type="application/vnd.rn-realmedia"]',
+    'object[type="audio/x-pn-realaudio"]',
+    'object[type="audio/x-pn-realaudio-plugin"]',
+    'object[classid="clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA"]',
+    /* Windows Media Player */
+    'object[type="video/x-ms-wm"]',
+    'object[type="audio/x-ms-wma"]',
+    'object[type="audio/x-ms-wmv"]',
+    'object[type="application/x-mplayer2"]',
+    'object[classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95"]',
+    'object[codebase^="http://activex.microsoft.com/activex/controls/mplayer"]',
+    'object[pluginspage^="http://www.microsoft.com"]',
+    /* VLC Plugin */
+    'object[type="application/x-vlc-plugin"]',
+    'object[pluginspage="http://www.videolan.org"]',
+    'object[classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"]',
+    'object[codebase="http://download.videolan.org/pub/videolan/vlc/last/win32/axvlc.cab"]'
+  ]
+  var embedList = [
+    /* QuickTime */
+    'embed[type="video/quicktime"]',
+    'embed[src$=".mov"]',
+    'embed[src$=".qt"]',
+    'embed[classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"]',
+    /* RealPlayer */
+    'embed[type="application/vnd.rn-realmedia"]',
+    'embed[type="audio/x-pn-realaudio"]',
+    'embed[type="audio/x-pn-realaudio-plugin"]',
+    'embed[classid="clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA"]',
+    'embed[src$=".ram"]',
+    'embed[src$=".rmp"]',
+    'embed[src$=".rm"]',
+    /* Windows Media Player */
+    'embed[type="video/x-ms-wm"]',
+    'embed[type="audio/x-ms-wma"]',
+    'embed[type="audio/x-ms-wmv"]',
+    'embed[type="application/x-mplayer2"]',
+    'embed[classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95"]',
+    'embed[pluginspage^="http://www.microsoft.com"]',
+    'embed[src$=".wm"]',
+    'embed[src$=".wma"]',
+    'embed[src$=".wmv"]',
+    /* VLC Plugin */
+    'embed[type="application/x-vlc-plugin"]',
+    'embed[pluginspage="http://www.videolan.org"]'
+  ]
+  var frameList = [
+    /* YouTube */
+    'iframe[src*="youtube.com/v/"]',
+    'frame[src*="youtube.com/v/"]'
+  ]
+  // Replace objects
+  var objects = objectList.toString()
+  document.querySelectorAll(objects).forEach(function (item) {
+    replaceObject(item)
+  })
+  // Replace embeds
+  var embeds = embedList.toString()
+  document.querySelectorAll(embeds).forEach(function (item) {
+    replaceEmbed(item)
+  })
+  // Replace frames
+  var frames = frameList.toString()
+  document.querySelectorAll(frames).forEach(function (item) {
+    replaceFrame(item)
+  })
+}
 
-// Initialize tooltips every time DOM is modified
-var observer = new MutationObserver(function(mutations) {
-	mutations.forEach(function(mutation) {
-		console.log("[NoPlugin] DOM change detected, looking for embeds again");
-		reloadDOM();
-	});
-});
-
-var observerConfig = {
-	attributes: true,
-	childList: true,
-	characterData: true
-};
-
-observer.observe(document, observerConfig);
+// Initialize NoPlugin on page load
+console.log('[NoPlugin] Searching for plugin objects...')
+loadDOM()

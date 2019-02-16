@@ -1,8 +1,8 @@
 NoPlugin
 ================
-NoPlugin is an extension for Chrome, Opera, and Firefox that allows you to play some plugin content in your browser without plugins. Most browsers are phasing out plugins, due to security concerns, so NoPlugin was created to maintain some compatibility with outdated sites.
+NoPlugin is an extension for Chrome, Opera, and Firefox that allows you to play some plugin content in your browser without plugins. All browsers have phrased out the use of web plugins, due to performance and security problems, so NoPlugin was created to maintain some compatibility with outdated sites.
 
-NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 players [if the file format is supported by your browser](https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F). If the file cannot be played in the browser, NoPlugin can download it for playback with the video/audio players installed on your computer.
+NoPlugin searches webpages for embedded plugin objects, and converts them to HTML5 media objects. If the browser is unable to play the file natively, NoPlugin can still download it to your computer.
 
 [Download for Opera](https://addons.opera.com/en/extensions/details/noplugin/)
 
@@ -11,21 +11,29 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 [Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/noplugin/)
 
 ---------------------------------------------------------
-__New in NoPlugin 4.0:__
-* Works much better on Chrome OS
-* Plugin embed data is now sanitized to prevent XSS attacks
-* Added support for RTSP media streams
-* Now detects VLC plugin embed code
-* Several other minor improvements and bug fixes
+
+**New in NoPlugin 5.0:**
+
+- Improved performance and reduced RAM usage
+- Some QuickTime files (.mov, .qt) files and other container formats can now be played in-browser
+- Broken pages can now be reported from inside the extension
+- Improved download notifications on Chrome and Opera
+- Improved Chrome OS support
+- Fixed bugs with media on Internet Archive page
+- Codebase rewritten in vanilla JavaScript
+- NoPlugin no longer scans for plugin objects when pages are modified
  
 ---------------------------------------------------------
 
-The MIT License (MIT)
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Copyright (c) 2017 Corbin Davenport
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
