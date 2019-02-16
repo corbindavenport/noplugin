@@ -1,8 +1,8 @@
 NoPlugin
 ================
-NoPlugin is an extension for Chrome, Opera, and Firefox that allows you to play some plugin content in your browser without plugins. Most browsers are phasing out plugins, due to security concerns, so NoPlugin was created to maintain some compatibility with outdated sites.
+NoPlugin is an extension for Chrome, Opera, and Firefox that allows you to play some plugin content in your browser without plugins. All browsers have phrased out the use of web plugins, due to performance and security problems, so NoPlugin was created to maintain some compatibility with outdated sites.
 
-NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 players [if the file format is supported by your browser](https://github.com/corbindavenport/noplugin/wiki/Why-cant-NoPlugin-play-a-video%3F). If the file cannot be played in the browser, NoPlugin can download it for playback with the video/audio players installed on your computer.
+NoPlugin searches webpages for embedded plugin objects, and converts them to HTML5 media objects. If the browser is unable to play the file natively, NoPlugin can still download it to your computer.
 
 [Download for Opera](https://addons.opera.com/en/extensions/details/noplugin/)
 
@@ -19,7 +19,8 @@ NoPlugin searches webpages for embedded plugin code, and converts them to HTML5 
 - Broken pages can now be reported from inside the extension
 - Improved download notifications on Chrome and Opera
 - Improved Chrome OS support
-- Fixed bugs with media on Internet Archive pages
+- Fixed bugs with media on Internet Archive page
+- Codebase rewritten in vanilla JavaScript
 - NoPlugin no longer scans for plugin objects when pages are modified
  
 ---------------------------------------------------------
