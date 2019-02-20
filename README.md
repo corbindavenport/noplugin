@@ -4,11 +4,7 @@ NoPlugin is an extension for Chrome, Opera, and Firefox that allows you to play 
 
 NoPlugin searches webpages for embedded plugin objects, and converts them to HTML5 media objects. If the browser is unable to play the file natively, NoPlugin can still download it to your computer.
 
-[Download for Opera](https://addons.opera.com/en/extensions/details/noplugin/)
-
-[Download for Chrome](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice)
-
-[Download for Firefox](https://addons.mozilla.org/en-US/firefox/addon/noplugin/)
+[![Download for Chrome](https://corbin.io/img/chrome-button.png)](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice) [![Download for Firefox](https://corbin.io/img/firefox-button.png)](https://addons.mozilla.org/en-US/firefox/addon/noplugin/) [![Download for Opera](https://corbin.io/img/opera-button.png)](https://addons.opera.com/en/extensions/details/noplugin/)
 
 ---------------------------------------------------------
 
