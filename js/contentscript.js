@@ -26,6 +26,16 @@ function findURL(url) {
   return url
 }
 
+// Add QuickTime API calls to HTML5 media elements created by NoPlugin
+function addQuickTimeScripting() {
+  var s = document.createElement('script');
+  s.src = chrome.runtime.getURL('js/quicktime.js');
+  s.onload = function() {
+      this.remove();
+  };
+  (document.head || document.documentElement).appendChild(s);
+}
+
 // Insert 'NoPlugin has loaded plugin content on this page' toolbar
 function injectHelp() {
   // Show warning for NoPlugin
@@ -223,6 +233,8 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     mediaPlayer.appendChild(source)
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
+    // Implement QuickTime scripting API
+    addQuickTimeScripting()
   } else {
     // Attempt to play other formats (MP4, QuickTime, etc.) in browser
     // Create noplguin container
@@ -267,6 +279,8 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       // Load media in player
       mediaPlayer.appendChild(source)
       mediaPlayer.play()
+      // Implement QuickTime scripting API
+      addQuickTimeScripting()
     })
   }
   console.log('[NoPlugin] Replaced plugin embed for ' + url)
