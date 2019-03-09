@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="img/icon16.png">
+  <title>NoPlugin</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">NoPlugin</a>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a href="https://github.com/corbindavenport/noplugin/">View on GitHub</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Download
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice">Chrome</a>
+            </li>
+            <li>
+              <a href="https://addons.opera.com/en/extensions/details/noplugin/">Opera</a>
+            </li>
+            <li>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/noplugin/">Firefox</a>
+            </li>
+          </ul>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <h2>QuickTIme test</h2>
+        <p>This is a test of NoPlugin's support for the QuickTime scripting API.</p>
+        <p>
+          <object classid="clsid:02bf25d5-8c17-4b23-bc80-d3488abddc6b" id="quicktime-test" width="320" height="180" codebase="http://www.apple.com/qtactivex/qtplugin.cab">
+            <param name="src" value="sample.mp4">
+            <param name="autoplay" value="true">
+            <param name="controller" value="false">
+            <b>There was a problem trying to run this plugin.</b>
+          </object>
+        </p>
+        <p><button id="play-button">Play()</button> <button id="stop-button">Stop()</button></p>
+        <script>
+        // Assign variables
+        var playButton = document.getElementById('play-button')
+        var stopButton = document.getElementById('stop-button')
+        // Add button functionality
+        playButton.onclick = document.getElementById('quicktime-test').Play()
+        stopButton.onclick = document.getElementById('quicktime-test').Stop()
+        </script>
+      </div>
+      <div class="col-md-4">
+        <h2>Donate</h2>
+        <p>If you find NoPlugin useful, please donate to support continued development. It would mean a lot!</p>
+        <p>
+          <a class="btn btn-warning" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=Peek%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"
+            target="_blank" role="button">Donate via PayPal</a>
+        </p>
+        <h2>Having issues?</h2>
+        <p>If you find a bug, or have a suggestion for a new feature, please create an issue at
+          <a href="https://github.com/corbindavenport/noplugin/issues" target="_blank">NoPlugin GitHub repository</a>. You can also
+          <a href="https://twitter.com/corbindavenport" target="_blank">send me a tweet</a> or
+          <a href="mailto:me@corbin.io?subject=NoPlugin%20bug%20report">email me</a>.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/jquery-3.2.1.slim.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
