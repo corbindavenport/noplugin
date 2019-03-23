@@ -7,11 +7,11 @@ var useragent = navigator.userAgent;
 // Opera has to be checked before Chrome, because Opera has both "Chrome" and "OPR" in the user agent string
 var review = document.querySelector('.review-info')
 if (useragent.includes("OPR")) {
-  review.innerHTML = 'Also please leave a review on the <a href="https://addons.opera.com/en/extensions/details/noplugin/" target="_blank">Opera add-ons site</a> if you can.'
+  review.innerHTML = 'Leaving a review on the <a href="https://addons.opera.com/en/extensions/details/noplugin/" target="_blank">Opera add-ons site</a> is also greatly appreciated!'
 } else if (navigator.userAgent.includes("Firefox")) {
-  review.innerHTML = 'Also please leave a review on the <a href="https://addons.mozilla.org/en-US/firefox/addon/noplugin/" target="_blank">Firefox add-ons site</a> if you can.'
+  review.innerHTML = 'Leaving a review on the <a href="https://addons.mozilla.org/en-US/firefox/addon/noplugin/" target="_blank">Firefox add-ons site</a> is also greatly appreciated!'
 } else if (useragent.includes("Chrome")) {
-  review.innerHTML = 'Also please leave a review on the <a href="https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice" target="_blank">Chrome Web Store</a> if you can.'
+  review.innerHTML = 'Leaving a review on the <a href="https://chrome.google.com/webstore/detail/noplugin/llpahfhchhlfdigfpeimeagojnkgeice" target="_blank">Chrome Web Store</a> is also greatly appreciated!'
 }
 
 // Download button for VLC
