@@ -289,6 +289,12 @@ function replaceEmbed(object) {
   } else {
     var url = null
   }
+  if ((url != null) && (url != undefined)) {
+    // Sanitize URL
+    url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
+    // Get exact URL
+    url = findURL(url)
+  }
   // Find attributes of object
   if (object.hasAttribute('width')) {
     var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })

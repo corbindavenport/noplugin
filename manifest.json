@@ -1,9 +1,9 @@
 {
 "manifest_version": 2,
 	"name": "NoPlugin",
-	"version": "5.0.1",
+	"version": "5.1",
 	"author": "Corbin Davenport",
-	"description": "Play some plugin content in modern browsers without plugins.",
+	"description": "Play legacy media in modern browsers without plugins.",
 	"homepage_url": "https://github.com/corbindavenport/noplugin",
 	"permissions": [
 		"http://*/*",
