@@ -8,8 +8,18 @@ chrome.runtime.onInstalled.addListener(function () {
     localStorage['platform'] = info.os
     // Windows: win
     // Mac: mac
+    // Linux: linux
     // Chrome OS: cros
   })
+  // Make sure browser supports Shadow DOM v1
+  if (!HTMLElement.prototype.attachShadow) {
+    chrome.notifications.create('', {
+      type: 'basic',
+      title: 'NoPlugin',
+      iconUrl: 'img/icon128.png',
+      message: 'Your browser does not support features that NoPlugin requires. Please update to a newer version of your browser.',
+    })
+  }
 })
 
 // Keep track of downloads that NoPlugin has already sent notifications for
