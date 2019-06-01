@@ -1,5 +1,5 @@
 // How NoPlugin works
-// 1 - The reloadDOM() function runs when the page is loaded and looks for plugin objects.
+// 1 - The loadDOM() function runs when the page is loaded and looks for plugin objects.
 // 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
@@ -168,9 +168,11 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 
 // Replace plugin embeds with native players
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
+  // If the URL ends in a port number or a slash, it's probably a livestream
+  // Regex demo: https://regex101.com/r/So4qWf/1
+  var streamRegex = /(\:\d{1,}$)|(\/$)/gm
   if (url == null) {
-    // URL error
-    // Create noplguin container
+    // There is a URL error
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
     container.id = id
@@ -183,8 +185,8 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Write container to page
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
-  } else if (url.includes('mms://') || url.includes('rtsp://')) {
-    // Create noplguin container
+  } else if (url.includes('mms://') || url.includes('rtsp://') || streamRegex.test(url)) {
+    // This is a media stream
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
     container.id = id
@@ -209,8 +211,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       openStream(url)
     })
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
-    // Play supported audio files in browser
-    // Create audio player
+    // This is an audio file
     var mediaPlayer = document.createElement('audio')
     mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
     mediaPlayer.id = id
@@ -224,8 +225,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
   } else {
-    // Attempt to play other formats (MP4, QuickTime, etc.) in browser
-    // Create noplguin container
+    // Attempt to play other formats (MP4, QuickTime, etc.) in the browser
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
     container.id = id
