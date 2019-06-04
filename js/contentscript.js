@@ -26,6 +26,18 @@ function findURL(url) {
   return url
 }
 
+// Function for centering popup windows roughly in the center of the screen
+function createPopup(url) {
+  // Set popup dimensions
+  var windowWidth = 500
+  var windowHeight = 350
+  // Calculate screen position
+  var posX = (window.screen.width / 2) - (windowWidth / 2)
+  var posY = (window.screen.height / 2) - (windowHeight / 2) - 15 // Subtract 15 to compensate for address bar
+  // Create the popup
+  window.open(url, '_blank', 'toolbar=no,height=' + windowHeight + ',width=' + windowWidth + ',screenX=' + posX + ',screenY=' + posY)
+}
+
 // Insert 'NoPlugin has loaded plugin content on this page' toolbar
 function injectHelp() {
   // Show warning for NoPlugin
@@ -54,8 +66,8 @@ function injectHelp() {
     popupButton.type = 'button'
     popupButton.id = 'noplugin-broken-button'
     popupButton.textContent = 'Not working?'
-    popupButton.addEventListener('click', function() {
-      window.open(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location), '_blank', 'height=350,width=500')
+    popupButton.addEventListener('click', function () {
+      createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
     })
     popup.appendChild(popupButton)
     // Create CSS styles for body margin
@@ -72,13 +84,13 @@ function openStream(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
     if ((response === 'win') && url.includes('mms://')) {
-       // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
+      // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
       alert('Choose Windows Media Player on the next pop-up.')
       window.open(url, '_self')
     } else if (response === 'cros') {
       // VLC Media Player is the only option for playing media streams on Chrome OS
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
-        prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, select "Stream" from the side menu, and paste this:', url)
+        prompt('NoPlugin cannot automatically open this stream. Open VLC Media Player, select "Stream" from the side menu, and paste this:', url)
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
@@ -92,7 +104,7 @@ function openStream(url) {
     } else {
       // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
-        prompt('NoPlugin cannot automatically open this stream in VLC. Open VLC, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
+        prompt('NoPlugin cannot automatically open this stream. Open VLC Media Player, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
       } else {
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
           // Download VLC for user's operating system
@@ -133,7 +145,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
     content.appendChild(downloadButton)
     content.appendChild(document.createElement('br'))
     // Create eventListener for play button
-    downloadButton.addEventListener('click', function() {
+    downloadButton.addEventListener('click', function () {
       chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
     })
     // Create VLC button for Chrome OS
@@ -143,12 +155,11 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
       vlcButton.textContent = 'Open with VLC for Android'
       content.appendChild(vlcButton)
       content.appendChild(document.createElement('br'))
-      // Remove 
       var newurl = url.replace(/^\/\/|^.*?:\/\//, '') // Remove protocol from URL
       var intenturl = 'intent://' + newurl + '#Intent;scheme=http;package=org.videolan.vlc;end'
       console.log('[NoPlugin] VLC intent URL set to: ' + intenturl)
       // Create eventListener for VLC button
-      vlcButton.addEventListener('click', function() {
+      vlcButton.addEventListener('click', function () {
         window.open(intenturl, '_blank')
       })
     }
@@ -157,8 +168,8 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
     infoButton.textContent = "More info"
     content.appendChild(infoButton)
     // Create eventListener for info button
-    infoButton.addEventListener('click', function() {
-      window.open(chrome.extension.getURL("media-info.html"), '_blank', 'height=350,width=500')
+    infoButton.addEventListener('click', function () {
+      createPopup(chrome.extension.getURL("media-info.html"))
     })
     // Write container to page
     container.appendChild(content)
@@ -207,7 +218,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
     // Create eventListener for button
-    playStreamButton.addEventListener('click', function() {
+    playStreamButton.addEventListener('click', function () {
       openStream(url)
     })
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
@@ -252,7 +263,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Add source to video player
     var source = document.createElement('source')
     source.src = url
-    source.addEventListener('error', function(event) {
+    source.addEventListener('error', function (event) {
       if (event.type === 'error') {
         playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
       }
@@ -261,7 +272,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
     // Create eventListener for button
-    playMediaButton.addEventListener('click', function() {
+    playMediaButton.addEventListener('click', function () {
       // Replace container element with video
       container.parentNode.replaceChild(mediaPlayer, container)
       // Load media in player
