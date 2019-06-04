@@ -26,7 +26,7 @@ function findURL(url) {
   return url
 }
 
-// Insert 'NoPlugin has loaded media content on this page' toolbar
+// Insert 'NoPlugin has loaded plugin content on this page' toolbar
 function injectHelp() {
   // Show warning for NoPlugin
   if (document.querySelector('.noplugin-popup')) {
@@ -44,12 +44,11 @@ function injectHelp() {
     // Create popup
     var popup = document.createElement('div')
     popup.className = 'noplugin-popup'
-    popup.attachShadow({mode: 'open'})
     // Create popup message
     var popupMessage = document.createElement('span')
     popupMessage.className = 'noplugin-popup-message'
-    popupMessage.innerText = 'NoPlugin has loaded media content on this page.'
-    popup.shadowRoot.appendChild(popupMessage)
+    popupMessage.innerText = 'NoPlugin has loaded plugin content on this page.'
+    popup.appendChild(popupMessage)
     // Create popup button
     var popupButton = document.createElement('button')
     popupButton.type = 'button'
@@ -58,11 +57,11 @@ function injectHelp() {
     popupButton.addEventListener('click', function() {
       window.open(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location), '_blank', 'height=350,width=500')
     })
-    popup.shadowRoot.appendChild(popupButton)
+    popup.appendChild(popupButton)
     // Create CSS styles for body margin
     var popupStyles = document.createElement('style')
     popupStyles.textContent = 'body {margin-top: ' + margin + 'px !important;}'
-    popup.shadowRoot.appendChild(popupStyles)
+    popup.appendChild(popupStyles)
     // Insert popup into <body>
     document.body.prepend(popup)
   }

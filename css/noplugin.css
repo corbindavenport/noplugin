@@ -49,31 +49,33 @@ video.noplugin {
 .noplugin-popup {
   background: #FFF9C4;
   height: 36px;
-  z-index: 10000000;
+  z-index: 10000000 !important;
   line-height: 36px;
   border-bottom: 1px solid #e1e1e2;
-  color: #44433c;
-  font-size: 16px;
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  color: #44433c !important;
+  font-size: 16px !important;
   position: fixed;
   left: 0px;
   right: 0px;
   top: 0px;
-  cursor: default;
-  padding-left: 10px;
-  padding-right: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  user-select: none;
+  cursor: default !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
 }
 .noplugin-popup .noplugin-popup-message {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
 }
 .noplugin-popup #noplugin-broken-button {
-  white-space: nowrap;
-  overflow: hidden;
+  white-space: nowrap !important;
+  overflow: hidden !important;
 }
