@@ -19,7 +19,8 @@
 		"img/*",
 		"fonts/*",
 		"bugreport.html",
-		"media-info.html"
+		"media-info.html",
+		"playlist-viewer.html"
 	],
 	"content_scripts": [
 		{

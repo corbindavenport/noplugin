@@ -3,28 +3,28 @@
 // 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
-var processedEmbeds = []
-
-// Get direct URL for media, and fix Internet Archive links if required
-function findURL(url) {
+// Find the full path of a given URL
+function getFullURL(url) {
+  // Fix URLs that start at the site root
+  if (url.startsWith('/')) {
+    url = window.location.protocol + "//" + window.location.host + url
+  }
   // Regex to parse Internet Archive URLs: https://regex101.com/r/4F12w7/3
   var regex = /(?:web\.archive\.org\/web\/)(\d*)(\/)(.*)/
-  if (document.location.href.includes('//web.archive.org/') && !(url.includes('//web.archive.org/'))) {
-    var date = regex.exec(document.location.href)[1]
-    // Change URL to Internet Archive mirror, and append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
-    url = 'https://web.archive.org/web/' + date + 'id_/' + url
-  } else if (url.includes('//web.archive.org/')) {
+  // Fix Internet Archive links
+  if (url.includes('//web.archive.org/')) {
     // Get date
-    var date = regex.exec(document.location.href)[1]
+    var date = regex.exec(url)[1]
     // Get original URL
-    var originalURL = regex.exec(document.location.href)[3]
+    var originalURL = regex.exec(url)[3]
     // Append '_id' to the end of the date, so the Internet Archive returns the original file and not an HTML file
     url = 'https://web.archive.org/web/' + date + 'id_/' + originalURL
   }
+  // Get full URL
   var img = document.createElement('img')
-  img.src = url // Set string url
-  url = img.src // Get qualified url
-  img.src = null // No server request
+  img.src = url
+  url = img.src
+  img.src = null
   return url
 }
 
@@ -129,6 +129,7 @@ function openInPlayer(url) {
 // Process playlist files and return them as an array of media links
 function parsePlaylist(url) {
   // Create synchronous HTTP request
+  console.log('[NoPlugin] Attempting to read playlist file: ' + url)
   var xhr = new XMLHttpRequest()
   xhr.onerror = function () {
     // Return empty array
@@ -148,11 +149,19 @@ function parsePlaylist(url) {
       // Create array of linked media files
       var array = []
       asx.querySelectorAll('ref').forEach(function (el) {
-        var url = el.getAttribute('href')
-        url = findURL(url)
-        array.push(url)
+        var mediaUrl = el.getAttribute('href')
+        // Check if the media file URLs are relative to the playlist's location
+        if ((mediaUrl.includes('://')) || (mediaUrl.startsWith('/'))) {
+          mediaUrl = getFullURL(mediaUrl)
+        } else {
+          // Re-create URL with full path before calling getFullURL()
+          var path = url.substr(0, url.lastIndexOf("/"))
+          mediaUrl = getFullURL(path + '/' + mediaUrl)
+        }
+        array.push(mediaUrl)
       })
       // Return the array
+      console.log('[NoPlugin] Identified playlist contents:', array)
       return array
     } else if (url.endsWith('.wpl')) {
       // Windows Media Player Playlist files are in XML format
@@ -220,12 +229,6 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 
 // Replace plugin embeds with native players
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
-  if (processedEmbeds.includes(url)) {
-    // Don't replace the same embed/object twice
-    return
-  } else {
-    processedEmbeds.push(url)
-  }
   // If the URL ends in a port number or a slash, it's probably a livestream
   // Regex demo: https://regex101.com/r/So4qWf/1
   var streamRegex = /(\:\d{1,}$)|(\/$)/gm
@@ -243,6 +246,8 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Write container to page
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
   } else if (url.includes('mms://') || url.includes('rtsp://') || streamRegex.test(url)) {
     // This is a media stream
     var container = document.createElement('div')
@@ -268,10 +273,57 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     playStreamButton.addEventListener('click', function () {
       openInPlayer(url)
     })
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
   } else if ((url.endsWith('.asx')) || (url.endsWith('.wpl'))) {
     // This is a playlist file
     var mediaArray = parsePlaylist(url)
-    console.log('Media files:', mediaArray)
+    if (mediaArray.length === 1) {
+      // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
+      injectPlayer(object, id, mediaArray[0], width, height, cssclass, cssstyles)
+    } else {
+      var container = document.createElement('div')
+      container.setAttribute('class', 'noplugin ' + cssclass)
+      container.id = id
+      container.align = 'center'
+      container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+      // Create text content
+      var content = document.createElement('div')
+      content.className = 'noplugin-content'
+      content.textContent = 'This page is trying to load playlist of media files here. You might be able to open the whole playlist with a media player, or you can see the individual files.'
+      content.appendChild(document.createElement('br'))
+      // Create play button
+      var playPlaylistButton = document.createElement('button')
+      playPlaylistButton.type = 'button'
+      playPlaylistButton.setAttribute('data-url', url)
+      playPlaylistButton.textContent = 'Open playlist'
+      playPlaylistButton.addEventListener('click', function () {
+        openInPlayer(url)
+      })
+      content.appendChild(playPlaylistButton)
+      content.appendChild(document.createElement('br'))
+      // Create list button
+      var showPlayListButton = document.createElement('button')
+      showPlayListButton.type = 'button'
+      showPlayListButton.setAttribute('data-url', url)
+      showPlayListButton.textContent = 'View playlist contents'
+      showPlayListButton.addEventListener('click', function () {
+        // Create urls paramter with comma-seperated list of playlist contents
+        var params = '?urls='
+        mediaArray.forEach(function (url) {
+          params += encodeURIComponent(url) + ','
+        })
+        // Remove trailing comma
+        params = params.substring(0, params.length - 1)
+        createPopup(chrome.extension.getURL("playlist-viewer.html") + params)
+      })
+      content.appendChild(showPlayListButton)
+      // Write container to page
+      container.appendChild(content)
+      object.parentNode.replaceChild(container, object)
+      // Add message to console
+      console.log('[NoPlugin] Replaced plugin embed for ' + url)
+    }
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     // This is an audio file
     var mediaPlayer = document.createElement('audio')
@@ -286,6 +338,8 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     mediaPlayer.appendChild(source)
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
   } else {
     // Attempt to play other formats (MP4, QuickTime, etc.) in the browser
     var container = document.createElement('div')
@@ -330,8 +384,9 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       mediaPlayer.appendChild(source)
       mediaPlayer.play()
     })
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
   }
-  console.log('[NoPlugin] Replaced plugin embed for ' + url)
 }
 
 // Parse <embed> tag attributes and pass data to injectPlayer()
@@ -355,7 +410,7 @@ function replaceEmbed(object) {
     // Sanitize URL
     url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
     // Get exact URL
-    url = findURL(url)
+    url = getFullURL(url)
   }
   // Find attributes of object
   if (object.hasAttribute('width')) {
@@ -421,7 +476,7 @@ function replaceObject(object) {
     // Sanitize URL
     url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
     // Get exact URL
-    url = findURL(url)
+    url = getFullURL(url)
   }
   // Find attributes of object
   if (object.hasAttribute('width')) {
