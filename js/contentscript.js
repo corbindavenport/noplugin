@@ -139,17 +139,26 @@ function parsePlaylist(url) {
   xhr.send(null)
   // Access data
   if (xhr.status === 200) {
+    // Create array of linked media files
+    var array = []
     // Read the file
     if (url.endsWith('.asx')) {
       // Advanced Stream Redirector (ASX) files are in XML format
       // Documentation: http://www.streamalot.com/playlists.shtml
       var asx = document.createElement('div')
       asx.innerHTML = xhr.responseText
-      asx = asx.querySelector('asx')
-      // Create array of linked media files
-      var array = []
+      // Check playlist is valid
+      if (asx.querySelectorAll('ref').length === 0) {
+        throw new Error('No <ref> tags found in ASX playlist file')
+      }
+      // Add each media file to array
       asx.querySelectorAll('ref').forEach(function (el) {
-        var mediaUrl = el.getAttribute('href')
+        try {
+          var mediaUrl = el.getAttribute('href')
+        } catch {
+          // Skip this <ref> tag if the URL can't be found
+          return
+        }
         // Check if the media file URLs are relative to the playlist's location
         if ((mediaUrl.includes('://')) || (mediaUrl.startsWith('/'))) {
           mediaUrl = getFullURL(mediaUrl)
@@ -160,14 +169,37 @@ function parsePlaylist(url) {
         }
         array.push(mediaUrl)
       })
-      // Return the array
-      console.log('[NoPlugin] Identified playlist contents:', array)
-      return array
     } else if (url.endsWith('.wpl')) {
       // Windows Media Player Playlist files are in XML format
       // Documentation: https://en.wikipedia.org/wiki/Windows_Media_Player_Playlist
-      // TODO: Implement
+      var wpl = document.createElement('div')
+      wpl.innerHTML = xhr.responseText
+      // Check playlist is valid
+      if (asx.querySelectorAll('media').length === 0) {
+        throw new Error('No <media> tags found in WPL playlist file')
+      }
+      // Add each media file to array
+      wpl.querySelectorAll('media').forEach(function (el) {
+        try {
+          var mediaUrl = el.getAttribute('src')
+        } catch {
+          // Skip this <ref> tag if the URL can't be found
+          return
+        }
+        // Check if the media file URLs are relative to the playlist's location
+        if ((mediaUrl.includes('://')) || (mediaUrl.startsWith('/'))) {
+          mediaUrl = getFullURL(mediaUrl)
+        } else {
+          // Re-create URL with full path before calling getFullURL()
+          var path = url.substr(0, url.lastIndexOf("/"))
+          mediaUrl = getFullURL(path + '/' + mediaUrl)
+        }
+        array.push(mediaUrl)
+      })
     }
+    // Return the array
+    console.log('[NoPlugin] Identified playlist contents:', array)
+    return array
   } else {
     // Return empty array
     return []
@@ -277,7 +309,25 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
   } else if ((url.endsWith('.asx')) || (url.endsWith('.wpl'))) {
     // This is a playlist file
-    var mediaArray = parsePlaylist(url)
+    try {
+      var mediaArray = parsePlaylist(url)
+    } catch(error) {
+      // If the file is invalid/couldn't be reached, display an error
+      var container = document.createElement('div')
+      container.setAttribute('class', 'noplugin ' + cssclass)
+      container.id = id
+      container.align = 'center'
+      container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+      // Create text content
+      var content = document.createElement('div')
+      content.className = 'noplugin-content'
+      content.textContent = 'This page is trying to load playlist of media files here, but the playlist is either invalid or could not be accessed by NoPlugin.'
+      // Write container to page
+      container.appendChild(content)
+      object.parentNode.replaceChild(container, object)
+      // Add message to console
+      console.error('[NoPlugin] Error replacing plugin embed for ' + url + ':', error)
+    }
     if (mediaArray.length === 1) {
       // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
       injectPlayer(object, id, mediaArray[0], width, height, cssclass, cssstyles)
