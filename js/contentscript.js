@@ -3,6 +3,8 @@
 // 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
 // 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
 
+var processedEmbeds = []
+
 // Get direct URL for media, and fix Internet Archive links if required
 function findURL(url) {
   // Regex to parse Internet Archive URLs: https://regex101.com/r/4F12w7/3
@@ -79,8 +81,8 @@ function injectHelp() {
   }
 }
 
-// Open a media stream with a local application
-function openStream(url) {
+// Open a media stream/playlist with a local application
+function openInPlayer(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
     if ((response === 'win') && url.includes('mms://')) {
@@ -122,6 +124,45 @@ function openStream(url) {
       }
     }
   })
+}
+
+// Process playlist files and return them as an array of media links
+function parsePlaylist(url) {
+  // Create synchronous HTTP request
+  var xhr = new XMLHttpRequest()
+  xhr.onerror = function () {
+    // Return empty array
+    return []
+  }
+  xhr.open('GET', url, false)
+  xhr.send(null)
+  // Access data
+  if (xhr.status === 200) {
+    // Read the file
+    if (url.endsWith('.asx')) {
+      // Advanced Stream Redirector (ASX) files are in XML format
+      // Documentation: http://www.streamalot.com/playlists.shtml
+      var asx = document.createElement('div')
+      asx.innerHTML = xhr.responseText
+      asx = asx.querySelector('asx')
+      // Create array of linked media files
+      var array = []
+      asx.querySelectorAll('ref').forEach(function (el) {
+        var url = el.getAttribute('href')
+        url = findURL(url)
+        array.push(url)
+      })
+      // Return the array
+      return array
+    } else if (url.endsWith('.wpl')) {
+      // Windows Media Player Playlist files are in XML format
+      // Documentation: https://en.wikipedia.org/wiki/Windows_Media_Player_Playlist
+      // TODO: Implement
+    }
+  } else {
+    // Return empty array
+    return []
+  }
 }
 
 // Allow user to download files that failed to play in-browser
@@ -179,6 +220,12 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 
 // Replace plugin embeds with native players
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
+  if (processedEmbeds.includes(url)) {
+    // Don't replace the same embed/object twice
+    return
+  } else {
+    processedEmbeds.push(url)
+  }
   // If the URL ends in a port number or a slash, it's probably a livestream
   // Regex demo: https://regex101.com/r/So4qWf/1
   var streamRegex = /(\:\d{1,}$)|(\/$)/gm
@@ -219,8 +266,12 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     object.parentNode.replaceChild(container, object)
     // Create eventListener for button
     playStreamButton.addEventListener('click', function () {
-      openStream(url)
+      openInPlayer(url)
     })
+  } else if ((url.endsWith('.asx')) || (url.endsWith('.wpl'))) {
+    // This is a playlist file
+    var mediaArray = parsePlaylist(url)
+    console.log('Media files:', mediaArray)
   } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
     // This is an audio file
     var mediaPlayer = document.createElement('audio')
