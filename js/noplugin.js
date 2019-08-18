@@ -90,13 +90,14 @@ function injectHelp() {
 function openInPlayer(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
-    var wmpCompatible = (url.includes('mms://') || url.endsWith('.asx') || url.endsWith('.wpl'))
-    if ((response === 'win') && wmpCompatible) {
-      // The user shouldn't need VLC Media Player these if they are running Windows, becausee they should already have Windows Media Player
-      url = url.replace('https://', 'mms://')
-      url = url.replace('http://', 'mms://')
-      alert('Choose Windows Media Player on the next pop-up.')
+    if ((response === 'win') && url.includes('mms://')) {
+      // If on Windows, open MMS streams with Windows Media Player
+      alert('Select Windows Media Player on the next pop-up.')
       window.open(url, '_self')
+    } else if ((response === 'win') && (url.endsWith('.asx') || url.endsWith('.wpl'))) {
+      // If on Windows, open Windows Media playlists with Windows Media Player
+      var message = 'Follow these steps to open this file:\n\n1. Open Windows Media Player from the Start Menu (search for "wmp").\n2. In Windows Media Player, press CTRL+U on your keyboard. The "Open URL" pop-up should open.\n3. Paste the below URL into the pop-up and press OK.'
+      prompt(message, url)
     } else if (response === 'cros') {
       // VLC Media Player is the only option for playing media streams on Chrome OS
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
@@ -104,7 +105,7 @@ function openInPlayer(url) {
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          if (confirm('Last question - does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
+          if (confirm('Last question: does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
             window.open('market://details?id=org.videolan.vlc', '_blank')
           } else {
             window.open('https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en', '_blank')
