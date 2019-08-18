@@ -163,7 +163,7 @@ function parsePlaylist(url) {
       // Add each media file to array
       asx.querySelectorAll('ref').forEach(function (el) {
         try {
-          var mediaUrl = el.getAttribute('href')
+          var mediaUrl = DOMPurify.sanitize(el.getAttribute('href'), { ALLOW_UNKNOWN_PROTOCOLS: true })
         } catch {
           // Skip this <ref> tag if the URL can't be found
           return
@@ -190,9 +190,36 @@ function parsePlaylist(url) {
       // Add each media file to array
       wpl.querySelectorAll('media').forEach(function (el) {
         try {
-          var mediaUrl = el.getAttribute('src')
+          var mediaUrl = DOMPurify.sanitize(el.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
         } catch {
-          // Skip this <ref> tag if the URL can't be found
+          // Skip this <media> tag if the URL can't be found
+          return
+        }
+        // Check if the media file URLs are relative to the playlist's location
+        if ((mediaUrl.includes('://')) || (mediaUrl.startsWith('/'))) {
+          mediaUrl = getFullURL(mediaUrl)
+        } else {
+          // Re-create URL with full path before calling getFullURL()
+          var path = url.substr(0, url.lastIndexOf("/"))
+          mediaUrl = getFullURL(path + '/' + mediaUrl)
+        }
+        array.push(mediaUrl)
+      })
+    } else if (url.endsWith('.qtl')) {
+      // QuickTime Link files are in XML format
+      // Documentation: https://stackoverflow.com/a/25399903/2255592 and http://www.streamalot.com/playlists.shtml
+      var qtl = document.createElement('div')
+      qtl.innerHTML = xhr.responseText
+      // Check playlist is valid
+      if (qtl.querySelectorAll('embed').length === 0) {
+        throw new Error('No <embed> tags found in QTL playlist file')
+      }
+      // Add each media file to array
+      qtl.querySelectorAll('embed').forEach(function (el) {
+        try {
+          var mediaUrl = DOMPurify.sanitize(el.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+        } catch {
+          // Skip this <embed> tag if the URL can't be found
           return
         }
         // Check if the media file URLs are relative to the playlist's location
@@ -316,7 +343,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     })
     // Add message to console
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if ((url.endsWith('.asx')) || (url.endsWith('.wpl'))) {
+  } else if (url.endsWith('.asx') || url.endsWith('.wpl') || url.endsWith('.qtl')) {
     // This is a playlist file
     try {
       var mediaArray = parsePlaylist(url)
@@ -337,7 +364,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       // Add message to console
       console.error('[NoPlugin] Error replacing plugin embed for ' + url + ':', error)
     }
-    if (mediaArray.length === 10) {
+    if (mediaArray.length === 1) {
       // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
       injectPlayer(object, id, mediaArray[0], width, height, cssclass, cssstyles)
     } else {
@@ -594,6 +621,7 @@ function loadDOM() {
   var objectList = [
     /* QuickTime */
     'object[type="video/quicktime"]',
+    'object[type="application/x-quicktimeplayer"]',
     'object[codebase="http://www.apple.com/qtactivex/qtplugin.cab"]',
     'object[classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"]',
     'object[data$=".mov"]',
@@ -622,8 +650,10 @@ function loadDOM() {
   var embedList = [
     /* QuickTime */
     'embed[type="video/quicktime"]',
+    'embed[type="application/x-quicktimeplayer"]',
     'embed[src$=".mov"]',
     'embed[src$=".qt"]',
+    'embed[src$=".qtl"]',
     'embed[classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B"]',
     /* RealPlayer */
     'embed[type="application/vnd.rn-realmedia"]',

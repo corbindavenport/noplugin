@@ -8,16 +8,9 @@ NoPlugin searches webpages for embedded plugin objects, and converts them to HTM
 
 ---------------------------------------------------------
 
-**New in NoPlugin 5.0:**
+**New in NoPlugin 5.1:**
 
-- Improved performance and reduced RAM usage
-- Some QuickTime files (.mov, .qt) files and other container formats can now be played in-browser
-- Broken pages can now be reported from inside the extension
-- Improved download notifications on Chrome and Opera
-- Improved Chrome OS support
-- Fixed bugs with media on Internet Archive page
-- Codebase rewritten in vanilla JavaScript
-- NoPlugin no longer scans for plugin objects when pages are modified
+- Added support for Windows Media Player Playlist (.wpl), Advanced Stream Redirector (.asx), and QuickTime Link (.qtl) playlists
  
 ---------------------------------------------------------
 
