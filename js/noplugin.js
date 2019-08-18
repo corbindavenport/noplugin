@@ -96,7 +96,11 @@ function openInPlayer(url) {
       window.open(url, '_self')
     } else if ((response === 'win') && (url.endsWith('.asx') || url.endsWith('.wpl'))) {
       // If on Windows, open Windows Media playlists with Windows Media Player
-      var message = 'Follow these steps to open this file:\n\n1. Open Windows Media Player from the Start Menu (search for "wmp").\n2. In Windows Media Player, press CTRL+U on your keyboard. The "Open URL" pop-up should open.\n3. Paste the below URL into the pop-up and press OK.'
+      var message = 'Follow these steps to open this file:\n\n1. Open Windows Media Player from the Start Menu (search for "wmp").\n2. In Windows Media Player, press CTRL+U on your keyboard. The "Open URL" pop-up should appear.\n3. Paste the below address into the pop-up:'
+      prompt(message, url)
+    } else if (url.endsWith('.ram')) {
+      // RealPlayer streams can only be played with RealPlayer
+      var message = 'Follow these steps to open this file:\n\n1. Open RealPlayer on your computer.\n2. In RealPlayer, press CTRL+O on your keyboard. The "Open" pop-up should appear.\n3. Paste the below address into the pop-up:'
       prompt(message, url)
     } else if (response === 'cros') {
       // VLC Media Player is the only option for playing media streams on Chrome OS
@@ -316,7 +320,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     object.parentNode.replaceChild(container, object)
     // Add message to console
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.includes('mms://') || url.includes('rtsp://') || streamRegex.test(url)) {
+  } else if (url.includes('mms://') || url.includes('rtsp://') || url.endsWith('.ram') || streamRegex.test(url)) {
     // This is a media stream
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
@@ -326,7 +330,11 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Create text content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
-    content.textContent = 'This page is trying to load a video/audio stream here. You might be able to play this with a media player.'
+    if (url.endsWith('.ram')) {
+      content.innerHTML = 'This page is trying to load a RealPlayer stream here. You will need <a href="http://www.oldversion.com/windows/realplayer-16-0-0-282" target="_blank">RealPlayer</a> to open this file.'
+    } else {
+      content.textContent = 'This page is trying to load a video/audio stream here. You might be able to play this with a media player.'
+    }
     content.appendChild(document.createElement('br'))
     // Create play button
     var playStreamButton = document.createElement('button')
