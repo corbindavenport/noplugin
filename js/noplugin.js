@@ -1,7 +1,12 @@
-// How NoPlugin works
-// 1 - The loadDOM() function runs when the page is loaded and looks for plugin objects.
-// 2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
-// 3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
+/*
+
+  How NoPlugin works:
+
+  1 - The loadDOM() function runs when the page is loaded and looks for <embed> and <object> tags that match plugin content.
+  2 - Plugin objects and embeds are passed to the replaceObject() and replaceEmbed() functions, respectively, which parse information from the objects/embeds including size, ID, CSS styles, etc
+  3- Both replaceObject() and replaceEmbed() pass the data to injectPlayer(), which replaces the plugin HTML with either an HTML5 player if the media is supported or a prompt to download it
+
+*/
 
 // Find the full path of a given URL
 function getFullURL(url) {
@@ -28,7 +33,7 @@ function getFullURL(url) {
   return url
 }
 
-// Function for centering popup windows roughly in the center of the screen
+// Function for placing popup windows roughly in the center of the screen
 function createPopup(url) {
   // Set popup dimensions
   var windowWidth = 500
@@ -81,12 +86,15 @@ function injectHelp() {
   }
 }
 
-// Open a media stream/playlist with a local application
+// Open a media stream/playlist with native media player
 function openInPlayer(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
-    if ((response === 'win') && url.includes('mms://')) {
-      // The user shouldn't need VLC Media Player for MMS streams if they are running Windows, becausee they should already have Windows Media Player
+    var wmpCompatible = (url.includes('mms://') || url.endsWith('.asx') || url.endsWith('.wpl'))
+    if ((response === 'win') && wmpCompatible) {
+      // The user shouldn't need VLC Media Player these if they are running Windows, becausee they should already have Windows Media Player
+      url = url.replace('https://', 'mms://')
+      url = url.replace('http://', 'mms://')
       alert('Choose Windows Media Player on the next pop-up.')
       window.open(url, '_self')
     } else if (response === 'cros') {
@@ -311,7 +319,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // This is a playlist file
     try {
       var mediaArray = parsePlaylist(url)
-    } catch(error) {
+    } catch (error) {
       // If the file is invalid/couldn't be reached, display an error
       var container = document.createElement('div')
       container.setAttribute('class', 'noplugin ' + cssclass)
@@ -328,7 +336,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       // Add message to console
       console.error('[NoPlugin] Error replacing plugin embed for ' + url + ':', error)
     }
-    if (mediaArray.length === 1) {
+    if (mediaArray.length === 10) {
       // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
       injectPlayer(object, id, mediaArray[0], width, height, cssclass, cssstyles)
     } else {
@@ -599,6 +607,8 @@ function loadDOM() {
     'object[type="audio/x-ms-wma"]',
     'object[type="audio/x-ms-wmv"]',
     'object[type="application/x-mplayer2"]',
+    'object[type="application/vnd.ms-wpl"]',
+    'object[type="video/x-ms-asf"]',
     'object[classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95"]',
     'object[codebase^="http://activex.microsoft.com/activex/controls/mplayer"]',
     'object[pluginspage^="http://www.microsoft.com"]',
@@ -627,11 +637,14 @@ function loadDOM() {
     'embed[type="audio/x-ms-wma"]',
     'embed[type="audio/x-ms-wmv"]',
     'embed[type="application/x-mplayer2"]',
+    'embed[type="application/vnd.ms-wpl"]',
     'embed[classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95"]',
     'embed[pluginspage^="http://www.microsoft.com"]',
     'embed[src$=".wm"]',
     'embed[src$=".wma"]',
     'embed[src$=".wmv"]',
+    'embed[src$=".wpl"]',
+    'embed[src$=".asx"]',
     /* VLC Plugin */
     'embed[type="application/x-vlc-plugin"]',
     'embed[pluginspage="http://www.videolan.org"]'
