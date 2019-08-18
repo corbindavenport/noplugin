@@ -8,7 +8,7 @@ NoPlugin searches webpages for embedded plugin objects, and converts them to HTM
 
 ---------------------------------------------------------
 
-**New in NoPlugin 5.1:**
+**New in NoPlugin 5.2:**
 
 - Added support for Windows Media Player Playlist (.wpl), Advanced Stream Redirector (.asx), and QuickTime Link (.qtl) playlists
  
