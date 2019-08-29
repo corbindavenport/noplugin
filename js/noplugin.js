@@ -236,13 +236,25 @@ function parsePlaylist(url) {
         }
         array.push(mediaUrl)
       })
+    } else if (url.endsWith('.m3u')) {
+      // M3U files are just lists with links to files
+      // Documentation: https://en.wikipedia.org/wiki/M3U#Examples and http://www.streamalot.com/playlists.shtml
+      var m3u = xhr.responseText.split('\n')
+      // Filter out empty lines and comments
+      m3u = m3u.filter(s => s.replace(/\s+/g, '').length !== 0)
+      m3u = m3u.filter(s => s.indexOf('#') !== 0)
+      // Check playlist is valid
+      if (m3u.length === 0) {
+        throw new Error('No links found in M3U playlist file')
+      }
+      // Copy contents of playlist to main array
+      array = m3u
     }
     // Return the array
     console.log('[NoPlugin] Identified playlist contents:', array)
     return array
   } else {
-    // Return empty array
-    return []
+    throw new Error('Could not read playlist file')
   }
 }
 
@@ -351,7 +363,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     })
     // Add message to console
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.endsWith('.asx') || url.endsWith('.wpl') || url.endsWith('.qtl')) {
+  } else if (url.endsWith('.asx') || url.endsWith('.wpl') || url.endsWith('.qtl') || url.endsWith('.m3u')) {
     // This is a playlist file
     try {
       var mediaArray = parsePlaylist(url)
@@ -686,7 +698,9 @@ function loadDOM() {
     'embed[src$=".asx"]',
     /* VLC Plugin */
     'embed[type="application/x-vlc-plugin"]',
-    'embed[pluginspage="http://www.videolan.org"]'
+    'embed[pluginspage="http://www.videolan.org"]',
+    /* Generic */
+    'embed[src$=".m3u"]'
   ]
   var frameList = [
     /* YouTube */
