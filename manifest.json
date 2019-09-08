@@ -17,7 +17,6 @@
 	},
 	"web_accessible_resources": [
 		"img/*",
-		"fonts/*",
 		"bugreport.html",
 		"media-info.html",
 		"playlist-viewer.html"

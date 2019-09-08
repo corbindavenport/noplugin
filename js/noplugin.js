@@ -48,9 +48,7 @@ function createPopup(url) {
 // Insert 'NoPlugin has loaded plugin content on this page' toolbar
 function injectHelp() {
   // Show warning for NoPlugin
-  if (document.querySelector('.noplugin-popup')) {
-    // The popup was already created by another instance, so don't do it again
-  } else {
+  if (!document.querySelector('.noplugin-popup')) {
     // Try to get existing margin
     var bodyMargin = window.getComputedStyle(document.body, null).getPropertyValue('margin-top')
     // Make sure margin is a pixel value and isn't null
@@ -80,7 +78,7 @@ function injectHelp() {
     // Create CSS styles for body margin
     var popupStyles = document.createElement('style')
     popupStyles.textContent = 'body {margin-top: ' + margin + 'px !important;}'
-    popup.appendChild(popupStyles)
+    document.body.appendChild(popupStyles)
     // Insert popup into <body>
     document.body.prepend(popup)
   }

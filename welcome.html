@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" type="image/png" href="img/icon16.png">
 	<title>NoPlugin</title>
-	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap.css" rel="stylesheet">
 </head>
 <body>
 	<div class="jumbotron">
@@ -19,18 +19,30 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-8">
-				<h2>How NoPlugin works</h2>
+				<p>
+					<h2>How NoPlugin works</h2>
+				</p>
 				<p>NoPlugin searches web pages for embedded plugin objects. If the file type is supported by your web browser (MP4, WAV, MP3, etc.), NoPlugin will play it directly in the web page. You can see a demo <a href="https://corbindavenport.github.io/noplugin" target="_blank">here</a>.</p>
 				<p>If the file cannot be played by your web browser, NoPlugin can still download the file so you can open it with your computer's media player. VLC Media Player is recommended for opening these files, since it will play just about every video and audio file in existence.</p>
-				<p><a class="btn btn-primary vlc-btn" href="#downloadvlc" role="button">Download VLC Media Player</a></p>
+				<p>
+					<button type="button" class="btn btn-primary link-btn vlc-btn">Download VLC Media Player</button>
+				</p>
 			</div>
 			<div class="col-md-4">
-				<h2>Donate</h2>
+				<p>
+					<h2>Donate</h2>
+				</p>
 				<p>If you find NoPlugin useful, please donate to support continued development. It would mean a lot!</p>
-				<p><a class="btn btn-success" href="https://www.patreon.com/corbindavenport" target="_blank" role="button" style="width: 100%">Donate via Patreon</a></p>
-				<p><a class="btn btn-success" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=NoPlugin%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank" role="button" style="width: 100%">Donate via PayPal</a></p>
+				<p>
+					<button type="button" class="btn btn-success btn-block link-btn" data-url="https://www.patreon.com/corbindavenport">Donate via Patreon</button>
+				</p>
+				<p>
+					<button type="button" class="btn btn-success btn-block link-btn" data-url="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=NoPlugin%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted">Donate via PayPal</button>
+				</p>
 				<p class="review-info"></p>
-				<h2>Having issues?</h2>
+				<p>
+					<h2>Having issues?</h2>
+				</p>
 				<p>If you find a bug, or have a suggestion for a new feature, please <a href="https://github.com/corbindavenport/noplugin/issues" target="_blank">create an issue on the NoPlugin GitHub repository</a> or <a href="mailto:noplugin@fire.fundersclub.com?subject=NoPlugin%20Bug%20Report">submit an issue via email</a>.</p>
 			</div>
 		</div>

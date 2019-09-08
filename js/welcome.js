@@ -37,3 +37,10 @@ document.querySelector('.vlc-btn').addEventListener('click', function () {
     }
   })
 })
+
+// Other buttons
+document.querySelectorAll('.link-btn').forEach(function(el) {
+  el.addEventListener('click', function() {
+    chrome.tabs.create({ url: el.getAttribute('data-url') })
+  })
+})

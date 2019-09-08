@@ -7,12 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="img/icon16.png">
     <title>NoPlugin</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
     <style>
         .list-group-item {
+            cursor: pointer;
+        }
+        .list-group-item span {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        video {
+            display: none;
         }
     </style>
 </head>
@@ -23,11 +29,7 @@
         <div class="row">
             <div class="col-md-12">
                 <p style="margin-top: 10px">These are all the files listed in the playlist. You can click on a link to download it.</p>
-                <p>
-                    <div class="list-group" id="playlist">
-
-                    </div>
-                </p>
+                <ul class="list-group" id="playlist"></ul>
             </div>
         </div>
 
