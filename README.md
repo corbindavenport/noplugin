@@ -11,6 +11,7 @@ NoPlugin searches webpages for embedded plugin objects, and converts them to HTM
 **New in NoPlugin 5.2:**
 
 - Added support for Windows Media (.wpl, .asx), QuickTime (.qtl), RealPlayer (.ram), and M3U (.m3u) playlists
+- Updated Bootstrap and DOMPurify dependencies to newest versions
  
 ---------------------------------------------------------
 
