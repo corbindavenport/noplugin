@@ -651,6 +651,8 @@ function loadDOM() {
     'object[classid="clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA"]',
     /* Windows Media Player */
     'object[type="video/x-ms-wm"]',
+    'object[type="video/x-ms-wmv"]',
+    'object[type="video/x-msvideo"]',
     'object[type="audio/x-ms-wma"]',
     'object[type="audio/x-ms-wmv"]',
     'object[type="application/x-mplayer2"]',
@@ -682,6 +684,8 @@ function loadDOM() {
     'embed[src$=".rmp"]',
     'embed[src$=".rm"]',
     /* Windows Media Player */
+    'embed[type="video/x-ms-wmv"]',
+    'embed[type="video/x-msvideo"]',
     'embed[type="video/x-ms-wm"]',
     'embed[type="audio/x-ms-wma"]',
     'embed[type="audio/x-ms-wmv"]',

@@ -9,7 +9,7 @@
 .noplugin-content button, .noplugin-popup button {
   line-height: initial !important;
   color: initial !important;
-  font-size: initial;
+  font-size: initial !important;
 }
 
 /* Rest of styles */
