@@ -1,5 +1,5 @@
 {
-"manifest_version": 2,
+	"manifest_version": 2,
 	"name": "NoPlugin",
 	"version": "5.3",
 	"author": "Corbin Davenport",
@@ -10,10 +10,13 @@
 		"https://*/*",
 		"downloads",
 		"downloads.open",
-		"notifications"
+		"notifications",
+		"storage"
 	],
 	"background": {
-		"scripts": ["js/background.js"]
+		"scripts": [
+			"js/background.js"
+		]
 	},
 	"web_accessible_resources": [
 		"img/*",
@@ -23,16 +26,34 @@
 	],
 	"content_scripts": [
 		{
-		"matches": ["http://*/*", "https://*/*"],
-		"css": ["css/noplugin.css"],
-		"js": ["js/purify.js", "js/noplugin.js"],
-		"run_at": "document_end"
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"js/noplugin-compat.js"
+			],
+			"run_at": "document_start"
+		},
+		{
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			],
+			"css": [
+				"css/noplugin.css"
+			],
+			"js": [
+				"js/purify.js",
+				"js/noplugin.js"
+			],
+			"run_at": "document_end"
 		}
 	],
-	"icons":{
-		"16":"img/icon16.png",
-		"32":"img/icon32.png",
-		"48":"img/icon48.png",
-		"128":"img/icon128.png"
+	"icons": {
+		"16": "img/icon16.png",
+		"32": "img/icon32.png",
+		"48": "img/icon48.png",
+		"128": "img/icon128.png"
 	}
 }

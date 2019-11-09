@@ -8,6 +8,9 @@
 
 */
 
+// Detect Flash support
+const flashSupported = navigator.plugins.namedItem('Shockwave Flash')
+
 // Find the full path of a given URL
 function getFullURL(url) {
   // Fix URLs that start at the site root
@@ -561,6 +564,9 @@ function replaceObject(object) {
   if (object.hasAttribute('data')) {
     // <object data="url"></object>
     var url = object.getAttribute('data')
+  } else if (object.querySelector('param[name="MOVIE" i]')) {
+    // <object><param name="movie" value="url"></object>
+    var url = object.querySelector('param[name="MOVIE" i]').getAttribute('value')
   } else if (object.querySelector('param[name="HREF" i]')) {
     // <object><param name="href" value="url"></object>
     var url = object.querySelector('param[name="HREF" i]').getAttribute('value')
@@ -709,6 +715,25 @@ function loadDOM() {
     'iframe[src*="youtube.com/v/"]',
     'frame[src*="youtube.com/v/"]'
   ]
+  // Detect Flash objects and embeds if the real Flash plugin is unavailable
+  if (!flashSupported) {
+    var flashObjectList = [
+      'object[classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"]',
+      'object[codebase*="download.macromedia.com/pub/shockwave"]',
+      'object[type="application/x-shockwave-flash"]',
+      'object[src$=".swf"]',
+      'object[src$=".flv"]'
+    ]
+    var flashEmbedList = [
+      'embed[classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"]',
+      'embed[codebase*="download.macromedia.com/pub/shockwave"]',
+      'embed[type="application/x-shockwave-flash"]',
+      'embed[src$=".swf"]',
+      'embed[src$=".flv"]'
+    ]
+    objectList = objectList.concat(flashObjectList)
+    embedList = embedList.concat(flashObjectList)
+  }
   // Replace objects
   var objects = objectList.toString()
   document.querySelectorAll(objects).forEach(function (item) {
