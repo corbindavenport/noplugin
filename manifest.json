@@ -30,16 +30,6 @@
 				"http://*/*",
 				"https://*/*"
 			],
-			"js": [
-				"js/noplugin-compat.js"
-			],
-			"run_at": "document_start"
-		},
-		{
-			"matches": [
-				"http://*/*",
-				"https://*/*"
-			],
 			"css": [
 				"css/noplugin.css"
 			],

@@ -262,7 +262,7 @@ function parsePlaylist(url) {
 // Allow user to download files that failed to play in-browser
 function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles) {
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
-    // Create new noplguin container
+    // Create new NoPlugin container
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
     container.id = id
@@ -523,12 +523,12 @@ function replaceEmbed(object) {
   if (object.hasAttribute('width')) {
     var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var width = object.getBoundingClientRect().width
+    var width = 'auto'
   }
   if (object.hasAttribute('height')) {
     var height = DOMPurify.sanitize(object.getAttribute('height'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var height = object.getBoundingClientRect().height
+    var height = 'auto'
   }
   if (object.hasAttribute('class')) {
     var cssclass = DOMPurify.sanitize(object.getAttribute('class'), { ALLOW_UNKNOWN_PROTOCOLS: true })
@@ -592,12 +592,12 @@ function replaceObject(object) {
   if (object.hasAttribute('width')) {
     var width = DOMPurify.sanitize(object.getAttribute('width'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var width = object.getBoundingClientRect().width
+    var width = 'auto'
   }
   if (object.hasAttribute('height')) {
     var height = DOMPurify.sanitize(object.getAttribute('height'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
-    var height = object.getBoundingClientRect().height
+    var height = 'auto'
   }
   if (object.hasAttribute('class')) {
     var cssclass = DOMPurify.sanitize(object.getAttribute('class'), { ALLOW_UNKNOWN_PROTOCOLS: true })

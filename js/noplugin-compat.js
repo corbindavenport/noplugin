@@ -1,6 +1,7 @@
+// This is a work-in-progress compatibility mode for NoPlugin
+// To test it, add this script to manifest.json for document_load and add the following cookie to a page:
 // document.cookie = 'noplugin-compat-mode=' + encodeURIComponent(document.URL) + '; path=/'
 
-// If compatibility mode has been enabled for this page, do the magic
 if (!navigator.plugins.namedItem('Shockwave Flash') && document.cookie.includes('noplugin-compat-mode') && document.cookie.includes(encodeURIComponent(document.URL))) {
 
     console.log('[NoPlugin] Compatibilty mode enabled.')
