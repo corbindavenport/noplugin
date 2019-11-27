@@ -87,10 +87,36 @@ function injectHelp() {
   }
 }
 
+// Open Adobe Flash content with Flash Projector desktop software
+function openInFlash(url) {
+  // Determine the user's operating system
+  chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    if (response === 'win' || response === 'mac' || response === 'linux') {
+      // Ask if Projector is installed
+      if (confirm('Do you have Adobe Flash Projector installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
+        // Projector on Mac and Windows have the URL bar in a submenu
+        if (response === 'win' || response === 'mac') {
+          prompt('Open Flash Projector on your computer, click the File menu, select Open, and paste this in the text box:', url)
+        } else {
+          // Projector on Linux has the URL bar in the main window
+          prompt('Open Flash Projector on your computer, and paste this in the URL box:', url)
+        }
+      } else {
+        // Help the user install Flash Projector
+        alert('The download page for Adobe Flash Projector will open in a new tab. Just click the "Download Flash Player projector" link for your platform (Windows, Mac, or Linux).')
+        window.open('https://www.adobe.com/support/flashplayer/debug_downloads.html', '_blank')
+      }
+    } else {
+      alert('Sorry, Adobe has not released Flash Projector for your operating system, so there is no way to play this content on your device. Projector is only availabe for Mac, Windows, and Linux.')
+    }
+  })
+}
+
 // Open a media stream/playlist with native media player
 function openInPlayer(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    console.log(response)
     if ((response === 'win') && url.includes('mms://')) {
       // If on Windows, open MMS streams with Windows Media Player
       alert('Select Windows Media Player on the next pop-up.')
@@ -364,6 +390,33 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     })
     // Add message to console
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
+  } else if (url.includes('.swf')) {
+    // This is a Flash Player file
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + cssclass)
+    container.id = id
+    container.align = 'center'
+    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    // Create text content
+    var content = document.createElement('div')
+    content.className = 'noplugin-content'
+    content.textContent = 'This page is trying to load Adobe Flash here. You might be able to play this with Adobe Flash Projector.'
+    content.appendChild(document.createElement('br'))
+    // Create play button
+    var playStreamButton = document.createElement('button')
+    playStreamButton.type = 'button'
+    playStreamButton.setAttribute('data-url', url)
+    playStreamButton.textContent = 'Open media'
+    content.appendChild(playStreamButton)
+    // Write container to page
+    container.appendChild(content)
+    object.parentNode.replaceChild(container, object)
+    // Create eventListener for button
+    playStreamButton.addEventListener('click', function () {
+      openInFlash(url)
+    })
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
   } else if (url.endsWith('.asx') || url.endsWith('.wpl') || url.endsWith('.qtl') || url.endsWith('.m3u')) {
     // This is a playlist file
     try {
@@ -448,7 +501,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Add message to console
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
   } else {
-    // Attempt to play other formats (MP4, QuickTime, etc.) in the browser
+    // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
     container.id = id
@@ -563,22 +616,22 @@ function replaceObject(object) {
   // Find video source of object
   if (object.hasAttribute('data')) {
     // <object data="url"></object>
-    var url = object.getAttribute('data')
+    var url = DOMPurify.sanitize(object.getAttribute('data'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else if (object.querySelector('param[name="MOVIE" i]')) {
     // <object><param name="movie" value="url"></object>
-    var url = object.querySelector('param[name="MOVIE" i]').getAttribute('value')
+    var url = DOMPurify.sanitize(object.querySelector('param[name="MOVIE" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else if (object.querySelector('param[name="HREF" i]')) {
     // <object><param name="href" value="url"></object>
-    var url = object.querySelector('param[name="HREF" i]').getAttribute('value')
+    var url = DOMPurify.sanitize(object.querySelector('param[name="HREF" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else if (object.querySelector('param[name="SRC" i]')) {
     // <object><param name="src" value="url"></object>
-    var url = object.querySelector('param[name="SRC" i]').getAttribute('value')
+    var url = DOMPurify.sanitize(object.querySelector('param[name="SRC" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else if (object.querySelector('embed').getAttribute('src')) {
     // <object><embed src="url"></object>
-    var url = object.querySelector('embed').getAttribute('src')
+    var url = DOMPurify.sanitize(object.querySelector('embed').getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else if (object.querySelector('embed').getAttribute('target')) {
     // <object><embed target="url"></object>
-    var url = object.querySelector('embed').getAttribute('target')
+    var url = DOMPurify.sanitize(object.querySelector('embed').getAttribute('target'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var url = null
   }
