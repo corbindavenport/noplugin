@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "NoPlugin",
-	"version": "5.3",
+	"version": "6.0",
 	"author": "Corbin Davenport",
 	"description": "Play legacy media in modern browsers without plugins.",
 	"homepage_url": "https://github.com/corbindavenport/noplugin",
@@ -34,7 +34,7 @@
 				"css/noplugin.css"
 			],
 			"js": [
-				"js/purify.js",
+				"js/purify.min.js",
 				"js/noplugin.js"
 			],
 			"run_at": "document_end"
