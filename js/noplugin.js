@@ -11,6 +11,11 @@
 // Detect Flash support
 const flashSupported = navigator.plugins.namedItem('Shockwave Flash')
 
+// YouTube ID regex
+const youtubeRegex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/
+// Regex for detecting livestream links https://regex101.com/r/So4qWf/1
+const streamDetectRegex = /(\:\d{1,}$)|(\/$)/gm
+
 // Find the full path of a given URL
 function getFullURL(url) {
   // Fix URLs that start at the site root
@@ -340,9 +345,6 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 
 // Replace plugin embeds with native players
 function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
-  // If the URL ends in a port number or a slash, it's probably a livestream
-  // Regex demo: https://regex101.com/r/So4qWf/1
-  var streamRegex = /(\:\d{1,}$)|(\/$)/gm
   if (url == null) {
     // There is a URL error
     var container = document.createElement('div')
@@ -359,7 +361,31 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     object.parentNode.replaceChild(container, object)
     // Add message to console
     console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.includes('mms://') || url.includes('rtsp://') || url.endsWith('.ram') || streamRegex.test(url)) {
+  } else if (url.includes('youtube.com/v/')) {
+    // Old Flash-based YouTube embed
+    var frame = document.createElement('iframe')
+    frame.setAttribute('class', cssclass)
+    frame.id = id
+    frame.setAttribute('style', 'border: 0; width:' + width + 'px; height:' + height + 'px;')
+    // Parse video ID and replace object
+    var youtubeID = url.match(youtubeRegex)[1]
+    frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
+    object.parentNode.replaceChild(frame, object)
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
+  } else if (url.includes('vimeo.com/moogaloop.swf')) {
+    // Old Flash-based Vimeo embed
+    var frame = document.createElement('iframe')
+    frame.setAttribute('class', cssclass)
+    frame.id = id
+    frame.setAttribute('style', 'border: 0; width:' + width + 'px; height:' + height + 'px;')
+    // Parse video ID and replace object
+    var vimeoID = url.split('clip_id=').pop().split('&')[0];
+    frame.setAttribute('src', 'https://player.vimeo.com/video/' + vimeoID)
+    object.parentNode.replaceChild(frame, object)
+    // Add message to console
+    console.log('[NoPlugin] Replaced plugin embed for ' + url)
+  } else if (url.includes('mms://') || url.includes('rtsp://') || url.endsWith('.ram') || streamDetectRegex.test(url)) {
     // This is a media stream
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + cssclass)
@@ -685,8 +711,7 @@ function replaceFrame(frame) {
   var url = DOMPurify.sanitize(frame.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   // Replace old YouTube embeds
   if (url.includes('youtube.com/v/')) {
-    var regex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/
-    var youtubeID = url.match(regex)[1]
+    var youtubeID = url.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     console.log('[NoPlugin] Replaced frame embed for ' + url)
   }
@@ -785,7 +810,7 @@ function loadDOM() {
       'embed[src$=".flv"]'
     ]
     objectList = objectList.concat(flashObjectList)
-    embedList = embedList.concat(flashObjectList)
+    embedList = embedList.concat(flashEmbedList)
   }
   // Replace objects
   var objects = objectList.toString()
