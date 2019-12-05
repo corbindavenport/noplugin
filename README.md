@@ -11,8 +11,8 @@ NoPlugin searches webpages for embedded plugin objects, and converts them to HTM
 **New in NoPlugin 6.1:**
 
 - Add support for Vimeo Flash embeds
-- Fixed bug that caused Flash-based YouTube embeds to not work
-- Fixed bug that caused some Flash embed tags to not be detected
+- Fixed bug that broke Flash-based YouTube embeds
+- Fixed bug that caused Flash `<embed>` tags to not be detected
  
 ---------------------------------------------------------
 
