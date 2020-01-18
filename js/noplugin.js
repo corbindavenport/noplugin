@@ -344,14 +344,15 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 }
 
 // Replace plugin embeds with native players
-function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
-  if (url == null) {
+function injectPlayer(object, media, mediaUrl) {
+  console.log(mediaUrl)
+  if ((mediaUrl === '') || (mediaUrl === null)) {
     // There is a URL error
     var container = document.createElement('div')
-    container.setAttribute('class', 'noplugin ' + cssclass)
-    container.id = id
+    container.setAttribute('class', 'noplugin ' + media.cssClass)
+    container.id = media.id
     container.align = 'center'
-    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
     // Create text content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
@@ -360,42 +361,42 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.includes('youtube.com/v/')) {
+    console.log('[NoPlugin] Replaced plugin embed but could not detect URL:', media)
+  } else if (mediaUrl.includes('youtube.com/v/')) {
     // Old Flash-based YouTube embed
     var frame = document.createElement('iframe')
-    frame.setAttribute('class', cssclass)
-    frame.id = id
-    frame.setAttribute('style', 'border: 0; width:' + width + 'px; height:' + height + 'px;')
+    frame.setAttribute('class', media.cssClass)
+    frame.id = media.id
+    frame.setAttribute('style', 'style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
     // Parse video ID and replace object
-    var youtubeID = url.match(youtubeRegex)[1]
+    var youtubeID = mediaUrl.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     object.parentNode.replaceChild(frame, object)
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.includes('vimeo.com/moogaloop.swf')) {
+    console.log('[NoPlugin] Replaced YouTube embed:', media)
+  } else if (mediaUrl.includes('vimeo.com/moogaloop.swf')) {
     // Old Flash-based Vimeo embed
     var frame = document.createElement('iframe')
-    frame.setAttribute('class', cssclass)
-    frame.id = id
-    frame.setAttribute('style', 'border: 0; width:' + width + 'px; height:' + height + 'px;')
+    frame.setAttribute('class', media.cssClass)
+    frame.id = media.id
+    frame.setAttribute('style', 'style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
     // Parse video ID and replace object
-    var vimeoID = url.split('clip_id=').pop().split('&')[0];
+    var vimeoID = mediaUrl.split('clip_id=').pop().split('&')[0]
     frame.setAttribute('src', 'https://player.vimeo.com/video/' + vimeoID)
     object.parentNode.replaceChild(frame, object)
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.includes('mms://') || url.includes('rtsp://') || url.endsWith('.ram') || streamDetectRegex.test(url)) {
+    console.log('[NoPlugin] Replaced Vimeo embed:', media)
+  } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
     var container = document.createElement('div')
-    container.setAttribute('class', 'noplugin ' + cssclass)
-    container.id = id
+    container.setAttribute('class', 'noplugin ' + media.cssClass)
+    container.id = media.id
     container.align = 'center'
-    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
     // Create text content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
-    if (url.endsWith('.ram')) {
+    if (mediaUrl.endsWith('.ram')) {
       content.innerHTML = 'This page is trying to load a RealPlayer stream here. You will need <a href="http://www.oldversion.com/windows/realplayer-16-0-0-282" target="_blank">RealPlayer</a> to open this file.'
     } else {
       content.textContent = 'This page is trying to load a video/audio stream here. You might be able to play this with a media player.'
@@ -404,7 +405,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Create play button
     var playStreamButton = document.createElement('button')
     playStreamButton.type = 'button'
-    playStreamButton.setAttribute('data-url', url)
+    playStreamButton.setAttribute('data-url', mediaUrl)
     playStreamButton.textContent = 'Open stream'
     content.appendChild(playStreamButton)
     // Write container to page
@@ -412,17 +413,17 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     object.parentNode.replaceChild(container, object)
     // Create eventListener for button
     playStreamButton.addEventListener('click', function () {
-      openInPlayer(url)
+      openInPlayer(mediaUrl)
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.includes('.swf')) {
+    console.log('[NoPlugin] Replaced playlist embed:', media)
+  } else if (mediaUrl.includes('.swf')) {
     // This is a Flash Player file
     var container = document.createElement('div')
-    container.setAttribute('class', 'noplugin ' + cssclass)
-    container.id = id
+    container.setAttribute('class', 'noplugin ' + media.cssClass)
+    container.id = media.id
     container.align = 'center'
-    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
     // Create text content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
@@ -431,7 +432,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Create play button
     var playStreamButton = document.createElement('button')
     playStreamButton.type = 'button'
-    playStreamButton.setAttribute('data-url', url)
+    playStreamButton.setAttribute('data-url', mediaUrl)
     playStreamButton.textContent = 'Open media'
     content.appendChild(playStreamButton)
     // Write container to page
@@ -439,21 +440,21 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     object.parentNode.replaceChild(container, object)
     // Create eventListener for button
     playStreamButton.addEventListener('click', function () {
-      openInFlash(url)
+      openInFlash(mediaUrl)
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
-  } else if (url.endsWith('.asx') || url.endsWith('.wpl') || url.endsWith('.qtl') || url.endsWith('.m3u')) {
+    console.log('[NoPlugin] Replaced Flash embed:', media)
+  } else if (mediaUrl.endsWith('.asx') || mediaUrl.endsWith('.wpl') || mediaUrl.endsWith('.qtl') || mediaUrl.endsWith('.m3u')) {
     // This is a playlist file
     try {
-      var mediaArray = parsePlaylist(url)
+      var mediaArray = parsePlaylist(mediaUrl)
     } catch (error) {
       // If the file is invalid/couldn't be reached, display an error
       var container = document.createElement('div')
-      container.setAttribute('class', 'noplugin ' + cssclass)
-      container.id = id
+      container.setAttribute('class', 'noplugin ' + media.cssClass)
+      container.id = media.id
       container.align = 'center'
-      container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+      container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
       // Create text content
       var content = document.createElement('div')
       content.className = 'noplugin-content'
@@ -462,17 +463,17 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       container.appendChild(content)
       object.parentNode.replaceChild(container, object)
       // Add message to console
-      console.error('[NoPlugin] Error replacing plugin embed for ' + url + ':', error)
+      console.error('[NoPlugin] Error replacing playlist embed for ' + mediaUrl + ':', error)
     }
     if (mediaArray.length === 1) {
       // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
-      injectPlayer(object, id, mediaArray[0], width, height, cssclass, cssstyles)
+      injectPlayer(object, media, mediaArray[0])
     } else {
       var container = document.createElement('div')
-      container.setAttribute('class', 'noplugin ' + cssclass)
-      container.id = id
+      container.setAttribute('class', 'noplugin ' + media.cssClass)
+      container.id = media.id
       container.align = 'center'
-      container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+      container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
       // Create text content
       var content = document.createElement('div')
       content.className = 'noplugin-content'
@@ -481,10 +482,10 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       // Create play button
       var playPlaylistButton = document.createElement('button')
       playPlaylistButton.type = 'button'
-      playPlaylistButton.setAttribute('data-url', url)
+      playPlaylistButton.setAttribute('data-url', mediaUrl)
       playPlaylistButton.textContent = 'Open playlist'
       playPlaylistButton.addEventListener('click', function () {
-        openInPlayer(url)
+        openInPlayer(mediaUrl)
       })
       content.appendChild(playPlaylistButton)
       content.appendChild(document.createElement('br'))
@@ -508,31 +509,31 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       container.appendChild(content)
       object.parentNode.replaceChild(container, object)
       // Add message to console
-      console.log('[NoPlugin] Replaced plugin embed for ' + url)
+      console.log('[NoPlugin] Replaced plugin embed:', media)
     }
-  } else if ((url.endsWith('.mp3')) || (url.endsWith('.m4a')) || (url.endsWith('.wav'))) {
+  } else if ((mediaUrl.endsWith('.mp3')) || (mediaUrl.endsWith('.m4a')) || (mediaUrl.endsWith('.wav'))) {
     // This is an audio file
     var mediaPlayer = document.createElement('audio')
     mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
-    mediaPlayer.id = id
+    mediaPlayer.id = media.id
     mediaPlayer.controls = true
     mediaPlayer.name = name
-    mediaPlayer.setAttribute('style', cssstyles + ' width:' + width + 'px !important; height:' + height + 'px !important;')
+    mediaPlayer.setAttribute('style', media.cssStyles + ' width:' + media.width + 'px !important; height:' + media.height + 'px !important;')
     // Add source to audio player
     var source = document.createElement('source')
-    source.src = url
+    source.src = mediaUrl
     mediaPlayer.appendChild(source)
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
+    console.log('[NoPlugin] Replaced audio embed:', media)
   } else {
     // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
     var container = document.createElement('div')
-    container.setAttribute('class', 'noplugin ' + cssclass)
-    container.id = id
+    container.setAttribute('class', 'noplugin ' + media.cssClass)
+    container.id = media.id
     container.align = 'center'
-    container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
+    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
     // Create text content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
@@ -541,22 +542,21 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
     // Create play button
     var playMediaButton = document.createElement('button')
     playMediaButton.type = 'button'
-    playMediaButton.setAttribute('data-url', url)
+    playMediaButton.setAttribute('data-url', mediaUrl)
     playMediaButton.textContent = 'Play media file'
     content.appendChild(playMediaButton)
     // Create video player
     var mediaPlayer = document.createElement('video')
     mediaPlayer.controls = true
-    mediaPlayer.setAttribute('class', 'noplugin ' + cssclass)
-    mediaPlayer.id = id
-    mediaPlayer.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
-    mediaPlayer.setAttribute('autopictureinpicture', 'true')
+    mediaPlayer.setAttribute('class', 'noplugin ' + media.cssClass)
+    mediaPlayer.id = media.id
+    mediaPlayer.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
     // Add source to video player
     var source = document.createElement('source')
-    source.src = url
+    source.src = mediaUrl
     source.addEventListener('error', function (event) {
       if (event.type === 'error') {
-        playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
+        playbackError(mediaPlayer, media.id, mediaUrl, media.width, media.height, media.cssClass, media.cssStyles)
       }
     })
     // Write container to page
@@ -571,7 +571,7 @@ function injectPlayer(object, id, url, width, height, cssclass, cssstyles) {
       mediaPlayer.play()
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed for ' + url)
+    console.log('[NoPlugin] Replaced plugin embed:', media)
   }
 }
 
@@ -639,7 +639,16 @@ function replaceEmbed(object) {
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
     url = url + '?' + flashVars
   }
-  injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  //injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  injectPlayer(object, {
+    id: id,
+    links: [url],
+    width: width,
+    height: height,
+    cssClass: cssclass,
+    cssStyles: cssstyles,
+    name: name
+  }, url)
   injectHelp()
 }
 
@@ -718,7 +727,16 @@ function replaceObject(object) {
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
     url = url + '?' + flashVars
   }
-  injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  //injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  injectPlayer(object, {
+    id: id,
+    links: [url],
+    width: width,
+    height: height,
+    cssClass: cssclass,
+    cssStyles: cssstyles,
+    name: name
+  }, url)
   injectHelp()
 }
 
