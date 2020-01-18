@@ -633,7 +633,13 @@ function replaceEmbed(object) {
   } else {
     var name = ''
   }
-  injectPlayer(object, id, url, width, height, cssclass, cssstyles)
+  // Add Flash variables to end of URL if they exist
+  if (object.hasAttribute('FlashVars')) {
+    var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
+    url = url + '?' + flashVars
+  }
+  injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
   injectHelp()
 }
 
@@ -701,6 +707,16 @@ function replaceObject(object) {
     var name = DOMPurify.sanitize(object.getAttribute('name'), { ALLOW_UNKNOWN_PROTOCOLS: true })
   } else {
     var name = ''
+  }
+  // Add Flash variables to end of URL if they exist
+  if (object.hasAttribute('FlashVars')) {
+    var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
+    url = url + '?' + flashVars
+  } else if (object.querySelector('param[name="FLASHVARS" i]')) {
+    var flashVars = DOMPurify.sanitize(object.querySelector('param[name="FLASHVARS" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+    flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
+    url = url + '?' + flashVars
   }
   injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
   injectHelp()
