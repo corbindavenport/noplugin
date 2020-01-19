@@ -345,7 +345,6 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 
 // Replace plugin embeds with native players
 function injectPlayer(object, media, mediaUrl) {
-  console.log(mediaUrl)
   if ((mediaUrl === '') || (mediaUrl === null)) {
     // There is a URL error
     var container = document.createElement('div')
@@ -577,26 +576,25 @@ function injectPlayer(object, media, mediaUrl) {
 
 // Parse <embed> tag attributes and pass data to injectPlayer()
 function replaceEmbed(object) {
-  // Create ID for player
-  var id = String(Math.floor((Math.random() * 1000000) + 1))
-  // Find video source of object
+  // Find video sources
+  var links = []
   if (object.hasAttribute('qtsrc')) {
     // <object qtsrc="url"></object>
     var url = DOMPurify.sanitize(object.getAttribute('qtsrc'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.hasAttribute('href')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.hasAttribute('href')) {
     // <object href="url"></object>
     var url = DOMPurify.sanitize(object.getAttribute('href'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.hasAttribute('src')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.hasAttribute('src')) {
     // <object src="url"></object>
     var url = DOMPurify.sanitize(object.getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else {
-    var url = null
-  }
-  if ((url != null) && (url != undefined)) {
-    // Sanitize URL
-    url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
-    // Get exact URL
     url = getFullURL(url)
+    links.push(url)
   }
   // Find attributes of object
   if (object.hasAttribute('width')) {
@@ -633,54 +631,68 @@ function replaceEmbed(object) {
   } else {
     var name = ''
   }
-  // Add Flash variables to end of URL if they exist
+  // Add Flash variables to end of URLs
   if (object.hasAttribute('FlashVars')) {
     var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
-    url = url + '?' + flashVars
+    links.forEach(function (link) {
+      link = link + '?' + flashVars
+    })
   }
-  //injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  // Remove duplicate URLs
+  links = [...new Set(links)]
+  // Inject the player
   injectPlayer(object, {
     id: id,
-    links: [url],
+    links: links,
     width: width,
     height: height,
     cssClass: cssclass,
     cssStyles: cssstyles,
     name: name
-  }, url)
+  }, links[0])
   injectHelp()
 }
 
 // Parse <object> tag attributes and pass data to injectPlayer()
 function replaceObject(object) {
-  // Find video source of object
+  // Find video sources
+  var links = []
   if (object.hasAttribute('data')) {
     // <object data="url"></object>
     var url = DOMPurify.sanitize(object.getAttribute('data'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.querySelector('param[name="MOVIE" i]')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.querySelector('param[name="MOVIE" i]')) {
     // <object><param name="movie" value="url"></object>
     var url = DOMPurify.sanitize(object.querySelector('param[name="MOVIE" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.querySelector('param[name="HREF" i]')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.querySelector('param[name="HREF" i]')) {
     // <object><param name="href" value="url"></object>
     var url = DOMPurify.sanitize(object.querySelector('param[name="HREF" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.querySelector('param[name="SRC" i]')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.querySelector('param[name="SRC" i]')) {
     // <object><param name="src" value="url"></object>
     var url = DOMPurify.sanitize(object.querySelector('param[name="SRC" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.querySelector('embed').getAttribute('src')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.querySelector('embed') && object.querySelector('embed').getAttribute('src')) {
     // <object><embed src="url"></object>
     var url = DOMPurify.sanitize(object.querySelector('embed').getAttribute('src'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else if (object.querySelector('embed').getAttribute('target')) {
+    url = getFullURL(url)
+    links.push(url)
+  }
+  if (object.querySelector('embed') && object.querySelector('embed').getAttribute('target')) {
     // <object><embed target="url"></object>
     var url = DOMPurify.sanitize(object.querySelector('embed').getAttribute('target'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-  } else {
-    var url = null
-  }
-  if ((url != null) && (url != undefined)) {
-    // Sanitize URL
-    url = DOMPurify.sanitize(url, { ALLOW_UNKNOWN_PROTOCOLS: true })
-    // Get exact URL
     url = getFullURL(url)
+    links.push(url)
   }
   // Find attributes of object
   if (object.hasAttribute('width')) {
@@ -717,26 +729,32 @@ function replaceObject(object) {
   } else {
     var name = ''
   }
-  // Add Flash variables to end of URL if they exist
+  // Add Flash variables to end of URLs
   if (object.hasAttribute('FlashVars')) {
     var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
-    url = url + '?' + flashVars
+    links.forEach(function (link) {
+      link = link + '?' + flashVars
+    })
   } else if (object.querySelector('param[name="FLASHVARS" i]')) {
     var flashVars = DOMPurify.sanitize(object.querySelector('param[name="FLASHVARS" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
-    url = url + '?' + flashVars
+    links.forEach(function (link) {
+      link = link + '?' + flashVars
+    })
   }
-  //injectPlayer(object, id, url, width, height, cssclass, cssstyles, name)
+  // Remove duplicate URLs
+  links = [...new Set(links)]
+  // Inject the player
   injectPlayer(object, {
     id: id,
-    links: [url],
+    links: links,
     width: width,
     height: height,
     cssClass: cssclass,
     cssStyles: cssstyles,
     name: name
-  }, url)
+  }, links[0])
   injectHelp()
 }
 
