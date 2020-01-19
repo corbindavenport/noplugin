@@ -346,21 +346,8 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 // Replace plugin embeds with native players
 function injectPlayer(object, media, mediaUrl) {
   if ((mediaUrl === '') || (mediaUrl === null)) {
-    // There is a URL error
-    var container = document.createElement('div')
-    container.setAttribute('class', 'noplugin ' + media.cssClass)
-    container.id = media.id
-    container.align = 'center'
-    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
-    // Create text content
-    var content = document.createElement('div')
-    content.className = 'noplugin-content'
-    content.textContent = 'This page is trying to load plugin content here, but NoPlugin could not detect the media address.'
-    // Write container to page
-    container.appendChild(content)
-    object.parentNode.replaceChild(container, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed but could not detect URL:', media)
+    // Silently fail
+    return
   } else if (mediaUrl.includes('youtube.com/v/')) {
     // Old Flash-based YouTube embed
     var frame = document.createElement('iframe')
@@ -631,6 +618,10 @@ function replaceEmbed(object) {
   } else {
     var name = ''
   }
+  // Remove duplicate URLs
+  links = [...new Set(links)]
+  // Remove blacklisted URLs
+  links = links.filter(link => !globalEmbedBlockList.test(link))
   // Add Flash variables to end of URLs
   if (object.hasAttribute('FlashVars')) {
     var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
@@ -639,9 +630,12 @@ function replaceEmbed(object) {
       link = link + '?' + flashVars
     })
   }
-  // Remove duplicate URLs
-  links = [...new Set(links)]
+  // Inject help if there are any valid links
+  if (links < 0) {
+    injectHelp()
+  }
   // Inject the player
+  var mainLink = links[0] || null
   injectPlayer(object, {
     id: id,
     links: links,
@@ -650,8 +644,7 @@ function replaceEmbed(object) {
     cssClass: cssclass,
     cssStyles: cssstyles,
     name: name
-  }, links[0])
-  injectHelp()
+  }, mainLink)
 }
 
 // Parse <object> tag attributes and pass data to injectPlayer()
@@ -729,6 +722,10 @@ function replaceObject(object) {
   } else {
     var name = ''
   }
+  // Remove duplicate URLs
+  links = [...new Set(links)]
+  // Remove blacklisted URLs
+  links = links.filter(link => !globalEmbedBlockList.test(link))
   // Add Flash variables to end of URLs
   if (object.hasAttribute('FlashVars')) {
     var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
@@ -743,9 +740,12 @@ function replaceObject(object) {
       link = link + '?' + flashVars
     })
   }
-  // Remove duplicate URLs
-  links = [...new Set(links)]
+  // Inject help if there are any valid links
+  if (links < 0) {
+    injectHelp()
+  }
   // Inject the player
+  var mainLink = links[0] || null
   injectPlayer(object, {
     id: id,
     links: links,
@@ -754,8 +754,7 @@ function replaceObject(object) {
     cssClass: cssclass,
     cssStyles: cssstyles,
     name: name
-  }, links[0])
-  injectHelp()
+  }, mainLink)
 }
 
 // Replace URLs for specific <frame> and <iframe> embeds
@@ -882,5 +881,9 @@ function loadDOM() {
 }
 
 // Initialize NoPlugin on page load
-console.log('[NoPlugin] Searching for plugin objects...')
-loadDOM()
+if (globalSiteBlockList.test(document.location)) {
+  console.log('[NoPlugin] This page is blacklisted, so no plugin objects will be scanned.')
+} else {
+  console.log('[NoPlugin] Searching for plugin objects...')
+  loadDOM()
+}
