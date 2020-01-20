@@ -638,8 +638,8 @@ function replaceEmbed(object) {
   if (object.hasAttribute('FlashVars')) {
     var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
-    links.forEach(function (link) {
-      link = link + '?' + flashVars
+    links.forEach(function (link, i) {
+      links[i] = link + '?' + flashVars
     })
   }
   // Inject help if there are any valid links
@@ -742,14 +742,14 @@ function replaceObject(object) {
   if (object.hasAttribute('FlashVars')) {
     var flashVars = DOMPurify.sanitize(object.getAttribute('FlashVars'), { ALLOW_UNKNOWN_PROTOCOLS: true })
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
-    links.forEach(function (link) {
-      link = link + '?' + flashVars
+    links.forEach(function (link, i) {
+      links[i] = link + '?' + flashVars
     })
   } else if (object.querySelector('param[name="FLASHVARS" i]')) {
     var flashVars = DOMPurify.sanitize(object.querySelector('param[name="FLASHVARS" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
     flashVars = flashVars.replace(/&amp;/g, '&') // Fix DOMPurify breaking & characters
-    links.forEach(function (link) {
-      link = link + '?' + flashVars
+    links.forEach(function (link, i) {
+      links[i] = link + '?' + flashVars
     })
   }
   // Inject help if there are any valid links
