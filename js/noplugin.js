@@ -353,7 +353,7 @@ function injectPlayer(object, media, mediaUrl) {
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
-    frame.setAttribute('style', 'style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
+    frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
     // Parse video ID and replace object
     var youtubeID = mediaUrl.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
@@ -365,13 +365,25 @@ function injectPlayer(object, media, mediaUrl) {
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
-    frame.setAttribute('style', 'style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
+    frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
     // Parse video ID and replace object
     var vimeoID = mediaUrl.split('clip_id=').pop().split('&')[0]
     frame.setAttribute('src', 'https://player.vimeo.com/video/' + vimeoID)
     object.parentNode.replaceChild(frame, object)
     // Add message to console
     console.log('[NoPlugin] Replaced Vimeo embed:', media)
+  } else if (mediaUrl.includes('viddler.com/simple')) {
+    // Old Flash-based Viddler embed
+    var frame = document.createElement('iframe')
+    frame.setAttribute('class', media.cssClass)
+    frame.id = media.id
+    frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
+    // Parse video ID and replace object
+    var viddlerID = mediaUrl.split('simple/').pop().split('/')[0]
+    frame.setAttribute('src', 'https://www.viddler.com/embed/' + viddlerID)
+    object.parentNode.replaceChild(frame, object)
+    // Add message to console
+    console.log('[NoPlugin] Replaced Viddler embed:', media)
   } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
     var container = document.createElement('div')
