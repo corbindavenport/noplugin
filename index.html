@@ -56,8 +56,7 @@
         </p>
         <p>Here's another video, this time using the Windows Media Player plugin. NoPlugin can't play this in modern browsers.</p>
         <p>
-          <object id="mediaplayer" classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95" codebase="http://activex.microsoft.com/activex/controls/mplayer/en/nsmp2inf.cab#version=5,1,52,701"
-            standby="loading microsoft windows media player components..." type="application/x-oleobject" width="320" height="180">
+          <object id="mediaplayer" classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95" codebase="http://activex.microsoft.com/activex/controls/mplayer/en/nsmp2inf.cab#version=5,1,52,701" standby="loading microsoft windows media player components..." type="application/x-oleobject" width="320" height="180">
             <param name="filename" value="sample.wmv">
             <param name="animationatstart" value="true">
             <param name="transparentatstart" value="true">
@@ -68,26 +67,36 @@
             <embed src="sample.wmv" autostart="true" showcontrols="true" showstatusbar="1" bgcolor="white" width="320" height="180">
           </object>
         </p>
-        <p>Here are two Flash-based YouTube players. NoPlugin can convert these to modern iFrame embeds.</p>
+        <p>Here's a Flash-based YouTube player. NoPlugin can convert these to modern iFrame embeds.</p>
         <p>
           <object width="320" height="180">
-            <param name="movie" value="https://www.youtube.com/v/NmMMHuzDtG0"></param>
-            <param name="allowScriptAccess" value="always"></param>
-            <embed src="https://www.youtube.com/v/NmMMHuzDtG0" type="application/x-shockwave-flash" allowscriptaccess="always" width="320"
-              height="180"></embed>
+            <param name="movie" value="https://www.youtube.com/v/NmMMHuzDtG0">
+            </param>
+            <param name="allowScriptAccess" value="always">
+            </param>
+            <embed src="https://www.youtube.com/v/NmMMHuzDtG0" type="application/x-shockwave-flash" allowscriptaccess="always" width="320" height="180"></embed>
           </object>
         </p>
         <p>
           <iframe width="350" height="150" src="https://www.youtube.com/v/NmMMHuzDtG0"></iframe>
         </p>
         <p>Here's a Flash-based Vimeo player.</p>
-        <p><object width="WIDTH" height="HEIGHT">   
-            <param name="allowfullscreen" value="true" /> 
+        <p><object width="WIDTH" height="HEIGHT">
+            <param name="allowfullscreen" value="true" />
             <param name="allowscriptaccess" value="always" />
-            <param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=CLIPID&amp;server=vimeo.com&amp;color=00adef&amp;fullscreen=1" />   
+            <param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=CLIPID&amp;server=vimeo.com&amp;color=00adef&amp;fullscreen=1" />
 
-        <embed src="http://vimeo.com/moogaloop.swf?clip_id=76979871&amp;server=vimeo.com&amp;color=00adef&amp;fullscreen=1"
-               type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="WIDTH" height="HEIGHT"></embed>
+            <embed src="http://vimeo.com/moogaloop.swf?clip_id=76979871&amp;server=vimeo.com&amp;color=00adef&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="WIDTH" height="HEIGHT"></embed>
+          </object>
+        </p>
+        <p>Here's a Flash-based Twitch player:</p>
+        <p>
+          <object data="//www-cdn.jtvnw.net/swflibs/TwitchPlayer.swf" height="378" type="application/x-shockwave-flash" width="620">
+            <param name="allowFullScreen" value="true" />
+            <param name="allowNetworking" value="all" />
+            <param name="allowScriptAccess" value="always" />
+            <param name="movie" value="//www-cdn.jtvnw.net/swflibs/TwitchPlayer.swf" />
+            <param name="flashvars" value="channel=androidpolice&auto_play=true" />
           </object>
         </p>
         <h2>Sample audio</h2>
@@ -103,22 +112,19 @@
         </p>
         <p>Here's an RTSP media stream, normally only playable with plugins. NoPlugin can open the URL in your computer's media
           player. Test stream provided by <a href="https://www.wowza.com/demo/rtsp" target="_blank">Wowza</a>.</p>
-        <OBJECT classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921" codebase="http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab"
-          width="350" height="150" id="vlc" events="True">
+        <OBJECT classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921" codebase="http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab" width="350" height="150" id="vlc" events="True">
           <param name="Src" value="rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov" />
           <param name="ShowDisplay" value="True" />
           <param name="AutoLoop" value="False" />
           <param name="AutoPlay" value="True" />
-          <embed id="vlcEmb" type="application/x-google-vlc-plugin" version="VideoLAN.VLCPlugin.2" autoplay="yes" loop="no" width="350"
-            height="150" target="rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"></embed>
+          <embed id="vlcEmb" type="application/x-google-vlc-plugin" version="VideoLAN.VLCPlugin.2" autoplay="yes" loop="no" width="350" height="150" target="rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov"></embed>
         </OBJECT>
       </div>
       <div class="col-md-4">
         <h2>Donate</h2>
         <p>If you find NoPlugin useful, please donate to support continued development. It would mean a lot!</p>
         <p>
-          <a class="btn btn-warning" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=Peek%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted"
-            target="_blank" role="button">Donate via PayPal</a>
+          <a class="btn btn-warning" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4SZVSMJKDS35J&lc=US&item_name=Peek%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank" role="button">Donate via PayPal</a>
         </p>
         <h2>Having issues?</h2>
         <p>If you find a bug, or have a suggestion for a new feature, please create an issue at
