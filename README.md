@@ -11,6 +11,7 @@ NoPlugin searches webpages for embedded plugin objects and converts them to HTML
 **New in NoPlugin 6.2:**
 
 - Add support for Flash-based Viddler embedded videos (#71)
+- Add support for Flash-based Twitch.tv embedded videos
 - Flash variables are now passed to the Flash Projector application (#68, #76)
 - Added a blocklist to prevent NoPlugin from loading Flash-based trackers (#66)
 - Fixed bugs

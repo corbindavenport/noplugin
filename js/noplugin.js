@@ -360,6 +360,23 @@ function injectPlayer(object, media, mediaUrl) {
     object.parentNode.replaceChild(frame, object)
     // Add message to console
     console.log('[NoPlugin] Replaced YouTube embed:', media)
+  } else if (mediaUrl.includes('TwitchPlayer.swf')) {
+    // Old Flash-based Twitch embed
+    var frame = document.createElement('iframe')
+    frame.setAttribute('class', media.cssClass)
+    frame.id = media.id
+    frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
+    // Parse video ID and replace object
+    if (object.querySelector('param[name="FLASHVARS" i]')) {
+      var flashVars = DOMPurify.sanitize(object.querySelector('param[name="FLASHVARS" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
+      var channelName = flashVars.split('channel=').pop().split('&')[0]
+    } else {
+      return
+    }
+    frame.setAttribute('src', 'https://player.twitch.tv/?channel=' + channelName)
+    object.parentNode.replaceChild(frame, object)
+    // Add message to console
+    console.log('[NoPlugin] Replaced Twitch.tv embed:', media)
   } else if (mediaUrl.includes('vimeo.com/moogaloop.swf')) {
     // Old Flash-based Vimeo embed
     var frame = document.createElement('iframe')
