@@ -41,6 +41,16 @@ function getFullURL(url) {
   return url
 }
 
+// Function for checking if a given object/embed is being used as an HTML5 fallback (e.g. inside a <video> element)
+function isFallback(object) {
+  var fallback = ((object.parentNode.nodeName === 'VIDEO') || object.parentNode.nodeName === 'AUDIO')
+  if (fallback) {
+    return true
+  } else {
+    return false
+  }
+}
+
 // Function for placing popup windows roughly in the center of the screen
 function createPopup(url) {
   // Set popup dimensions
@@ -592,6 +602,11 @@ function injectPlayer(object, media, mediaUrl) {
 
 // Parse <embed> tag attributes and pass data to injectPlayer()
 function replaceEmbed(object) {
+  // Skip element if it is being used as a fallback for an HTML5 player
+  if (isFallback(object)) {
+    console.log('[NoPlugin] skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    return
+  }
   // Find video sources
   var links = []
   if (object.hasAttribute('qtsrc')) {
@@ -678,6 +693,11 @@ function replaceEmbed(object) {
 
 // Parse <object> tag attributes and pass data to injectPlayer()
 function replaceObject(object) {
+  // Skip element if it is being used as a fallback for an HTML5 player
+  if (isFallback(object)) {
+    console.log('[NoPlugin] skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    return
+  }
   // Find video sources
   var links = []
   if (object.hasAttribute('data')) {
