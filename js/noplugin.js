@@ -201,7 +201,7 @@ function parsePlaylist(url) {
       // Advanced Stream Redirector (ASX) files are in XML format
       // Documentation: http://www.streamalot.com/playlists.shtml
       var asx = document.createElement('div')
-      asx.innerHTML = xhr.responseText
+      asx.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
       if (asx.querySelectorAll('ref').length === 0) {
         throw new Error('No <ref> tags found in ASX playlist file')
@@ -228,7 +228,7 @@ function parsePlaylist(url) {
       // Windows Media Player Playlist files are in XML format
       // Documentation: https://en.wikipedia.org/wiki/Windows_Media_Player_Playlist
       var wpl = document.createElement('div')
-      wpl.innerHTML = xhr.responseText
+      wpl.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
       if (asx.querySelectorAll('media').length === 0) {
         throw new Error('No <media> tags found in WPL playlist file')
@@ -255,7 +255,7 @@ function parsePlaylist(url) {
       // QuickTime Link files are in XML format
       // Documentation: https://stackoverflow.com/a/25399903/2255592 and http://www.streamalot.com/playlists.shtml
       var qtl = document.createElement('div')
-      qtl.innerHTML = xhr.responseText
+      qtl.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
       if (qtl.querySelectorAll('embed').length === 0) {
         throw new Error('No <embed> tags found in QTL playlist file')
@@ -604,7 +604,7 @@ function injectPlayer(object, media, mediaUrl) {
 function replaceEmbed(object) {
   // Skip element if it is being used as a fallback for an HTML5 player
   if (isFallback(object)) {
-    console.log('[NoPlugin] skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    console.log('[NoPlugin] Skipping embed because it seems to be a fallback for an HTML5 player:', object)
     return
   }
   // Find video sources
@@ -695,7 +695,7 @@ function replaceEmbed(object) {
 function replaceObject(object) {
   // Skip element if it is being used as a fallback for an HTML5 player
   if (isFallback(object)) {
-    console.log('[NoPlugin] skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    console.log('[NoPlugin] Skipping embed because it seems to be a fallback for an HTML5 player:', object)
     return
   }
   // Find video sources
