@@ -1,6 +1,7 @@
 {
 	"manifest_version": 2,
-	"name": "NoPlugin",
+	"name": "NoPlugin - Play Flash, QuickTime, Windows Media, and more",
+	"short_name": "NoPlugin",
 	"version": "6.2",
 	"author": "Corbin Davenport",
 	"description": "Play legacy media in modern browsers without plugins.",
