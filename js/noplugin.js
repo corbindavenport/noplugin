@@ -376,17 +376,56 @@ function injectPlayer(object, media, mediaUrl) {
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
     frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
-    // Parse video ID and replace object
+    // Parse video information
     if (object.querySelector('param[name="FLASHVARS" i]')) {
+      // Convert flashvars into JSON
       var flashVars = DOMPurify.sanitize(object.querySelector('param[name="FLASHVARS" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-      var channelName = flashVars.split('channel=').pop().split('&')[0]
+      try {
+        var twitchObj = JSON.parse('{"' + decodeURI(flashVars.replace(/&/g, "\",\"").replace(/=/g, "\":\"")) + '"}')
+      } catch (error) {
+        console.error('[NoPlugin] Could not detect flashVars from Twitch object:', error)
+        return
+      }
+      // Create NoPlugin object
+      var container = document.createElement('div')
+      container.setAttribute('class', 'noplugin ' + media.cssClass)
+      container.id = media.id
+      container.align = 'center'
+      container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
+      // Create text content
+      var content = document.createElement('div')
+      content.className = 'noplugin-content'
+      console.log(twitchObj['title'])
+      if (twitchObj.hasOwnProperty('title')) {
+        // Use title from embed if available
+        content.textContent = 'This page is trying to load "' + decodeURIComponent(twitchObj['title']) + '" from Twitch.tv. It might still be available on the Twitch website.'
+      } else {
+        content.textContent = 'This page is trying to load content from Twitch.tv here. It might still be available on the Twitch website.'
+      }
+      content.appendChild(document.createElement('br'))
+      // Create play button
+      var playStreamButton = document.createElement('button')
+      playStreamButton.type = 'button'
+      playStreamButton.textContent = 'Open on Twitch'
+      content.appendChild(playStreamButton)
+      // Write container to page
+      container.appendChild(content)
+      object.parentNode.replaceChild(container, object)
+      // Create eventListener for button
+      playStreamButton.addEventListener('click', function () {
+        // Detect embed type and replace original element
+        if (twitchObj.hasOwnProperty('videoId')) {
+          window.open('https://twitch.tv/videos/' + twitchObj['videoId'], '_blank')
+        } else if (twitchObj.hasOwnProperty('channel')) {
+          window.open('https://twitch.tv/' + twitchObj['channel'], '_blank')
+        } else {
+          alert('Sorry, NoPlugin could not load the content because the embed code was invalid:\n\n' + flashVars)
+        }
+      })
+      console.log('[NoPlugin] Replaced Twitch.tv embed:', media, twitchObj)
     } else {
       return
     }
-    frame.setAttribute('src', 'https://player.twitch.tv/?channel=' + channelName)
-    object.parentNode.replaceChild(frame, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced Twitch.tv embed:', media)
   } else if (mediaUrl.includes('vimeo.com/moogaloop.swf')) {
     // Old Flash-based Vimeo embed
     var frame = document.createElement('iframe')
