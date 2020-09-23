@@ -151,11 +151,7 @@ function openInPlayer(url) {
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          if (confirm('Last question: does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
-            window.open('market://details?id=org.videolan.vlc', '_blank')
-          } else {
-            window.open('https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en', '_blank')
-          }
+          window.open('market://details?id=org.videolan.vlc', '_blank')
         }
       }
     } else {
@@ -395,7 +391,6 @@ function injectPlayer(object, media, mediaUrl) {
       // Create text content
       var content = document.createElement('div')
       content.className = 'noplugin-content'
-      console.log(twitchObj['title'])
       if (twitchObj.hasOwnProperty('title')) {
         // Use title from embed if available
         content.textContent = 'This page is trying to load "' + decodeURIComponent(twitchObj['title']) + '" from Twitch.tv. It might still be available on the Twitch website.'

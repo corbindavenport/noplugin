@@ -1,15 +1,19 @@
-chrome.runtime.onInstalled.addListener(function () {
-  if (localStorage.getItem('version') != chrome.runtime.getManifest().version) {
+// Welcome page
+chrome.storage.local.get(function (data) {
+  // Show welcome page on new version
+  if (data.version) {
+    if (!(data.version === chrome.runtime.getManifest().version)) {
+      chrome.tabs.create({ 'url': chrome.extension.getURL('welcome.html') })
+      chrome.storage.local.set({
+        version: chrome.runtime.getManifest().version
+      })
+    }
+  } else {
     chrome.tabs.create({ 'url': chrome.extension.getURL('welcome.html') })
-    localStorage['version'] = chrome.runtime.getManifest().version
+    chrome.storage.local.set({
+      version: chrome.runtime.getManifest().version
+    })
   }
-  // Save operating system info to storage to avoid calling getPlatformInfo every time
-  chrome.runtime.getPlatformInfo(function (info) {
-    localStorage['platform'] = info.os
-    // Windows: win
-    // Mac: mac
-    // Chrome OS: cros
-  })
 })
 
 // Keep track of downloads that NoPlugin has already sent notifications for
@@ -17,7 +21,9 @@ var downloadsAlreadyNotified = []
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.method == 'getPlatform') { // Send system info to content script
-    sendResponse(localStorage['platform'])
+    chrome.runtime.getPlatformInfo(function (info) {
+      sendResponse(info.os)
+    })
   } else if (request.method == 'saveVideo') { // Download and open videos that can"t be played in HTML5 player
     var videoID
     var myNotificationID
@@ -93,23 +99,21 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                     chrome.downloads.open(videoID)
                   } else {
                     // Download VLC for user's operating system
-                    if (localStorage['platform'] === 'mac') {
-                      // Mac OS X download
-                      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-macosx.html' })
-                    } else if (localStorage['platform'] === 'win') {
-                      // Windows download
-                      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-windows.html' })
-                    } else if (localStorage['platform'] === 'cros') {
-                      // Chrome OS download
-                      if (confirm('Does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
+                    chrome.runtime.getPlatformInfo(function (info) {
+                      if (info.os === 'mac') {
+                        // Mac OS X download
+                        chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-macosx.html' })
+                      } else if (info.os === 'win') {
+                        // Windows download
+                        chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-windows.html' })
+                      } else if (info.os === 'cros') {
+                        // Chrome OS download
                         chrome.tabs.create({ url: 'market://details?id=org.videolan.vlc' })
                       } else {
-                        chrome.tabs.create({ url: 'https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en' })
+                        // Other downloads
+                        chrome.tabs.create({ url: 'http://www.videolan.org/vlc/#download' })
                       }
-                    } else {
-                      // Other downloads
-                      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/#download' })
-                    }
+                    })
                   }
                 }
               })
