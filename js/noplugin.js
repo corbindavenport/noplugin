@@ -16,6 +16,26 @@ const youtubeRegex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).
 // Regex for detecting livestream links https://regex101.com/r/So4qWf/1
 const streamDetectRegex = /(\:\d{1,}$)|(\/$)/gm
 
+// Function for sending events to Google Analytics
+function sendEvent(eventCategory, eventAction) {
+  return new Promise(async function (resolve) {
+      // Get UUID from storage
+      chrome.storage.local.get(function (data) {
+          var uuid = data.uuid
+          // Send Fetch data
+          fetch('https://www.google-analytics.com/collect', {
+              method: 'POST',
+              body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction)
+          }).then(function (data) {
+              resolve()
+          }).catch(function (err) {
+              console.log('Analytics error:', err)
+              resolve()
+          })
+      })
+  })
+}
+
 // Find the full path of a given URL
 function getFullURL(url) {
   // Fix URLs that start at the site root
@@ -151,11 +171,7 @@ function openInPlayer(url) {
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          if (confirm('Last question: does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
-            window.open('market://details?id=org.videolan.vlc', '_blank')
-          } else {
-            window.open('https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en', '_blank')
-          }
+          window.open('market://details?id=org.videolan.vlc', '_blank')
         }
       }
     } else {
@@ -200,6 +216,7 @@ function parsePlaylist(url) {
     if (url.endsWith('.asx')) {
       // Advanced Stream Redirector (ASX) files are in XML format
       // Documentation: http://www.streamalot.com/playlists.shtml
+      sendEvent('Playlist Load', 'ASX')
       var asx = document.createElement('div')
       asx.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
@@ -227,6 +244,7 @@ function parsePlaylist(url) {
     } else if (url.endsWith('.wpl')) {
       // Windows Media Player Playlist files are in XML format
       // Documentation: https://en.wikipedia.org/wiki/Windows_Media_Player_Playlist
+      sendEvent('Playlist Load', 'WPL')
       var wpl = document.createElement('div')
       wpl.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
@@ -254,6 +272,7 @@ function parsePlaylist(url) {
     } else if (url.endsWith('.qtl')) {
       // QuickTime Link files are in XML format
       // Documentation: https://stackoverflow.com/a/25399903/2255592 and http://www.streamalot.com/playlists.shtml
+      sendEvent('Playlist Load', 'QTL')
       var qtl = document.createElement('div')
       qtl.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
@@ -281,6 +300,7 @@ function parsePlaylist(url) {
     } else if (url.endsWith('.m3u')) {
       // M3U files are just lists with links to files
       // Documentation: https://en.wikipedia.org/wiki/M3U#Examples and http://www.streamalot.com/playlists.shtml
+      sendEvent('Playlist Load', 'M3U')
       var m3u = xhr.responseText.split('\n')
       // Filter out empty lines and comments
       m3u = m3u.filter(s => s.replace(/\s+/g, '').length !== 0)
@@ -360,6 +380,7 @@ function injectPlayer(object, media, mediaUrl) {
     return
   } else if (mediaUrl.includes('youtube.com/v/')) {
     // Old Flash-based YouTube embed
+    sendEvent('Media Load', 'YouTube Flash')
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
@@ -372,23 +393,63 @@ function injectPlayer(object, media, mediaUrl) {
     console.log('[NoPlugin] Replaced YouTube embed:', media)
   } else if (mediaUrl.includes('TwitchPlayer.swf')) {
     // Old Flash-based Twitch embed
+    sendEvent('Media Load', 'Twitch.tv Flash')
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
     frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
-    // Parse video ID and replace object
+    // Parse video information
     if (object.querySelector('param[name="FLASHVARS" i]')) {
+      // Convert flashvars into JSON
       var flashVars = DOMPurify.sanitize(object.querySelector('param[name="FLASHVARS" i]').getAttribute('value'), { ALLOW_UNKNOWN_PROTOCOLS: true })
-      var channelName = flashVars.split('channel=').pop().split('&')[0]
+      try {
+        var twitchObj = JSON.parse('{"' + decodeURI(flashVars.replace(/&/g, "\",\"").replace(/=/g, "\":\"")) + '"}')
+      } catch (error) {
+        console.error('[NoPlugin] Could not detect flashVars from Twitch object:', error)
+        return
+      }
+      // Create NoPlugin object
+      var container = document.createElement('div')
+      container.setAttribute('class', 'noplugin ' + media.cssClass)
+      container.id = media.id
+      container.align = 'center'
+      container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
+      // Create text content
+      var content = document.createElement('div')
+      content.className = 'noplugin-content'
+      if (twitchObj.hasOwnProperty('title')) {
+        // Use title from embed if available
+        content.textContent = 'This page is trying to load "' + decodeURIComponent(twitchObj['title']) + '" from Twitch.tv. It might still be available on the Twitch website.'
+      } else {
+        content.textContent = 'This page is trying to load content from Twitch.tv here. It might still be available on the Twitch website.'
+      }
+      content.appendChild(document.createElement('br'))
+      // Create play button
+      var playStreamButton = document.createElement('button')
+      playStreamButton.type = 'button'
+      playStreamButton.textContent = 'Open on Twitch'
+      content.appendChild(playStreamButton)
+      // Write container to page
+      container.appendChild(content)
+      object.parentNode.replaceChild(container, object)
+      // Create eventListener for button
+      playStreamButton.addEventListener('click', function () {
+        // Detect embed type and replace original element
+        if (twitchObj.hasOwnProperty('videoId')) {
+          window.open('https://twitch.tv/videos/' + twitchObj['videoId'], '_blank')
+        } else if (twitchObj.hasOwnProperty('channel')) {
+          window.open('https://twitch.tv/' + twitchObj['channel'], '_blank')
+        } else {
+          alert('Sorry, NoPlugin could not load the content because the embed code was invalid:\n\n' + flashVars)
+        }
+      })
+      console.log('[NoPlugin] Replaced Twitch.tv embed:', media, twitchObj)
     } else {
       return
     }
-    frame.setAttribute('src', 'https://player.twitch.tv/?channel=' + channelName)
-    object.parentNode.replaceChild(frame, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced Twitch.tv embed:', media)
   } else if (mediaUrl.includes('vimeo.com/moogaloop.swf')) {
     // Old Flash-based Vimeo embed
+    sendEvent('Media Load', 'Vimeo Flash')
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
@@ -413,6 +474,7 @@ function injectPlayer(object, media, mediaUrl) {
     console.log('[NoPlugin] Replaced Viddler embed:', media)
   } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
+    sendEvent('Media Load', 'Misc Stream')
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
@@ -444,6 +506,7 @@ function injectPlayer(object, media, mediaUrl) {
     console.log('[NoPlugin] Replaced playlist embed:', media)
   } else if (mediaUrl.includes('.swf')) {
     // This is a Flash Player file
+    sendEvent('Media Load', 'Misc Flash')
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
@@ -538,6 +601,7 @@ function injectPlayer(object, media, mediaUrl) {
     }
   } else if ((mediaUrl.endsWith('.mp3')) || (mediaUrl.endsWith('.m4a')) || (mediaUrl.endsWith('.wav'))) {
     // This is an audio file
+    sendEvent('Media Load', 'Misc Audio')
     var mediaPlayer = document.createElement('audio')
     mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
     mediaPlayer.id = media.id
@@ -554,6 +618,7 @@ function injectPlayer(object, media, mediaUrl) {
     console.log('[NoPlugin] Replaced audio embed:', media)
   } else {
     // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
+    sendEvent('Media Load', 'Misc Media')
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
