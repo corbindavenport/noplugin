@@ -129,6 +129,7 @@ function injectHelp() {
 }
 
 // Open Adobe Flash content with Flash Projector desktop software
+// TODO: Add Chrome OS support through Linux container
 function openInFlash(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
@@ -143,12 +144,12 @@ function openInFlash(url) {
           prompt('Open Flash Projector on your computer, and paste this in the URL box:', url)
         }
       } else {
-        // Help the user install Flash Projector
-        alert('The download page for Adobe Flash Projector will open in a new tab. Just click the "Download Flash Player projector" link for your platform (Windows, Mac, or Linux).')
-        window.open('https://www.adobe.com/support/flashplayer/debug_downloads.html', '_blank')
+        // Download Flash Projector
+        alert('Adobe Flash Projector will now be downloaded from a mirror by the Internet Archive (archive.org).\n\nThis software is no longer supported by Adobe.')
+        chrome.runtime.sendMessage({ method: 'downloadProjector', key: response })
       }
     } else {
-      alert('Sorry, Adobe has not released Flash Projector for your operating system, so there is no way to play this content on your device. Projector is only availabe for Mac, Windows, and Linux.')
+      alert('Sorry, Adobe has not released Flash Projector for your operating system, so there is no way to play this content on your device. Projector is only available for Mac, Windows, and Linux.')
     }
   })
 }
@@ -157,7 +158,6 @@ function openInFlash(url) {
 function openInPlayer(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
-    console.log(response)
     if ((response === 'win') && url.includes('mms://')) {
       // If on Windows, open MMS streams with Windows Media Player
       alert('Select Windows Media Player on the next pop-up.')

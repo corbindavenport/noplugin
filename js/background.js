@@ -37,7 +37,23 @@ var downloadsAlreadyNotified = []
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.method == 'getPlatform') { // Send system info to content script
     chrome.runtime.getPlatformInfo(function (info) {
-      sendResponse(info.os)
+      sendResponse(info[request.key])
+    })
+  } else if (request.method = 'downloadProjector') {
+    // Set the URL
+    console.log(request.key)
+    var download = ''
+    if (request.key === 'linux') {
+      download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flash_player_sa_linux.x86_64.tar.gz'
+    } else if (request.key === 'mac') {
+      download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.dmg'
+    } else if (request.key === 'windows') {
+      download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe'
+    }
+    chrome.downloads.download({
+      url: download,
+    }, function () {
+      // Woo
     })
   } else if (request.method == 'saveVideo') { // Download and open videos that can"t be played in HTML5 player
     var videoID
@@ -140,4 +156,5 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   } else {
     sendResponse({})
   }
+  return true
 })
