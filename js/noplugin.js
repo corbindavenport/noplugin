@@ -17,7 +17,7 @@ const youtubeRegex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).
 const streamDetectRegex = /(\:\d{1,}$)|(\/$)/gm
 
 // Function for sending events to Google Analytics
-function sendEvent(eventCategory, eventAction) {
+function sendEvent(eventCategory, eventAction, eventLabel='') {
   return new Promise(async function (resolve) {
       // Get UUID from storage
       chrome.storage.local.get(function (data) {
@@ -25,7 +25,7 @@ function sendEvent(eventCategory, eventAction) {
           // Send Fetch data
           fetch('https://www.google-analytics.com/collect', {
               method: 'POST',
-              body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction)
+              body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction) + '&el=' + encodeURIComponent(eventLabel)
           }).then(function (data) {
               resolve()
           }).catch(function (err) {
@@ -59,6 +59,12 @@ function getFullURL(url) {
   url = img.src
   img.src = null
   return url
+}
+
+// Get the file name of a given URL
+function getFileName(url) {
+  // Remove everything before the last slash, and everything after the ? symbol (if it exists)
+  return url.split("?")[0].split('/').pop()
 }
 
 // Function for checking if a given object/embed is being used as an HTML5 fallback (e.g. inside a <video> element)
@@ -491,7 +497,7 @@ function injectPlayer(object, media, mediaUrl) {
     console.log('[NoPlugin] Replaced playlist embed:', media)
   } else if (mediaUrl.includes('.swf')) {
     // This is a Flash Player file
-    sendEvent('Media Load', 'Misc Flash')
+    sendEvent('Media Load', 'Misc Flash', getFileName(mediaUrl))
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
