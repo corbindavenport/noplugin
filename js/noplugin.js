@@ -408,41 +408,26 @@ function injectPlayer(object, media, mediaUrl) {
         console.error('[NoPlugin] Could not detect flashVars from Twitch object:', error)
         return
       }
-      // Create NoPlugin object
-      var container = document.createElement('div')
-      container.setAttribute('class', 'noplugin ' + media.cssClass)
-      container.id = media.id
-      container.align = 'center'
-      container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
-      // Create text content
-      var content = document.createElement('div')
-      content.className = 'noplugin-content'
-      if (twitchObj.hasOwnProperty('title')) {
-        // Use title from embed if available
-        content.textContent = 'This page is trying to load "' + decodeURIComponent(twitchObj['title']) + '" from Twitch.tv. It might still be available on the Twitch website.'
+      // Detect embed type
+      var twitchParent = window.location.hostname
+      if (twitchObj.hasOwnProperty('videoId')) {
+        frame.setAttribute('src', 'https://player.twitch.tv/?video=' + twitchObj['videoId'] + '&parent=' + twitchParent + '&autoplay=false')
+      } else if (twitchObj.hasOwnProperty('channel')) {
+        frame.setAttribute('src', 'https://player.twitch.tv/?channel=' + twitchObj['channel'] + '&parent=' + twitchParent + '&autoplay=false')
       } else {
-        content.textContent = 'This page is trying to load content from Twitch.tv here. It might still be available on the Twitch website.'
+        console.error('[NoPlugin] Could not detect source from Twitch object:', twitchObj)
+        return
       }
-      content.appendChild(document.createElement('br'))
-      // Create play button
-      var playStreamButton = document.createElement('button')
-      playStreamButton.type = 'button'
-      playStreamButton.textContent = 'Open on Twitch'
-      content.appendChild(playStreamButton)
-      // Write container to page
-      container.appendChild(content)
-      object.parentNode.replaceChild(container, object)
-      // Create eventListener for button
-      playStreamButton.addEventListener('click', function () {
-        // Detect embed type and replace original element
-        if (twitchObj.hasOwnProperty('videoId')) {
-          window.open('https://twitch.tv/videos/' + twitchObj['videoId'], '_blank')
-        } else if (twitchObj.hasOwnProperty('channel')) {
-          window.open('https://twitch.tv/' + twitchObj['channel'], '_blank')
-        } else {
-          alert('Sorry, NoPlugin could not load the content because the embed code was invalid:\n\n' + flashVars)
-        }
-      })
+      // Detect content title
+      if (twitchObj.hasOwnProperty('title')) {
+        frame.setAttribute('title', twitchObj['title'])
+      }
+      // Detect starting time
+      if (twitchObj.hasOwnProperty('initial_time')) {
+        frame.setAttribute('src', frame.getAttribute('src') + '&time=' + twitchObj['initial_time'])
+      }
+      // Replace object
+      object.parentNode.replaceChild(frame, object)
       console.log('[NoPlugin] Replaced Twitch.tv embed:', media, twitchObj)
     } else {
       return
