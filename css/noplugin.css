@@ -4,17 +4,10 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
 }
 
-/* CSS reset for buttons */
-
-.noplugin-content button, .noplugin-popup button {
-  line-height: initial !important;
-  color: initial !important;
-  font-size: initial !important;
-}
-
 /* Rest of styles */
 
 .noplugin {
+  font-family: Arial, Helvetica, sans-serif !important;
   overflow: auto !important;
   box-shadow: inset 0px 0px 0px 1px #212121 !important;
   box-sizing: border-box !important;
@@ -37,6 +30,7 @@
   font-style: normal !important;
 }
 .noplugin-content button {
+  font-family: Arial, Helvetica, sans-serif !important;
   line-height: initial !important;
   color: initial !important;
   font-size: 95% !important;
@@ -46,36 +40,18 @@ video.noplugin {
   background: url('chrome-extension://__MSG_@@extension_id__/img/preloader.gif') no-repeat center #616161 !important;
   box-shadow: inset 0px 0px 0px 1px #4e4e4e !important;
 }
-.noplugin-popup {
-  background: #FFF9C4;
-  height: 36px;
-  z-index: 10000000 !important;
-  line-height: 36px;
-  border-bottom: 1px solid #e1e1e2;
-  border-top: 0 !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-  color: #44433c !important;
-  font-size: 16px !important;
-  position: fixed;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  cursor: default !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+
+/* Tippy styles */
+
+.tippy-box[data-theme~='noplugin-tippy-theme'] {
+  font-family: Arial, Helvetica, sans-serif !important;
+  line-height: 30px;
 }
-.noplugin-popup .noplugin-popup-message {
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-  overflow: hidden !important;
-}
-.noplugin-popup #noplugin-broken-button {
-  white-space: nowrap !important;
-  overflow: hidden !important;
+
+.tippy-box[data-theme~='noplugin-tippy-theme'] button {
+  font-family: Arial, Helvetica, sans-serif !important;
+  margin-left: 8px !important;
+  background: #212121 !important;
+  border: 1px solid #44433c !important;
+  border-radius: 5px !important;
 }

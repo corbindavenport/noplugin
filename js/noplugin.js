@@ -17,23 +17,44 @@ const youtubeRegex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).
 const streamDetectRegex = /(\:\d{1,}$)|(\/$)/gm
 
 // Function for sending events to Google Analytics
-function sendEvent(eventCategory, eventAction, eventLabel='') {
+function sendEvent(eventCategory, eventAction, eventLabel = '') {
   return new Promise(async function (resolve) {
-      // Get UUID from storage
-      chrome.storage.local.get(function (data) {
-          var uuid = data.uuid
-          // Send Fetch data
-          fetch('https://www.google-analytics.com/collect', {
-              method: 'POST',
-              body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction) + '&el=' + encodeURIComponent(eventLabel)
-          }).then(function (data) {
-              resolve()
-          }).catch(function (err) {
-              console.log('Analytics error:', err)
-              resolve()
-          })
+    // Get UUID from storage
+    chrome.storage.local.get(function (data) {
+      var uuid = data.uuid
+      // Send Fetch data
+      fetch('https://www.google-analytics.com/collect', {
+        method: 'POST',
+        body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction) + '&el=' + encodeURIComponent(eventLabel)
+      }).then(function (data) {
+        resolve()
+      }).catch(function (err) {
+        console.log('Analytics error:', err)
+        resolve()
       })
+    })
   })
+}
+
+// Function for adding tooltip to replaced elements
+function addTooltip(element) {
+  // Generate content
+  var popupContent = document.createElement('div')
+  popupContent.innerText = 'NoPlugin has loaded this legacy content.'
+  var popupBtn = document.createElement('button')
+  popupBtn.innerText = 'Not working?'
+  popupBtn.addEventListener('click', function () {
+    createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
+  })
+  popupContent.appendChild(popupBtn)
+  // Show popup
+  tippy(element, {
+    content: popupContent,
+    allowHTML: true,
+    interactive: true,
+    theme: 'noplugin-tippy-theme',
+    maxWidth: 400
+  });
 }
 
 // Find the full path of a given URL
@@ -87,45 +108,6 @@ function createPopup(url) {
   var posY = (window.screen.height / 2) - (windowHeight / 2) - 15 // Subtract 15 to compensate for address bar
   // Create the popup
   window.open(url, '_blank', 'toolbar=no,height=' + windowHeight + ',width=' + windowWidth + ',screenX=' + posX + ',screenY=' + posY)
-}
-
-// Insert 'NoPlugin has loaded plugin content on this page' toolbar
-function injectHelp() {
-  // Show warning for NoPlugin
-  if (!document.querySelector('.noplugin-popup')) {
-    // Try to get existing margin
-    var bodyMargin = window.getComputedStyle(document.body, null).getPropertyValue('margin-top')
-    // Make sure margin is a pixel value and isn't null
-    if (bodyMargin && bodyMargin.includes('px')) {
-      margin = bodyMargin.replace('px', '')
-      margin = parseInt(margin) + 36
-    } else {
-      margin = 36
-    }
-    // Create popup
-    var popup = document.createElement('div')
-    popup.className = 'noplugin-popup'
-    // Create popup message
-    var popupMessage = document.createElement('span')
-    popupMessage.className = 'noplugin-popup-message'
-    popupMessage.innerText = 'NoPlugin has loaded plugin content on this page.'
-    popup.appendChild(popupMessage)
-    // Create popup button
-    var popupButton = document.createElement('button')
-    popupButton.type = 'button'
-    popupButton.id = 'noplugin-broken-button'
-    popupButton.textContent = 'Not working?'
-    popupButton.addEventListener('click', function () {
-      createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
-    })
-    popup.appendChild(popupButton)
-    // Create CSS styles for body margin
-    var popupStyles = document.createElement('style')
-    popupStyles.textContent = 'body {margin-top: ' + margin + 'px !important;}'
-    document.body.appendChild(popupStyles)
-    // Insert popup into <body>
-    document.body.prepend(popup)
-  }
 }
 
 // Open Adobe Flash content with Flash Projector desktop software
@@ -395,8 +377,9 @@ function injectPlayer(object, media, mediaUrl) {
     var youtubeID = mediaUrl.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     object.parentNode.replaceChild(frame, object)
-    // Add message to console
+    // Add message to console and add tooltip
     console.log('[NoPlugin] Replaced YouTube embed:', media)
+    addTooltip(frame)
   } else if (mediaUrl.includes('TwitchPlayer.swf')) {
     // Old Flash-based Twitch embed
     sendEvent('Media Load', 'Twitch.tv Flash')
@@ -434,7 +417,9 @@ function injectPlayer(object, media, mediaUrl) {
       }
       // Replace object
       object.parentNode.replaceChild(frame, object)
+      // Add message to console and add tooltip
       console.log('[NoPlugin] Replaced Twitch.tv embed:', media, twitchObj)
+      addTooltip(frame)
     } else {
       return
     }
@@ -449,8 +434,9 @@ function injectPlayer(object, media, mediaUrl) {
     var vimeoID = mediaUrl.split('clip_id=').pop().split('&')[0]
     frame.setAttribute('src', 'https://player.vimeo.com/video/' + vimeoID)
     object.parentNode.replaceChild(frame, object)
-    // Add message to console
+    // Add message to console and add tooltip
     console.log('[NoPlugin] Replaced Vimeo embed:', media)
+    addTooltip(frame)
   } else if (mediaUrl.includes('viddler.com/simple')) {
     // Old Flash-based Viddler embed
     var frame = document.createElement('iframe')
@@ -461,8 +447,9 @@ function injectPlayer(object, media, mediaUrl) {
     var viddlerID = mediaUrl.split('simple/').pop().split('/')[0]
     frame.setAttribute('src', 'https://www.viddler.com/embed/' + viddlerID)
     object.parentNode.replaceChild(frame, object)
-    // Add message to console
+    // Add message to console and add tooltip
     console.log('[NoPlugin] Replaced Viddler embed:', media)
+    addTooltip(frame)
   } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
     sendEvent('Media Load', 'Misc Stream')
@@ -605,8 +592,9 @@ function injectPlayer(object, media, mediaUrl) {
     mediaPlayer.appendChild(source)
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
-    // Add message to console
+    // Add message to console and add tooltip
     console.log('[NoPlugin] Replaced audio embed:', media)
+    addTooltip(mediaPlayer)
   } else {
     // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
     sendEvent('Media Load', 'Misc Media')
@@ -651,8 +639,9 @@ function injectPlayer(object, media, mediaUrl) {
       mediaPlayer.appendChild(source)
       mediaPlayer.play()
     })
-    // Add message to console
+    // Add message to console and add tooltip
     console.log('[NoPlugin] Replaced plugin embed:', media)
+    addTooltip(mediaPlayer)
   }
 }
 
@@ -729,10 +718,6 @@ function replaceEmbed(object) {
     links.forEach(function (link, i) {
       links[i] = link + '?' + flashVars
     })
-  }
-  // Inject help if there are any valid links
-  if (links < 0) {
-    injectHelp()
   }
   // Inject the player
   var mainLink = links[0] || null
@@ -845,10 +830,6 @@ function replaceObject(object) {
       links[i] = link + '?' + flashVars
     })
   }
-  // Inject help if there are any valid links
-  if (links < 0) {
-    injectHelp()
-  }
   // Inject the player
   var mainLink = links[0] || null
   injectPlayer(object, {
@@ -869,9 +850,10 @@ function replaceFrame(frame) {
   if (url.includes('youtube.com/v/')) {
     var youtubeID = url.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
+    // Add message to console and add tooltip
     console.log('[NoPlugin] Replaced frame embed for ' + url)
+    addTooltip(frame)
   }
-  injectHelp()
 }
 
 // Detect possible plugin/frame objects and pass elements to replaceObject(), replaceEmbed(), and replaceFrame()

@@ -36,6 +36,8 @@
 			"js": [
 				"js/purify.js",
 				"js/blocklist.js",
+				"js/popper.min.js",
+				"js/tippy-bundle.umd.min.js",
 				"js/noplugin.js"
 			],
 			"run_at": "document_end"
