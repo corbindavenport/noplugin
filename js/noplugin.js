@@ -188,7 +188,7 @@ function openInPlayer(url) {
 // Process playlist files and return them as an array of media links
 function parsePlaylist(url) {
   // Create synchronous HTTP request
-  console.log('[NoPlugin] Attempting to read playlist file: ' + url)
+  console.log('Attempting to read playlist file: ' + url)
   var xhr = new XMLHttpRequest()
   xhr.onerror = function () {
     // Return empty array
@@ -301,7 +301,7 @@ function parsePlaylist(url) {
       array = m3u
     }
     // Return the array
-    console.log('[NoPlugin] Identified playlist contents:', array)
+    console.log('Identified playlist contents:', array)
     return array
   } else {
     throw new Error('Could not read playlist file')
@@ -341,7 +341,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
       content.appendChild(document.createElement('br'))
       var newurl = url.replace(/^\/\/|^.*?:\/\//, '') // Remove protocol from URL
       var intenturl = 'intent://' + newurl + '#Intent;scheme=http;package=org.videolan.vlc;end'
-      console.log('[NoPlugin] VLC intent URL set to: ' + intenturl)
+      console.log('VLC intent URL set to: ' + intenturl)
       // Create eventListener for VLC button
       vlcButton.addEventListener('click', function () {
         window.open(intenturl, '_blank')
@@ -378,7 +378,7 @@ function injectPlayer(object, media, mediaUrl) {
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     object.parentNode.replaceChild(frame, object)
     // Add message to console and add tooltip
-    console.log('[NoPlugin] Replaced YouTube embed:', media)
+    console.log('Replaced YouTube embed:', media)
     addTooltip(frame)
   } else if (mediaUrl.includes('TwitchPlayer.swf')) {
     // Old Flash-based Twitch embed
@@ -394,7 +394,7 @@ function injectPlayer(object, media, mediaUrl) {
       try {
         var twitchObj = JSON.parse('{"' + decodeURI(flashVars.replace(/&/g, "\",\"").replace(/=/g, "\":\"")) + '"}')
       } catch (error) {
-        console.error('[NoPlugin] Could not detect flashVars from Twitch object:', error)
+        console.error('Could not detect flashVars from Twitch object:', error)
         return
       }
       // Detect embed type
@@ -404,7 +404,7 @@ function injectPlayer(object, media, mediaUrl) {
       } else if (twitchObj.hasOwnProperty('channel')) {
         frame.setAttribute('src', 'https://player.twitch.tv/?channel=' + twitchObj['channel'] + '&parent=' + twitchParent + '&autoplay=false')
       } else {
-        console.error('[NoPlugin] Could not detect source from Twitch object:', twitchObj)
+        console.error('Could not detect source from Twitch object:', twitchObj)
         return
       }
       // Detect content title
@@ -418,7 +418,7 @@ function injectPlayer(object, media, mediaUrl) {
       // Replace object
       object.parentNode.replaceChild(frame, object)
       // Add message to console and add tooltip
-      console.log('[NoPlugin] Replaced Twitch.tv embed:', media, twitchObj)
+      console.log('Replaced Twitch.tv embed:', media, twitchObj)
       addTooltip(frame)
     } else {
       return
@@ -435,7 +435,7 @@ function injectPlayer(object, media, mediaUrl) {
     frame.setAttribute('src', 'https://player.vimeo.com/video/' + vimeoID)
     object.parentNode.replaceChild(frame, object)
     // Add message to console and add tooltip
-    console.log('[NoPlugin] Replaced Vimeo embed:', media)
+    console.log('Replaced Vimeo embed:', media)
     addTooltip(frame)
   } else if (mediaUrl.includes('viddler.com/simple')) {
     // Old Flash-based Viddler embed
@@ -448,7 +448,7 @@ function injectPlayer(object, media, mediaUrl) {
     frame.setAttribute('src', 'https://www.viddler.com/embed/' + viddlerID)
     object.parentNode.replaceChild(frame, object)
     // Add message to console and add tooltip
-    console.log('[NoPlugin] Replaced Viddler embed:', media)
+    console.log('Replaced Viddler embed:', media)
     addTooltip(frame)
   } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
@@ -481,7 +481,7 @@ function injectPlayer(object, media, mediaUrl) {
       openInPlayer(mediaUrl)
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced playlist embed:', media)
+    console.log('Replaced playlist embed:', media)
   } else if (mediaUrl.includes('.swf')) {
     // This is a Flash Player file
     sendEvent('Media Load', 'Misc Flash', getFileName(mediaUrl))
@@ -509,7 +509,7 @@ function injectPlayer(object, media, mediaUrl) {
       openInFlash(mediaUrl)
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced Flash embed:', media)
+    console.log('Replaced Flash embed:', media)
   } else if (mediaUrl.endsWith('.asx') || mediaUrl.endsWith('.wpl') || mediaUrl.endsWith('.qtl') || mediaUrl.endsWith('.m3u')) {
     // This is a playlist file
     try {
@@ -529,7 +529,7 @@ function injectPlayer(object, media, mediaUrl) {
       container.appendChild(content)
       object.parentNode.replaceChild(container, object)
       // Add message to console
-      console.error('[NoPlugin] Error replacing playlist embed for ' + mediaUrl + ':', error)
+      console.error('Error replacing playlist embed for ' + mediaUrl + ':', error)
     }
     if (mediaArray.length === 1) {
       // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
@@ -575,7 +575,7 @@ function injectPlayer(object, media, mediaUrl) {
       container.appendChild(content)
       object.parentNode.replaceChild(container, object)
       // Add message to console
-      console.log('[NoPlugin] Replaced plugin embed:', media)
+      console.log('Replaced plugin embed:', media)
     }
   } else if ((mediaUrl.endsWith('.mp3')) || (mediaUrl.endsWith('.m4a')) || (mediaUrl.endsWith('.wav'))) {
     // This is an audio file
@@ -593,7 +593,7 @@ function injectPlayer(object, media, mediaUrl) {
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
     // Add message to console and add tooltip
-    console.log('[NoPlugin] Replaced audio embed:', media)
+    console.log('Replaced audio embed:', media)
     addTooltip(mediaPlayer)
   } else {
     // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
@@ -640,7 +640,7 @@ function injectPlayer(object, media, mediaUrl) {
       mediaPlayer.play()
     })
     // Add message to console and add tooltip
-    console.log('[NoPlugin] Replaced plugin embed:', media)
+    console.log('Replaced plugin embed:', media)
     addTooltip(mediaPlayer)
   }
 }
@@ -649,7 +649,7 @@ function injectPlayer(object, media, mediaUrl) {
 function replaceEmbed(object) {
   // Skip element if it is being used as a fallback for an HTML5 player
   if (isFallback(object)) {
-    console.log('[NoPlugin] Skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    console.log('Skipping embed because it seems to be a fallback for an HTML5 player:', object)
     return
   }
   // Find video sources
@@ -736,7 +736,7 @@ function replaceEmbed(object) {
 function replaceObject(object) {
   // Skip element if it is being used as a fallback for an HTML5 player
   if (isFallback(object)) {
-    console.log('[NoPlugin] Skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    console.log('Skipping embed because it seems to be a fallback for an HTML5 player:', object)
     return
   }
   // Find video sources
@@ -851,7 +851,7 @@ function replaceFrame(frame) {
     var youtubeID = url.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     // Add message to console and add tooltip
-    console.log('[NoPlugin] Replaced frame embed for ' + url)
+    console.log('Replaced frame embed for ' + url)
     addTooltip(frame)
   }
 }
@@ -969,8 +969,8 @@ function loadDOM() {
 
 // Initialize NoPlugin on page load
 if (globalSiteBlockList.test(document.location)) {
-  console.log('[NoPlugin] This page is blacklisted, so no plugin objects will be scanned.')
+  console.log('This page is blacklisted, so no plugin objects will be scanned.')
 } else {
-  console.log('[NoPlugin] Searching for plugin objects...')
+  console.log('Searching for plugin objects...')
   loadDOM()
 }
