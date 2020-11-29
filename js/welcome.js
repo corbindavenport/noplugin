@@ -18,23 +18,26 @@ if (useragent.includes("OPR")) {
 document.querySelector('.vlc-btn').addEventListener('click', function () {
   // Get the OS from background.js
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
-    if (localStorage['platform'] === 'mac') {
+    if (response === 'mac') {
       // Mac OS X download
-      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-macosx.html' });
-    } else if (localStorage['platform'] === 'win') {
+      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-macosx.html' })
+    } else if (response === 'win') {
       // Windows download
-      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-windows.html' });
-    } else if (localStorage['platform'] === 'cros') {
+      chrome.tabs.create({ url: 'http://www.videolan.org/vlc/download-windows.html' })
+    } else if (response === 'cros') {
       // Chrome OS download
-      if (confirm('Does your Chromebook have the Google Play Store? Press "OK" for Yes, or "Cancel" for No.')) {
-        chrome.tabs.create({ url: 'market://details?id=org.videolan.vlc' });
-      } else {
-        chrome.tabs.create({ url: 'https://chrome.google.com/webstore/detail/vlc/obpdeolnggmbekmklghapmfpnfhpcndf?hl=en' });
-      }
+      chrome.tabs.create({ url: 'market://details?id=org.videolan.vlc' })
     } else {
       // Other downloads
       chrome.tabs.create({ url: 'http://www.videolan.org/vlc/#download' })
     }
+  })
+})
+
+document.querySelector('.flash-btn').addEventListener('click', function() {
+  // Get the OS from background.js
+  chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    chrome.runtime.sendMessage({ method: 'downloadProjector', key: response })
   })
 })
 
