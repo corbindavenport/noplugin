@@ -48,10 +48,28 @@ chrome.storage.local.get(function (data) {
   }
 })
 
-// Keep track of downloads that NoPlugin has already sent notifications for
-var downloadsAlreadyNotified = []
+// Create context menu for compatibility mode
+chrome.contextMenus.create({
+  title: 'Toggle NoPlugin Compatibility Mode',
+  contexts: ['page'],
+  documentUrlPatterns: ['http://*/*', 'https://*/*'],
+  id: 'toggle-compat-mode'
+})
+chrome.contextMenus.onClicked.addListener(function (itemData) {
+  if (itemData.menuItemId == 'toggle-compat-mode') {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      var obj = new URL(tabs[0].url)
+      if (obj.searchParams.has('noplugin_compat')) {
+        obj.searchParams.delete('noplugin_compat')
+      } else {
+        obj.searchParams.append('noplugin_compat', 'true')
+      }
+      chrome.tabs.update(tabs[0].id, {url: obj.toString()})
+    })
+  }
+})
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sendResponse) {
   if (request.method == 'getPlatform') {
     chrome.runtime.getPlatformInfo(function (info) {
       sendResponse(info[request.key])

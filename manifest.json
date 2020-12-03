@@ -9,7 +9,9 @@
 		"http://*/*",
 		"https://*/*",
 		"downloads",
-		"storage"
+		"storage",
+		"contextMenus",
+		"tabs"
 	],
 	"background": {
 		"scripts": [
@@ -39,6 +41,16 @@
 				"js/noplugin.js"
 			],
 			"run_at": "document_end"
+		},
+		{
+			"matches": [
+				"http://*/*noplugin_compat=true*",
+				"https://*/*noplugin_compat=true*"
+			],
+			"js": [
+				"js/noplugin-compat.js"
+			],
+			"run_at": "document_start"
 		}
 	],
 	"icons": {
