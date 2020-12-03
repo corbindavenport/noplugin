@@ -383,10 +383,12 @@ function injectPlayer(object, media, mediaUrl) {
   } else if (mediaUrl.includes('TwitchPlayer.swf')) {
     // Old Flash-based Twitch embed
     sendEvent('Media Load', 'Twitch.tv Flash')
-    var frame = document.createElement('iframe')
-    frame.setAttribute('class', media.cssClass)
-    frame.id = media.id
-    frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + media.cssClass)
+    container.id = media.id
+    container.align = 'center'
+    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
+    var twitchURL = ''
     // Parse video information
     if (object.querySelector('param[name="FLASHVARS" i]')) {
       // Convert flashvars into JSON
@@ -398,28 +400,38 @@ function injectPlayer(object, media, mediaUrl) {
         return
       }
       // Detect embed type
-      var twitchParent = window.location.hostname
       if (twitchObj.hasOwnProperty('videoId')) {
-        frame.setAttribute('src', 'https://player.twitch.tv/?video=' + twitchObj['videoId'] + '&parent=' + twitchParent + '&autoplay=false')
+        twitchURL = 'https://www.twitch.tv/videos/' + twitchObj['videoId']
       } else if (twitchObj.hasOwnProperty('channel')) {
-        frame.setAttribute('src', 'https://player.twitch.tv/?channel=' + twitchObj['channel'] + '&parent=' + twitchParent + '&autoplay=false')
+        twitchURL = 'https://www.twitch.tv/' + twitchObj['channel']
       } else {
         console.error('Could not detect source from Twitch object:', twitchObj)
         return
       }
-      // Detect content title
-      if (twitchObj.hasOwnProperty('title')) {
-        frame.setAttribute('title', twitchObj['title'])
-      }
-      // Detect starting time
+      // Detect starting time if available
       if (twitchObj.hasOwnProperty('initial_time')) {
-        frame.setAttribute('src', frame.getAttribute('src') + '&time=' + twitchObj['initial_time'])
+        twitchURL += '&time=' + twitchObj['initial_time']
       }
-      // Replace object
-      object.parentNode.replaceChild(frame, object)
+      // Create text content
+      var content = document.createElement('div')
+      content.className = 'noplugin-content'
+      content.textContent = "NoPlugin has detected legacy content from Twitch.tv. The content might be viewable on Twitch's website."
+      content.appendChild(document.createElement('br'))
+      // Create play button
+      var playStreamButton = document.createElement('button')
+      playStreamButton.type = 'button'
+      playStreamButton.setAttribute('data-url', mediaUrl)
+      playStreamButton.textContent = 'Open on Twitch'
+      content.appendChild(playStreamButton)
+      // Write container to page
+      container.appendChild(content)
+      object.parentNode.replaceChild(container, object)
+      // Create eventListener for button
+      playStreamButton.addEventListener('click', function () {
+        window.open(twitchURL, '_blank')
+      })
       // Add message to console and add tooltip
       console.log('Replaced Twitch.tv embed:', media, twitchObj)
-      addTooltip(frame)
     } else {
       return
     }
