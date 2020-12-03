@@ -9,8 +9,6 @@
 		"http://*/*",
 		"https://*/*",
 		"downloads",
-		"downloads.open",
-		"notifications",
 		"storage"
 	],
 	"background": {

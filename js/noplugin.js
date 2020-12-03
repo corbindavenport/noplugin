@@ -317,21 +317,21 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
     container.id = id
     container.align = 'center'
     container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
-    // Create text content
+    // Create content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
     content.textContent = 'This media file cannot be played in your browser. Do you want to try downloading the file instead?'
     content.appendChild(document.createElement('br'))
-    // Create play button
+    // Create download button with link
+    var downloadLink = document.createElement('a')
+    downloadLink.setAttribute('href', url)
+    downloadLink.setAttribute('download', '')
     var downloadButton = document.createElement('button')
     downloadButton.type = 'button'
     downloadButton.textContent = 'Download media file'
-    content.appendChild(downloadButton)
+    downloadLink.appendChild(downloadButton)
+    content.appendChild(downloadLink)
     content.appendChild(document.createElement('br'))
-    // Create eventListener for play button
-    downloadButton.addEventListener('click', function () {
-      chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
-    })
     // Create VLC button for Chrome OS
     if (response === 'cros') {
       var vlcButton = document.createElement('button')

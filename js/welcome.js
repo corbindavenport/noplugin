@@ -37,6 +37,7 @@ document.querySelector('.vlc-btn').addEventListener('click', function () {
 document.querySelector('.flash-btn').addEventListener('click', function() {
   // Get the OS from background.js
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
+    // Download Adobe Flash projector
     chrome.runtime.sendMessage({ method: 'downloadProjector', key: response })
   })
 })
