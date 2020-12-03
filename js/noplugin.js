@@ -54,10 +54,10 @@ function addTooltip(element) {
     interactive: true,
     theme: 'noplugin-tippy-theme',
     maxWidth: 400
-  });
+  })
 }
 
-// Find the full path of a given URL
+// Function for finding full path of URL
 function getFullURL(url) {
   // Fix URLs that start at the site root
   if (url.startsWith('/')) {
@@ -362,7 +362,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 }
 
 // Replace plugin embeds with native players
-function injectPlayer(object, media, mediaUrl) {
+async function injectPlayer(object, media, mediaUrl) {
   if ((mediaUrl === '') || (mediaUrl === null)) {
     // Silently fail
     return
@@ -376,6 +376,7 @@ function injectPlayer(object, media, mediaUrl) {
     // Parse video ID and replace object
     var youtubeID = mediaUrl.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
+    frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture')
     object.parentNode.replaceChild(frame, object)
     // Add message to console and add tooltip
     console.log('Replaced YouTube embed:', media)
@@ -640,6 +641,12 @@ function injectPlayer(object, media, mediaUrl) {
         playbackError(mediaPlayer, media.id, mediaUrl, media.width, media.height, media.cssClass, media.cssStyles)
       }
     })
+    // Add tooltip if video won't fail
+    mediaPlayer.addEventListener('canplaythrough', function(event) {
+      if (event.type === 'canplaythrough') {
+        addTooltip(mediaPlayer)
+      }
+    })
     // Write container to page
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
@@ -651,9 +658,8 @@ function injectPlayer(object, media, mediaUrl) {
       mediaPlayer.appendChild(source)
       mediaPlayer.play()
     })
-    // Add message to console and add tooltip
+    // Add message to console
     console.log('Replaced plugin embed:', media)
-    addTooltip(mediaPlayer)
   }
 }
 
@@ -862,8 +868,9 @@ function replaceFrame(frame) {
   if (url.includes('youtube.com/v/')) {
     var youtubeID = url.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
+    frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture')
     // Add message to console and add tooltip
-    console.log('Replaced frame embed for ' + url)
+    console.log('Replaced YouTube embed:', frame)
     addTooltip(frame)
   }
 }
