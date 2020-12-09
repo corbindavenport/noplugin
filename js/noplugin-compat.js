@@ -40,6 +40,12 @@ if (!navigator.plugins.namedItem('Shockwave Flash')) {
                         description: 'Shockwave Flash 50.0 r0 (NoPlugin)',
                         version: '50.0',
                         filename: 'NoPlugin'
+                    },
+                    'Windows Media Player Plug-in Dynamic Link Library': {
+                        name: 'Windows Media Player Plug-in Dynamic Link Library 5.0',
+                        description: 'Windows Media Player Plug-in Dynamic Link Library',
+                        version: '50.0',
+                        filename: 'NoPlugin'
                     }
                 },
                 configurable: false,
@@ -353,6 +359,60 @@ if (!navigator.plugins.namedItem('Shockwave Flash')) {
                         description: 'WAVE audio',
                         enabledPlugin: navigator.plugins['QuickTime Plug-in']
                     },
+                    'application/asx': {
+                        type: 'application/asx',
+                        suffixes: '*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'video/x-ms-asf-plugin': {
+                        type: 'video/x-ms-asf-plugin',
+                        suffixes: '*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'application/x-mplayer2': {
+                        type: 'application/x-mplayer2',
+                        suffixes: '*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'video/x-ms-asf': {
+                        type: 'video/x-ms-asf',
+                        suffixes: 'asf,asx,*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'video/x-ms-wm': {
+                        type: 'video/x-ms-wm',
+                        suffixes: 'wm,*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'audio/x-ms-wma': {
+                        type: 'audio/x-ms-wma',
+                        suffixes: 'wma,*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'audio/x-ms-wax': {
+                        type: 'audio/x-ms-wax',
+                        suffixes: 'wax,*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'video/x-ms-wmv': {
+                        type: 'video/x-ms-wmv',
+                        suffixes: 'wmv,*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    },
+                    'video/x-ms-wmv': {
+                        type: 'video/x-ms-wmv',
+                        suffixes: 'wmv,*',
+                        description: 'Media Files',
+                        enabledPlugin: navigator.plugins['Windows Media Player Plug-in Dynamic Link Library']
+                    }
 
                 },
                 configurable: false,
