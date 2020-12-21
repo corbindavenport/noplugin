@@ -69,7 +69,7 @@ chrome.contextMenus.onClicked.addListener(function (itemData) {
   }
 })
 
-chrome.runtime.onMessage.addListener(function (request, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.method == 'getPlatform') {
     chrome.runtime.getPlatformInfo(function (info) {
       sendResponse(info[request.key])

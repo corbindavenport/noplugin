@@ -8,6 +8,10 @@
   border-radius: 5px !important;
 }
 
+.noplugin-content button:active, .tippy-box[data-theme~='noplugin-tippy-theme'] button:active {
+  background: #3f3f3f !important;
+}
+
 /* Content dialogs */
 
 .noplugin {
@@ -36,12 +40,6 @@
 .noplugin-content button {
   margin-top: 10px !important;
   padding: 5px 10px !important;
-}
-
-/* Media players */
-
-video.noplugin {
-  background: url('chrome-extension://__MSG_@@extension_id__/img/preloader.gif') no-repeat center #616161 !important;
 }
 
 /* Tippy-specific styles */

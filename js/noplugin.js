@@ -376,7 +376,6 @@ async function injectPlayer(object, media, mediaUrl) {
     // Parse video ID and replace object
     var youtubeID = mediaUrl.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
-    frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture')
     object.parentNode.replaceChild(frame, object)
     // Add message to console and add tooltip
     console.log('Replaced YouTube embed:', media)
@@ -868,7 +867,6 @@ function replaceFrame(frame) {
   if (url.includes('youtube.com/v/')) {
     var youtubeID = url.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
-    frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture')
     // Add message to console and add tooltip
     console.log('Replaced YouTube embed:', frame)
     addTooltip(frame)
