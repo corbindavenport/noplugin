@@ -41,10 +41,18 @@ function addTooltip(element) {
   // Generate content
   var popupContent = document.createElement('div')
   popupContent.innerText = 'NoPlugin has loaded this legacy content.'
+  // Add bug reporting button
   var popupBtn = document.createElement('button')
-  popupBtn.innerText = 'Not working?'
+  popupBtn.innerText = 'Report Bug'
   popupBtn.addEventListener('click', function () {
     createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
+  })
+  popupContent.appendChild(popupBtn)
+  // Add donate button
+  var popupBtn = document.createElement('button')
+  popupBtn.innerText = 'Support NoPlugin'
+  popupBtn.addEventListener('click', function () {
+    window.open('https://www.patreon.com/corbindavenport', '_blank')
   })
   popupContent.appendChild(popupBtn)
   // Show popup
@@ -53,7 +61,7 @@ function addTooltip(element) {
     allowHTML: true,
     interactive: true,
     theme: 'noplugin-tippy-theme',
-    maxWidth: 400
+    maxWidth: 600
   })
 }
 
@@ -127,8 +135,8 @@ function openInFlash(url) {
         }
       } else {
         // Download Flash Projector
-        alert('Adobe Flash Projector will now be downloaded from a mirror by the Internet Archive (archive.org).\n\nThis software is no longer supported by Adobe.')
-        chrome.runtime.sendMessage({ method: 'downloadProjector', key: response })
+        alert('Adobe Flash Projector will now be downloaded from a mirror by the Internet Archive (archive.org). This software is no longer supported by Adobe.')
+        chrome.runtime.sendMessage({ method: 'downloadProjector'})
       }
     } else {
       alert('Sorry, Adobe has not released Flash Projector for your operating system, so there is no way to play this content on your device. Projector is only available for Mac, Windows, and Linux.')
@@ -155,30 +163,20 @@ function openInPlayer(url) {
     } else if (response === 'cros') {
       // VLC Media Player is the only option for playing media streams on Chrome OS
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
-        prompt('NoPlugin cannot automatically open this stream. Open VLC Media Player, select "Stream" from the side menu, and paste this:', url)
+        prompt('Open VLC Media Player, select "Stream" from the side menu, and paste this:', url)
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          window.open('market://details?id=org.videolan.vlc', '_blank')
+          chrome.runtime.sendMessage({ method: 'downloadVLC', key: ''})
         }
       }
     } else {
       // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
-        prompt('NoPlugin cannot automatically open this stream. Open VLC Media Player, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
+        prompt('Open VLC Media Player, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
       } else {
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          // Download VLC for user's operating system
-          if (response === 'win') {
-            // Windows download
-            window.open('http://www.videolan.org/vlc/download-windows.html', '_blank')
-          } else if (response === 'mac') {
-            // macOS download
-            window.open('http://www.videolan.org/vlc/download-macosx.html', '_blank')
-          } else {
-            // Other downloads
-            window.open('http://www.videolan.org/vlc/#download', '_blank')
-          }
+          chrome.runtime.sendMessage({ method: 'downloadVLC', key: ''})
         }
       }
     }

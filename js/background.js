@@ -23,6 +23,21 @@ function downloadVLC(platform) {
   }
 }
 
+// Function for downloading Adobe Flash Projector
+function downloadProjector(platform) {
+  var download = ''
+  if (platform === 'linux') {
+    download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flash_player_sa_linux.x86_64.tar.gz'
+  } else if (platform === 'mac') {
+    download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.dmg'
+  } else if (platform === 'windows') {
+    download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe'
+  }
+  chrome.downloads.download({
+    url: download
+  })
+}
+
 // Welcome page
 chrome.storage.local.get(function (data) {
   // Show welcome page on new version
@@ -64,7 +79,7 @@ chrome.contextMenus.onClicked.addListener(function (itemData) {
       } else {
         obj.searchParams.append('noplugin_compat', 'true')
       }
-      chrome.tabs.update(tabs[0].id, {url: obj.toString()})
+      chrome.tabs.update(tabs[0].id, { url: obj.toString() })
     })
   }
 })
@@ -74,20 +89,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     chrome.runtime.getPlatformInfo(function (info) {
       sendResponse(info[request.key])
     })
-  } else if (request.method = 'downloadProjector') {
-    // Set the URL
-    var download = ''
-    if (request.key === 'linux') {
-      download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flash_player_sa_linux.x86_64.tar.gz'
-    } else if (request.key === 'mac') {
-      download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.dmg'
-    } else if (request.key === 'windows') {
-      download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe'
-    }
-    chrome.downloads.download({
-      url: download,
-    }, function () {
-      // Woo
+  } else if (request.method === 'downloadProjector') {
+    chrome.runtime.getPlatformInfo(function (info) {
+      downloadProjector(info.os)
+    })
+  } else if (request.method === 'downloadVLC') {
+    chrome.runtime.getPlatformInfo(function (info) {
+      downloadVLC(info.os)
     })
   } else {
     sendResponse({})
