@@ -17,26 +17,55 @@ const youtubeRegex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).
 const streamDetectRegex = /(\:\d{1,}$)|(\/$)/gm
 
 // Function for sending events to Google Analytics
-function sendEvent(eventCategory, eventAction) {
+function sendEvent(eventCategory, eventAction, eventLabel = '') {
   return new Promise(async function (resolve) {
-      // Get UUID from storage
-      chrome.storage.local.get(function (data) {
-          var uuid = data.uuid
-          // Send Fetch data
-          fetch('https://www.google-analytics.com/collect', {
-              method: 'POST',
-              body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction)
-          }).then(function (data) {
-              resolve()
-          }).catch(function (err) {
-              console.log('Analytics error:', err)
-              resolve()
-          })
+    // Get UUID from storage
+    chrome.storage.local.get(function (data) {
+      var uuid = data.uuid
+      // Send Fetch data
+      fetch('https://www.google-analytics.com/collect', {
+        method: 'POST',
+        body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction) + '&el=' + encodeURIComponent(eventLabel)
+      }).then(function (data) {
+        resolve()
+      }).catch(function (err) {
+        console.log('Analytics error:', err)
+        resolve()
       })
+    })
   })
 }
 
-// Find the full path of a given URL
+// Function for adding tooltip to replaced elements
+function addTooltip(element) {
+  // Generate content
+  var popupContent = document.createElement('div')
+  popupContent.innerText = 'NoPlugin has loaded this legacy content.'
+  // Add bug reporting button
+  var popupBtn = document.createElement('button')
+  popupBtn.innerText = 'Report Bug'
+  popupBtn.addEventListener('click', function () {
+    createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
+  })
+  popupContent.appendChild(popupBtn)
+  // Add donate button
+  var popupBtn = document.createElement('button')
+  popupBtn.innerText = 'Support NoPlugin'
+  popupBtn.addEventListener('click', function () {
+    window.open('https://www.patreon.com/corbindavenport', '_blank')
+  })
+  popupContent.appendChild(popupBtn)
+  // Show popup
+  tippy(element, {
+    content: popupContent,
+    allowHTML: true,
+    interactive: true,
+    theme: 'noplugin-tippy-theme',
+    maxWidth: 600
+  })
+}
+
+// Function for finding full path of URL
 function getFullURL(url) {
   // Fix URLs that start at the site root
   if (url.startsWith('/')) {
@@ -61,6 +90,12 @@ function getFullURL(url) {
   return url
 }
 
+// Get the file name of a given URL
+function getFileName(url) {
+  // Remove everything before the last slash, and everything after the ? symbol (if it exists)
+  return url.split("?")[0].split('/').pop()
+}
+
 // Function for checking if a given object/embed is being used as an HTML5 fallback (e.g. inside a <video> element)
 function isFallback(object) {
   var fallback = ((object.parentNode.nodeName === 'VIDEO') || object.parentNode.nodeName === 'AUDIO')
@@ -83,46 +118,8 @@ function createPopup(url) {
   window.open(url, '_blank', 'toolbar=no,height=' + windowHeight + ',width=' + windowWidth + ',screenX=' + posX + ',screenY=' + posY)
 }
 
-// Insert 'NoPlugin has loaded plugin content on this page' toolbar
-function injectHelp() {
-  // Show warning for NoPlugin
-  if (!document.querySelector('.noplugin-popup')) {
-    // Try to get existing margin
-    var bodyMargin = window.getComputedStyle(document.body, null).getPropertyValue('margin-top')
-    // Make sure margin is a pixel value and isn't null
-    if (bodyMargin && bodyMargin.includes('px')) {
-      margin = bodyMargin.replace('px', '')
-      margin = parseInt(margin) + 36
-    } else {
-      margin = 36
-    }
-    // Create popup
-    var popup = document.createElement('div')
-    popup.className = 'noplugin-popup'
-    // Create popup message
-    var popupMessage = document.createElement('span')
-    popupMessage.className = 'noplugin-popup-message'
-    popupMessage.innerText = 'NoPlugin has loaded plugin content on this page.'
-    popup.appendChild(popupMessage)
-    // Create popup button
-    var popupButton = document.createElement('button')
-    popupButton.type = 'button'
-    popupButton.id = 'noplugin-broken-button'
-    popupButton.textContent = 'Not working?'
-    popupButton.addEventListener('click', function () {
-      createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
-    })
-    popup.appendChild(popupButton)
-    // Create CSS styles for body margin
-    var popupStyles = document.createElement('style')
-    popupStyles.textContent = 'body {margin-top: ' + margin + 'px !important;}'
-    document.body.appendChild(popupStyles)
-    // Insert popup into <body>
-    document.body.prepend(popup)
-  }
-}
-
 // Open Adobe Flash content with Flash Projector desktop software
+// TODO: Add Chrome OS support through Linux container
 function openInFlash(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
@@ -137,12 +134,12 @@ function openInFlash(url) {
           prompt('Open Flash Projector on your computer, and paste this in the URL box:', url)
         }
       } else {
-        // Help the user install Flash Projector
-        alert('The download page for Adobe Flash Projector will open in a new tab. Just click the "Download Flash Player projector" link for your platform (Windows, Mac, or Linux).')
-        window.open('https://www.adobe.com/support/flashplayer/debug_downloads.html', '_blank')
+        // Download Flash Projector
+        alert('Adobe Flash Projector will now be downloaded from a mirror by the Internet Archive (archive.org). This software is no longer supported by Adobe.')
+        chrome.runtime.sendMessage({ method: 'downloadProjector'})
       }
     } else {
-      alert('Sorry, Adobe has not released Flash Projector for your operating system, so there is no way to play this content on your device. Projector is only availabe for Mac, Windows, and Linux.')
+      alert('Sorry, Adobe has not released Flash Projector for your operating system, so there is no way to play this content on your device. Projector is only available for Mac, Windows, and Linux.')
     }
   })
 }
@@ -151,7 +148,6 @@ function openInFlash(url) {
 function openInPlayer(url) {
   // Determine the user's operating system
   chrome.runtime.sendMessage({ method: 'getPlatform', key: 'os' }, function (response) {
-    console.log(response)
     if ((response === 'win') && url.includes('mms://')) {
       // If on Windows, open MMS streams with Windows Media Player
       alert('Select Windows Media Player on the next pop-up.')
@@ -167,30 +163,20 @@ function openInPlayer(url) {
     } else if (response === 'cros') {
       // VLC Media Player is the only option for playing media streams on Chrome OS
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
-        prompt('NoPlugin cannot automatically open this stream. Open VLC Media Player, select "Stream" from the side menu, and paste this:', url)
+        prompt('Open VLC Media Player, select "Stream" from the side menu, and paste this:', url)
       } else {
         // Help the user install VLC Media Player
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          window.open('market://details?id=org.videolan.vlc', '_blank')
+          chrome.runtime.sendMessage({ method: 'downloadVLC', key: ''})
         }
       }
     } else {
       // For other operating systems, the user can open the stream with whatever they have installed, or NoPlugin can offer to download VLC for them
       if (confirm('Do you have VLC Media Player installed?\n\nPress "OK" for Yes, or "Cancel" for No.')) {
-        prompt('NoPlugin cannot automatically open this stream. Open VLC Media Player, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
+        prompt('Open VLC Media Player, click the "Media" menu at the top-left, select "Open Network Stream", and paste this:', url)
       } else {
         if (confirm('Would you like to download VLC Media Player? It might be able to play this stream.')) {
-          // Download VLC for user's operating system
-          if (response === 'win') {
-            // Windows download
-            window.open('http://www.videolan.org/vlc/download-windows.html', '_blank')
-          } else if (response === 'mac') {
-            // macOS download
-            window.open('http://www.videolan.org/vlc/download-macosx.html', '_blank')
-          } else {
-            // Other downloads
-            window.open('http://www.videolan.org/vlc/#download', '_blank')
-          }
+          chrome.runtime.sendMessage({ method: 'downloadVLC', key: ''})
         }
       }
     }
@@ -200,7 +186,7 @@ function openInPlayer(url) {
 // Process playlist files and return them as an array of media links
 function parsePlaylist(url) {
   // Create synchronous HTTP request
-  console.log('[NoPlugin] Attempting to read playlist file: ' + url)
+  console.log('Attempting to read playlist file: ' + url)
   var xhr = new XMLHttpRequest()
   xhr.onerror = function () {
     // Return empty array
@@ -313,7 +299,7 @@ function parsePlaylist(url) {
       array = m3u
     }
     // Return the array
-    console.log('[NoPlugin] Identified playlist contents:', array)
+    console.log('Identified playlist contents:', array)
     return array
   } else {
     throw new Error('Could not read playlist file')
@@ -329,21 +315,21 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
     container.id = id
     container.align = 'center'
     container.setAttribute('style', cssstyles + ' width:' + (width - 10) + 'px !important; height:' + (height - 10) + 'px !important;')
-    // Create text content
+    // Create content
     var content = document.createElement('div')
     content.className = 'noplugin-content'
     content.textContent = 'This media file cannot be played in your browser. Do you want to try downloading the file instead?'
     content.appendChild(document.createElement('br'))
-    // Create play button
+    // Create download button with link
+    var downloadLink = document.createElement('a')
+    downloadLink.setAttribute('href', url)
+    downloadLink.setAttribute('download', '')
     var downloadButton = document.createElement('button')
     downloadButton.type = 'button'
     downloadButton.textContent = 'Download media file'
-    content.appendChild(downloadButton)
+    downloadLink.appendChild(downloadButton)
+    content.appendChild(downloadLink)
     content.appendChild(document.createElement('br'))
-    // Create eventListener for play button
-    downloadButton.addEventListener('click', function () {
-      chrome.runtime.sendMessage({ method: 'saveVideo', key: url })
-    })
     // Create VLC button for Chrome OS
     if (response === 'cros') {
       var vlcButton = document.createElement('button')
@@ -353,7 +339,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
       content.appendChild(document.createElement('br'))
       var newurl = url.replace(/^\/\/|^.*?:\/\//, '') // Remove protocol from URL
       var intenturl = 'intent://' + newurl + '#Intent;scheme=http;package=org.videolan.vlc;end'
-      console.log('[NoPlugin] VLC intent URL set to: ' + intenturl)
+      console.log('VLC intent URL set to: ' + intenturl)
       // Create eventListener for VLC button
       vlcButton.addEventListener('click', function () {
         window.open(intenturl, '_blank')
@@ -374,7 +360,7 @@ function playbackError(mediaPlayer, id, url, width, height, cssclass, cssstyles)
 }
 
 // Replace plugin embeds with native players
-function injectPlayer(object, media, mediaUrl) {
+async function injectPlayer(object, media, mediaUrl) {
   if ((mediaUrl === '') || (mediaUrl === null)) {
     // Silently fail
     return
@@ -389,15 +375,18 @@ function injectPlayer(object, media, mediaUrl) {
     var youtubeID = mediaUrl.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
     object.parentNode.replaceChild(frame, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced YouTube embed:', media)
+    // Add message to console and add tooltip
+    console.log('Replaced YouTube embed:', media)
+    addTooltip(frame)
   } else if (mediaUrl.includes('TwitchPlayer.swf')) {
     // Old Flash-based Twitch embed
     sendEvent('Media Load', 'Twitch.tv Flash')
-    var frame = document.createElement('iframe')
-    frame.setAttribute('class', media.cssClass)
-    frame.id = media.id
-    frame.setAttribute('style', media.cssStyles + ' border: 0; width:' + media.width + 'px; height:' + media.height + 'px;')
+    var container = document.createElement('div')
+    container.setAttribute('class', 'noplugin ' + media.cssClass)
+    container.id = media.id
+    container.align = 'center'
+    container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
+    var twitchURL = ''
     // Parse video information
     if (object.querySelector('param[name="FLASHVARS" i]')) {
       // Convert flashvars into JSON
@@ -405,28 +394,31 @@ function injectPlayer(object, media, mediaUrl) {
       try {
         var twitchObj = JSON.parse('{"' + decodeURI(flashVars.replace(/&/g, "\",\"").replace(/=/g, "\":\"")) + '"}')
       } catch (error) {
-        console.error('[NoPlugin] Could not detect flashVars from Twitch object:', error)
+        console.error('Could not detect flashVars from Twitch object:', error)
         return
       }
-      // Create NoPlugin object
-      var container = document.createElement('div')
-      container.setAttribute('class', 'noplugin ' + media.cssClass)
-      container.id = media.id
-      container.align = 'center'
-      container.setAttribute('style', media.cssStyles + ' width:' + (media.width - 10) + 'px !important; height:' + (media.height - 10) + 'px !important;')
+      // Detect embed type
+      if (twitchObj.hasOwnProperty('videoId')) {
+        twitchURL = 'https://www.twitch.tv/videos/' + twitchObj['videoId']
+      } else if (twitchObj.hasOwnProperty('channel')) {
+        twitchURL = 'https://www.twitch.tv/' + twitchObj['channel']
+      } else {
+        console.error('Could not detect source from Twitch object:', twitchObj)
+        return
+      }
+      // Detect starting time if available
+      if (twitchObj.hasOwnProperty('initial_time')) {
+        twitchURL += '&time=' + twitchObj['initial_time']
+      }
       // Create text content
       var content = document.createElement('div')
       content.className = 'noplugin-content'
-      if (twitchObj.hasOwnProperty('title')) {
-        // Use title from embed if available
-        content.textContent = 'This page is trying to load "' + decodeURIComponent(twitchObj['title']) + '" from Twitch.tv. It might still be available on the Twitch website.'
-      } else {
-        content.textContent = 'This page is trying to load content from Twitch.tv here. It might still be available on the Twitch website.'
-      }
+      content.textContent = "NoPlugin has detected legacy content from Twitch.tv. The content might be viewable on Twitch's website."
       content.appendChild(document.createElement('br'))
       // Create play button
       var playStreamButton = document.createElement('button')
       playStreamButton.type = 'button'
+      playStreamButton.setAttribute('data-url', mediaUrl)
       playStreamButton.textContent = 'Open on Twitch'
       content.appendChild(playStreamButton)
       // Write container to page
@@ -434,16 +426,10 @@ function injectPlayer(object, media, mediaUrl) {
       object.parentNode.replaceChild(container, object)
       // Create eventListener for button
       playStreamButton.addEventListener('click', function () {
-        // Detect embed type and replace original element
-        if (twitchObj.hasOwnProperty('videoId')) {
-          window.open('https://twitch.tv/videos/' + twitchObj['videoId'], '_blank')
-        } else if (twitchObj.hasOwnProperty('channel')) {
-          window.open('https://twitch.tv/' + twitchObj['channel'], '_blank')
-        } else {
-          alert('Sorry, NoPlugin could not load the content because the embed code was invalid:\n\n' + flashVars)
-        }
+        window.open(twitchURL, '_blank')
       })
-      console.log('[NoPlugin] Replaced Twitch.tv embed:', media, twitchObj)
+      // Add message to console and add tooltip
+      console.log('Replaced Twitch.tv embed:', media, twitchObj)
     } else {
       return
     }
@@ -458,8 +444,9 @@ function injectPlayer(object, media, mediaUrl) {
     var vimeoID = mediaUrl.split('clip_id=').pop().split('&')[0]
     frame.setAttribute('src', 'https://player.vimeo.com/video/' + vimeoID)
     object.parentNode.replaceChild(frame, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced Vimeo embed:', media)
+    // Add message to console and add tooltip
+    console.log('Replaced Vimeo embed:', media)
+    addTooltip(frame)
   } else if (mediaUrl.includes('viddler.com/simple')) {
     // Old Flash-based Viddler embed
     var frame = document.createElement('iframe')
@@ -470,8 +457,9 @@ function injectPlayer(object, media, mediaUrl) {
     var viddlerID = mediaUrl.split('simple/').pop().split('/')[0]
     frame.setAttribute('src', 'https://www.viddler.com/embed/' + viddlerID)
     object.parentNode.replaceChild(frame, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced Viddler embed:', media)
+    // Add message to console and add tooltip
+    console.log('Replaced Viddler embed:', media)
+    addTooltip(frame)
   } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
     sendEvent('Media Load', 'Misc Stream')
@@ -503,10 +491,10 @@ function injectPlayer(object, media, mediaUrl) {
       openInPlayer(mediaUrl)
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced playlist embed:', media)
+    console.log('Replaced playlist embed:', media)
   } else if (mediaUrl.includes('.swf')) {
     // This is a Flash Player file
-    sendEvent('Media Load', 'Misc Flash')
+    sendEvent('Media Load', 'Misc Flash', getFileName(mediaUrl))
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
@@ -531,7 +519,7 @@ function injectPlayer(object, media, mediaUrl) {
       openInFlash(mediaUrl)
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced Flash embed:', media)
+    console.log('Replaced Flash embed:', media)
   } else if (mediaUrl.endsWith('.asx') || mediaUrl.endsWith('.wpl') || mediaUrl.endsWith('.qtl') || mediaUrl.endsWith('.m3u')) {
     // This is a playlist file
     try {
@@ -551,7 +539,7 @@ function injectPlayer(object, media, mediaUrl) {
       container.appendChild(content)
       object.parentNode.replaceChild(container, object)
       // Add message to console
-      console.error('[NoPlugin] Error replacing playlist embed for ' + mediaUrl + ':', error)
+      console.error('Error replacing playlist embed for ' + mediaUrl + ':', error)
     }
     if (mediaArray.length === 1) {
       // If there is only one item in the playlist, run the injectPlayer() function again with it as the new URL
@@ -597,7 +585,7 @@ function injectPlayer(object, media, mediaUrl) {
       container.appendChild(content)
       object.parentNode.replaceChild(container, object)
       // Add message to console
-      console.log('[NoPlugin] Replaced plugin embed:', media)
+      console.log('Replaced plugin embed:', media)
     }
   } else if ((mediaUrl.endsWith('.mp3')) || (mediaUrl.endsWith('.m4a')) || (mediaUrl.endsWith('.wav'))) {
     // This is an audio file
@@ -614,8 +602,9 @@ function injectPlayer(object, media, mediaUrl) {
     mediaPlayer.appendChild(source)
     // Write container to page
     object.parentNode.replaceChild(mediaPlayer, object)
-    // Add message to console
-    console.log('[NoPlugin] Replaced audio embed:', media)
+    // Add message to console and add tooltip
+    console.log('Replaced audio embed:', media)
+    addTooltip(mediaPlayer)
   } else {
     // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
     sendEvent('Media Load', 'Misc Media')
@@ -649,6 +638,12 @@ function injectPlayer(object, media, mediaUrl) {
         playbackError(mediaPlayer, media.id, mediaUrl, media.width, media.height, media.cssClass, media.cssStyles)
       }
     })
+    // Add tooltip if video won't fail
+    mediaPlayer.addEventListener('canplaythrough', function(event) {
+      if (event.type === 'canplaythrough') {
+        addTooltip(mediaPlayer)
+      }
+    })
     // Write container to page
     container.appendChild(content)
     object.parentNode.replaceChild(container, object)
@@ -661,7 +656,7 @@ function injectPlayer(object, media, mediaUrl) {
       mediaPlayer.play()
     })
     // Add message to console
-    console.log('[NoPlugin] Replaced plugin embed:', media)
+    console.log('Replaced plugin embed:', media)
   }
 }
 
@@ -669,7 +664,7 @@ function injectPlayer(object, media, mediaUrl) {
 function replaceEmbed(object) {
   // Skip element if it is being used as a fallback for an HTML5 player
   if (isFallback(object)) {
-    console.log('[NoPlugin] Skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    console.log('Skipping embed because it seems to be a fallback for an HTML5 player:', object)
     return
   }
   // Find video sources
@@ -739,10 +734,6 @@ function replaceEmbed(object) {
       links[i] = link + '?' + flashVars
     })
   }
-  // Inject help if there are any valid links
-  if (links < 0) {
-    injectHelp()
-  }
   // Inject the player
   var mainLink = links[0] || null
   injectPlayer(object, {
@@ -760,7 +751,7 @@ function replaceEmbed(object) {
 function replaceObject(object) {
   // Skip element if it is being used as a fallback for an HTML5 player
   if (isFallback(object)) {
-    console.log('[NoPlugin] Skipping embed because it seems to be a fallback for an HTML5 player:', object)
+    console.log('Skipping embed because it seems to be a fallback for an HTML5 player:', object)
     return
   }
   // Find video sources
@@ -854,10 +845,6 @@ function replaceObject(object) {
       links[i] = link + '?' + flashVars
     })
   }
-  // Inject help if there are any valid links
-  if (links < 0) {
-    injectHelp()
-  }
   // Inject the player
   var mainLink = links[0] || null
   injectPlayer(object, {
@@ -878,9 +865,10 @@ function replaceFrame(frame) {
   if (url.includes('youtube.com/v/')) {
     var youtubeID = url.match(youtubeRegex)[1]
     frame.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeID)
-    console.log('[NoPlugin] Replaced frame embed for ' + url)
+    // Add message to console and add tooltip
+    console.log('Replaced YouTube embed:', frame)
+    addTooltip(frame)
   }
-  injectHelp()
 }
 
 // Detect possible plugin/frame objects and pass elements to replaceObject(), replaceEmbed(), and replaceFrame()
@@ -996,8 +984,8 @@ function loadDOM() {
 
 // Initialize NoPlugin on page load
 if (globalSiteBlockList.test(document.location)) {
-  console.log('[NoPlugin] This page is blacklisted, so no plugin objects will be scanned.')
+  console.log('This page is blacklisted, so no plugin objects will be scanned.')
 } else {
-  console.log('[NoPlugin] Searching for plugin objects...')
+  console.log('Searching for plugin objects...')
   loadDOM()
 }

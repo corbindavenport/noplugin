@@ -12,7 +12,7 @@
 	<div class="jumbotron">
 		<div class="container">
 			<h1>Welcome to NoPlugin <span class="version"></span>!</h1>
-			<p>You have been updated to the latest version of the NoPlugin extension. This version includes security improvements and fixes for old Twitch.tv embeds.</p>
+			<p>You have been updated to the latest version of the NoPlugin extension. This version improves support for Adobe Flash embeds, adds a compatibility mode in the right-click menu, updates the UI, and much more! Read all about it <a href="https://blog.corbin.io/post/638155534677245952/introducing-noplugin-70" target="_blank">here</a>.</p>
 		</div>
 	</div>
 
@@ -22,10 +22,14 @@
 				<p>
 					<h2>How NoPlugin works</h2>
 				</p>
-				<p>NoPlugin searches web pages for embedded plugin objects. If the file type is supported by your web browser (MP4, WAV, MP3, etc.), NoPlugin will play it directly in the web page. You can see a demo <a href="https://corbindavenport.github.io/noplugin" target="_blank">here</a>.</p>
-				<p>If the file cannot be played by your web browser, NoPlugin can still download the file so you can open it with your computer's media player. VLC Media Player is recommended for opening these files, since it will play just about every video and audio file in existence.</p>
+				<p>NoPlugin searches web pages for embedded plugin objects. If the file type is supported by your web browser (MP4, WAV, MP3, etc.), NoPlugin will play it directly in the web page. If the file cannot be played by your web browser, NoPlugin can still download the file so you can open it with your computer's media player.</p>
+				<p>If a page says you don't have a plugin installed, right-click the page and select 'Toggle NoPlugin Compatibility Mode'. This will trick some pages into thinking you have Flash, QuickTime, Windows Media Player, and other plugins installed.</p>
+				<p>VLC Media Player is recommended for opening these files, since it will play just about every video and audio file in existence. Adobe Flash Player Projector is required to run Flash content.</p>
 				<p>
-					<button type="button" class="btn btn-light link-btn vlc-btn">Download VLC Media Player</button>
+					<button type="button" class="btn btn-primary vlc-btn">Download VLC Media Player</button>
+				</p>
+				<p>
+					<button type="button" class="btn btn-primary flash-btn">Download Adobe Flash Projector</button>
 				</p>
 			</div>
 			<div class="col-md-4">
@@ -50,7 +54,7 @@
 		<hr>
 
 		<footer>
-			<p>NoPlugin uses code from <a href="https://getbootstrap.com/" target="_blank">Bootstrap</a> and <a href="https://github.com/cure53/DOMPurify" target="_blank">DOMPurify</a>. You can find NoPlugin's source code <a href="https://github.com/corbindavenport/noplugin" target="_blank">on GitHub</a>, under the GPLv3 license. NoPlugin uses Google Analytics to collect anonymous usage data, see the <a href="https://github.com/corbindavenport/noplugin/wiki/Privacy-Policy" target="_blank">privacy policy</a> for more information.</p></p>
+			<p>NoPlugin uses code from <a href="https://getbootstrap.com/" target="_blank">Bootstrap</a>, <a href="https://popper.js.org/" target="_blank">Popper</a>, <a href="https://atomiks.github.io/tippyjs/" target="_blank">Tippy</a>, and <a href="https://github.com/cure53/DOMPurify" target="_blank">DOMPurify</a>. You can find NoPlugin's source code <a href="https://github.com/corbindavenport/noplugin" target="_blank">on GitHub</a>, under the GPLv3 license. NoPlugin uses Google Analytics to collect anonymous usage data, see the <a href="https://github.com/corbindavenport/noplugin/wiki/Privacy-Policy" target="_blank">privacy policy</a> for more information.</p></p>
 		</footer>
 	</div>
 
