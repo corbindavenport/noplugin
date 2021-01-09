@@ -30,7 +30,7 @@ function downloadProjector(platform) {
     download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flash_player_sa_linux.x86_64.tar.gz'
   } else if (platform === 'mac') {
     download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.dmg'
-  } else if (platform === 'windows') {
+  } else if (platform === 'win') {
     download = 'https://web.archive.org/web/20201122011204id_/https://fpdownload.macromedia.com/pub/flashplayer/updaters/32/flashplayer_32_sa.exe'
   }
   chrome.downloads.download({
