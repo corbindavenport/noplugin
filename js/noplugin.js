@@ -447,6 +447,36 @@ async function injectPlayer(object, media, mediaUrl) {
     // Add message to console and add tooltip
     console.log('Replaced Vimeo embed:', media)
     addTooltip(frame)
+  } else if (mediaUrl.includes('zplayer.swf')) {
+    // Zanorg Player: https://radio.zanorg.com/zplayer_eng.htm
+    sendEvent('Media Load', 'Zanorg Player')
+    var mediaPlayer = document.createElement('audio')
+    mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
+    mediaPlayer.id = media.id
+    mediaPlayer.controls = true
+    mediaPlayer.name = name
+    mediaPlayer.setAttribute('style', media.cssStyles + ' width:' + media.width + 'px !important; height:' + media.height + 'px !important;')
+    // Extract URL to audio file
+    var parsedUrl = new URL(mediaUrl)
+    if (parsedUrl.searchParams.get('mp3')) {
+      // Add source to audio player
+      var source = document.createElement('source')
+      source.src = parsedUrl.searchParams.get('mp3')
+      mediaPlayer.appendChild(source)
+      // Set volume if specified by original embed
+      if (parsedUrl.searchParams.get('vol')) {
+        var vol = parseInt('70') * 0.01
+        mediaPlayer.volume = vol
+      }
+      // Write container to page
+      object.parentNode.replaceChild(mediaPlayer, object)
+      // Add message to console and add tooltip
+      console.log('Replaced audio embed:', media)
+      addTooltip(mediaPlayer)
+    } else {
+      // Invalid embed code
+      return
+    }
   } else if (mediaUrl.includes('viddler.com/simple')) {
     // Old Flash-based Viddler embed
     var frame = document.createElement('iframe')

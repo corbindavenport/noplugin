@@ -4,4 +4,4 @@ NoPlugin is the missing compatibility layer for modern web browers, allowing you
 
 NoPlugin searches webpages for embedded plugin objects and converts them into native player elements, wherever possible. If the content can't be played in-browser (e.g. most Flash embeds), NoPlugin will help you download the file and play it in a separate application.
 
-[![Download for Chrome](https://corbin.io/img/chrome-button.png)](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice) [![Download for Firefox](https://corbin.io/img/firefox-button.png)](https://addons.mozilla.org/en-US/firefox/addon/noplugin/) [![Download for Opera](https://corbin.io/img/opera-button.png)](https://addons.opera.com/en/extensions/details/noplugin/)
+[![Download for Chrome](https://corbin.io/img/chrome-button.png)](https://chrome.google.com/webstore/detail/noplugin-previously-quick/llpahfhchhlfdigfpeimeagojnkgeice) [![Download for Firefox](https://corbin.io/img/firefox-button.png)](https://addons.mozilla.org/en-US/firefox/addon/noplugin/)

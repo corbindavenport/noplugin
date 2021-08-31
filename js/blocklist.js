@@ -11,6 +11,10 @@ var siteBlocks = [
 // Examples: Tracking scripts, fallbacks for HTML5 players, etc.
 var embedBlocks = [
     'fp.swf', // Tracking (#66)
+    'visitCounter105.swf', // Used for tracking
+    'VPAIDFlash.swf', // Broken DRM: https://docs.viblast.com/player/videojs-vast
+    'pmfso.swf', // Security risk: https://github.com/offensive-security/exploitdb/blob/master/exploits/java/webapps/44634.txt#L63
+    'ZeroClipboard.swf', // Security risk: https://www.acunetix.com/vulnerabilities/web/cross-site-scripting-vulnerability-in-zeroclipboard-swf/
 ]
 
 // Generate regexes
