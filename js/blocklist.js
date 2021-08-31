@@ -11,7 +11,9 @@ var siteBlocks = [
 // Examples: Tracking scripts, fallbacks for HTML5 players, etc.
 var embedBlocks = [
     'fp.swf', // Tracking (#66)
+    'swfupload.swf', // Upload button that won't work outside the browser
     'visitCounter105.swf', // Used for tracking
+    'soundmanager2.swf', // Fallback for HTML5 player: http://www.schillmania.com/projects/soundmanager2/
     'VPAIDFlash.swf', // Broken DRM: https://docs.viblast.com/player/videojs-vast
     'pmfso.swf', // Security risk: https://github.com/offensive-security/exploitdb/blob/master/exploits/java/webapps/44634.txt#L63
     'ZeroClipboard.swf', // Security risk: https://www.acunetix.com/vulnerabilities/web/cross-site-scripting-vulnerability-in-zeroclipboard-swf/

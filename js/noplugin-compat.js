@@ -1,4 +1,4 @@
-alert('NoPlugin Compatibility Mode is now enabled for this page. Compatibility Mode tricks sites into thinking you have Adobe Flash Player and other plugins installed, allowing you to potentially view legacy plugin content. The mode may not work for all pages.\n\nCompatibility Mode will automatically turn off when you leave this page.')
+alert('NoPlugin Compatibility Mode is enabled for this page. Compatibility Mode tricks sites into thinking you have Adobe Flash Player and other plugins installed, allowing you to potentially view legacy plugin content. The mode may not work for all pages.\n\nCompatibility Mode will automatically turn off when you leave this page.')
 
 if (!navigator.plugins.namedItem('Shockwave Flash')) {
 
@@ -486,6 +486,57 @@ if (!navigator.plugins.namedItem('Shockwave Flash')) {
                 enumerable: true,
                 writable: false
             }
+        })
+
+        // Wrapper for FlashEmbed library
+        // Original code: https://github.com/jquerytools/jquerytools/blob/master/src/toolbox/toolbox.flashembed.js
+        // Documentation: http://jquerytools.github.io/documentation/toolbox/flashembed.html
+        // Test page: http://jquerytools.org/demos/toolbox/flashembed/index.html?noplugin_compat=true
+
+        Object.defineProperty(window, 'flashembed', {
+            // TODO: Implement asString(Object), getHTML(options, config), getVersion(), and isSupported(version)
+                value: function (container, embedOptions, flashConfiguration) {
+                    console.log('Detected flashembed() call:', { container, embedOptions, flashConfiguration })
+                    // The "container" param represents the ID of an element in the page
+                    container.replace('#', '')
+                    if (document.getElementById(container)) {
+                        container = document.getElementById(container)
+                        // Create Flash object
+                        var el = document.createElement('object')
+                        el.setAttribute('type', 'application/x-shockwave-flash')
+                        // Set embed options
+                        if (typeof embedOptions === 'string') {
+                            // embedOptions parameter is just a string of the media URL
+                            el.setAttribute('data', embedOptions)
+                        } else if (typeof embedOptions === 'object') {
+                            // embedOptions parameter is an object
+                            el.setAttribute('data', embedOptions.src)
+                            el.setAttribute('id', embedOptions.id)
+                            el.setAttribute('width', embedOptions.width)
+                            el.setAttribute('height', embedOptions.height)
+                            el.style.backgroundColor = embedOptions.bgcolor
+                        } else {
+                            console.error('Could not parse embedOptions')
+                        }
+                        // Set Flash configuration
+                        // This doesn't work for configurations with nested JSON
+                        if (typeof flashConfiguration === 'object') {
+                            var data = ''
+                            for (var key in flashConfiguration) {
+                                data += encodeURIComponent(key) + '=' + encodeURIComponent(flashConfiguration[key]) + '&'
+                            }
+                            data = data.slice(0, -1)
+                            el.setAttribute('flashvars', data)
+                        }
+                        // Inject object
+                        container.appendChild(el)
+                    } else {
+                        console.error('Could not find element with ID ' + container)
+                    }
+                },
+                configurable: false,
+                enumerable: true,
+                writable: false
         })
 
     } + ')()'
