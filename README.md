@@ -1,4 +1,4 @@
-# NoPlugin
+# NoPlugin is now discontinued, see [this blog post](https://blog.corbin.io/post/667791666532483072/ending-development-of-noplugin) for more information.
 
 NoPlugin is the missing compatibility layer for modern web browers, allowing you to view most legacy content designed for browser plugins like Adobe Flash, QuickTime, and Windows Media Player. All browsers have phrased out the use of browser plugins, due to performance and security problems, so NoPlugin was created to maintain some compatibility with outdated/archived sites.
 
