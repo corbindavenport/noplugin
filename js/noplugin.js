@@ -16,45 +16,25 @@ const youtubeRegex = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).
 // Regex for detecting livestream links https://regex101.com/r/So4qWf/1
 const streamDetectRegex = /(\:\d{1,}$)|(\/$)/gm
 
-// Function for sending events to Google Analytics
-function sendEvent(eventCategory, eventAction, eventLabel = '') {
-  return new Promise(async function (resolve) {
-    // Get UUID from storage
-    chrome.storage.local.get(function (data) {
-      var uuid = data.uuid
-      // Send Fetch data
-      fetch('https://www.google-analytics.com/collect', {
-        method: 'POST',
-        body: 'v=1&tid=UA-59452245-9&cid=' + uuid + '&t=event&ec=' + encodeURIComponent(eventCategory) + '&ea=' + encodeURIComponent(eventAction) + '&el=' + encodeURIComponent(eventLabel)
-      }).then(function (data) {
-        resolve()
-      }).catch(function (err) {
-        console.log('Analytics error:', err)
-        resolve()
-      })
-    })
-  })
-}
-
 // Function for adding tooltip to replaced elements
 function addTooltip(element) {
   // Generate content
   var popupContent = document.createElement('div')
   popupContent.innerText = 'NoPlugin has loaded this legacy content.'
   // Add bug reporting button
-  var popupBtn = document.createElement('button')
-  popupBtn.innerText = 'Report Bug'
-  popupBtn.addEventListener('click', function () {
-    createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
-  })
-  popupContent.appendChild(popupBtn)
+  // var popupBtn = document.createElement('button')
+  // popupBtn.innerText = 'Report Bug'
+  // popupBtn.addEventListener('click', function () {
+  //   createPopup(chrome.extension.getURL("bugreport.html") + '?url=' + encodeURIComponent(window.location))
+  // })
+  // popupContent.appendChild(popupBtn)
   // Add donate button
-  var popupBtn = document.createElement('button')
-  popupBtn.innerText = 'Support NoPlugin'
-  popupBtn.addEventListener('click', function () {
-    window.open('https://www.patreon.com/corbindavenport', '_blank')
-  })
-  popupContent.appendChild(popupBtn)
+  // var popupBtn = document.createElement('button')
+  // popupBtn.innerText = 'Support NoPlugin'
+  // popupBtn.addEventListener('click', function () {
+  //   window.open('https://www.patreon.com/corbindavenport', '_blank')
+  // })
+  // popupContent.appendChild(popupBtn)
   // Show popup
   tippy(element, {
     content: popupContent,
@@ -202,7 +182,6 @@ function parsePlaylist(url) {
     if (url.endsWith('.asx')) {
       // Advanced Stream Redirector (ASX) files are in XML format
       // Documentation: http://www.streamalot.com/playlists.shtml
-      sendEvent('Playlist Load', 'ASX')
       var asx = document.createElement('div')
       asx.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
@@ -230,7 +209,6 @@ function parsePlaylist(url) {
     } else if (url.endsWith('.wpl')) {
       // Windows Media Player Playlist files are in XML format
       // Documentation: https://en.wikipedia.org/wiki/Windows_Media_Player_Playlist
-      sendEvent('Playlist Load', 'WPL')
       var wpl = document.createElement('div')
       wpl.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
@@ -258,7 +236,6 @@ function parsePlaylist(url) {
     } else if (url.endsWith('.qtl')) {
       // QuickTime Link files are in XML format
       // Documentation: https://stackoverflow.com/a/25399903/2255592 and http://www.streamalot.com/playlists.shtml
-      sendEvent('Playlist Load', 'QTL')
       var qtl = document.createElement('div')
       qtl.innerHTML = DOMPurify.sanitize(xhr.responseText)
       // Check playlist is valid
@@ -286,7 +263,6 @@ function parsePlaylist(url) {
     } else if (url.endsWith('.m3u')) {
       // M3U files are just lists with links to files
       // Documentation: https://en.wikipedia.org/wiki/M3U#Examples and http://www.streamalot.com/playlists.shtml
-      sendEvent('Playlist Load', 'M3U')
       var m3u = xhr.responseText.split('\n')
       // Filter out empty lines and comments
       m3u = m3u.filter(s => s.replace(/\s+/g, '').length !== 0)
@@ -366,7 +342,6 @@ async function injectPlayer(object, media, mediaUrl) {
     return
   } else if (mediaUrl.includes('youtube.com/v/')) {
     // Old Flash-based YouTube embed
-    sendEvent('Media Load', 'YouTube Flash')
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
@@ -380,7 +355,6 @@ async function injectPlayer(object, media, mediaUrl) {
     addTooltip(frame)
   } else if (mediaUrl.includes('TwitchPlayer.swf')) {
     // Old Flash-based Twitch embed
-    sendEvent('Media Load', 'Twitch.tv Flash')
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
@@ -435,7 +409,6 @@ async function injectPlayer(object, media, mediaUrl) {
     }
   } else if (mediaUrl.includes('vimeo.com/moogaloop.swf')) {
     // Old Flash-based Vimeo embed
-    sendEvent('Media Load', 'Vimeo Flash')
     var frame = document.createElement('iframe')
     frame.setAttribute('class', media.cssClass)
     frame.id = media.id
@@ -449,7 +422,6 @@ async function injectPlayer(object, media, mediaUrl) {
     addTooltip(frame)
   } else if (mediaUrl.includes('zplayer.swf')) {
     // Zanorg Player: https://radio.zanorg.com/zplayer_eng.htm
-    sendEvent('Media Load', 'Zanorg Player')
     var mediaPlayer = document.createElement('audio')
     mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
     mediaPlayer.id = media.id
@@ -492,7 +464,6 @@ async function injectPlayer(object, media, mediaUrl) {
     addTooltip(frame)
   } else if (mediaUrl.includes('mms://') || mediaUrl.includes('rtsp://') || mediaUrl.endsWith('.ram') || streamDetectRegex.test(mediaUrl)) {
     // This is a media stream
-    sendEvent('Media Load', 'Misc Stream')
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
@@ -524,7 +495,6 @@ async function injectPlayer(object, media, mediaUrl) {
     console.log('Replaced playlist embed:', media)
   } else if (mediaUrl.includes('.swf')) {
     // This is a Flash Player file
-    sendEvent('Media Load', 'Misc Flash', getFileName(mediaUrl))
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
@@ -619,7 +589,6 @@ async function injectPlayer(object, media, mediaUrl) {
     }
   } else if ((mediaUrl.endsWith('.mp3')) || (mediaUrl.endsWith('.m4a')) || (mediaUrl.endsWith('.wav'))) {
     // This is an audio file
-    sendEvent('Media Load', 'Misc Audio')
     var mediaPlayer = document.createElement('audio')
     mediaPlayer.setAttribute('controlsList', 'nofullscreen nodownload')
     mediaPlayer.id = media.id
@@ -637,7 +606,6 @@ async function injectPlayer(object, media, mediaUrl) {
     addTooltip(mediaPlayer)
   } else {
     // Attempt to play other formats (MP4, FLV, QuickTime, etc.) in the browser
-    sendEvent('Media Load', 'Misc Media')
     var container = document.createElement('div')
     container.setAttribute('class', 'noplugin ' + media.cssClass)
     container.id = media.id
